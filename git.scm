@@ -16,7 +16,7 @@
 ;; DRAFT!
 
 (define libgit2
-  (dynamic-link "/gnu/store/g8r0qwnzf2j17hd84cchc6cmr51sflz8-libgit2-0.24.1/lib/libgit2.so"))
+  (dynamic-link "/gnu/store/g2lmim65h3nak2kdg7bv34dp79vx2q05-libgit2-0.24.1/lib/libgit2.so"))
 
 (define (libgit2->procedure return name params)
   (pointer->procedure return (dynamic-func name libgit2) params))
@@ -51,8 +51,34 @@
                          #,(symbol->string symbol)
                          (number->string (pointer-address (unwrap obj))
                                          16))))))))))
-
+(define-libgit2-type buf)
+(define-libgit2-type commit)
+(define-libgit2-type config)
+(define-libgit2-type object)
+(define-libgit2-type oid)
+(define-libgit2-type reference)
 (define-libgit2-type repository)
+
+;; repository
+
+(define repository-config
+  (let ((proc (libgit2->procedure* "git_repository_config" '(* *))))
+    (lambda (repository)
+      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc result (repository->pointer repository))
+	(pointer->config (dereference-pointer result))))))
+
+(define repository-config-snapshot
+  (let ((proc (libgit2->procedure* "git_repository_config_snapshot" '(* *))))
+    (lambda (repository)
+      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc result (repository->pointer repository))
+	(pointer->config (dereference-pointer result))))))
+
+(define repository-detach-head
+  (let ((proc (libgit2->procedure* "git_repository_detach_head" '(*))))
+    (lambda (repository)
+      (proc (repository->pointer repository)))))
 
 (define open-repository
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
@@ -61,8 +87,6 @@
         (proc result (string->pointer file))
         (pointer->repository (dereference-pointer result))))))
 
-(define-libgit2-type reference)
-
 (define repository-head
   (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
     (lambda (repository)
@@ -70,14 +94,27 @@
         (proc result (repository->pointer repository))
         (pointer->reference (dereference-pointer result))))))
 
-(define-libgit2-type oid)
+(define repository-discover
+  (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
+    (lambda (start-path across-fs ceiling-dirs)
+      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc result
+	      (string->pointer start-path)
+	      (if across-fs 1 0)
+	      (string->pointer ceiling-dirs))
+	(pointer->buf (dereference-pointer result))))))
+
+(define repository-fetchhead-foreach
+  (let ((proc (libgit2->procedure* "git_repository_fetchhead_foreach")))
+    (lambda (repository callback)
+      (proc (repository->pointer repository)
+
 
 (define reference-target
   (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
     (lambda (reference)
       (pointer->oid (proc (reference->pointer reference))))))
 
-(define-libgit2-type commit)
 
 (define lookup-commit
   (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
@@ -102,7 +139,7 @@
     ((pointer asize size)
      (pointer->bytevector pointer size))))
 
-(define (buffer-content/string buf)
+(define (buffer-content/string buf)1
   (match (parse-c-struct buf %buffer-struct)
     ((pointer asize size)
      (pointer->string pointer size "UTF-8"))))
@@ -125,7 +162,7 @@
           (values signature* data*))))))
 
 
-(define-libgit2-type object)
+
 
 (define GIT_OBJ_ANY -2)
 
