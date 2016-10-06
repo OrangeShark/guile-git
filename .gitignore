@@ -5,3 +5,16 @@
 *.scm~
 *.scm#*
 .#*.scm
+
+*.go
+
+Makefile
+Makefile.in
+configure
+aclocal.m4
+autom4te.cache/
+build-aux/
+config.log
+config.status
+pre-inst-env
+git/config.scm

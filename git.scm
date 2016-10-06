@@ -1,10 +1,11 @@
 ;;; Copyright © Ludovic Courtès <ludo@gnu.org>
 ;;; Released under the GNU GPL version 3 or later.
 
-(define-module (guix git)
+(define-module (git)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (ice-9 match)
+  #:use-module (git config)
   #:export (repository?
             open-repository
             reference?
@@ -16,7 +17,7 @@
 ;; DRAFT!
 
 (define libgit2
-  (dynamic-link "/gnu/store/g2lmim65h3nak2kdg7bv34dp79vx2q05-libgit2-0.24.1/lib/libgit2.so"))
+  (dynamic-link %libgit2))
 
 (define (libgit2->procedure return name params)
   (pointer->procedure return (dynamic-func name libgit2) params))
