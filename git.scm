@@ -105,9 +105,9 @@
 	(pointer->buf (dereference-pointer result))))))
 
 (define repository-fetchhead-foreach
-  (let ((proc (libgit2->procedure* "git_repository_fetchhead_foreach")))
+  (let ((proc (libgit2->procedure* "git_repository_fetchhead_foreach" '())))
     (lambda (repository callback)
-      (proc (repository->pointer repository)
+      (proc (repository->pointer repository)))))
 
 
 (define reference-target
