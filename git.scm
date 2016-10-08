@@ -52,14 +52,34 @@
 			 #,(symbol->string symbol)
 			 (number->string (pointer-address (unwrap obj))
 					 16))))))))))
-(define-libgit2-type buf)
+
 (define-libgit2-type commit)
 (define-libgit2-type config)
 (define-libgit2-type index)
 (define-libgit2-type object)
 (define-libgit2-type oid)
+(define-libgit2-type refdb)
 (define-libgit2-type reference)
 (define-libgit2-type repository)
+
+(define %buffer-struct                            ;git_buf
+  (list '* size_t size_t))
+
+(define (make-buffer)
+  (make-c-struct %buffer-struct `(,%null-pointer 0 0)))
+
+(define free-buffer
+  (libgit2->procedure void "git_buf_free" '(*)))
+
+(define (buffer-content buf)
+  (match (parse-c-struct buf %buffer-struct)
+    ((pointer asize size)
+     (pointer->bytevector pointer size))))
+
+(define (buffer-content/string buf)
+  (match (parse-c-struct buf %buffer-struct)
+    ((pointer asize size)
+     (pointer->string pointer size "UTF-8"))))
 
 ;; repository
 
@@ -82,13 +102,6 @@
     (lambda (repository)
       (proc (repository->pointer repository)))))
 
-(define open-repository
-  (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
-    (lambda (file)
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result (string->pointer file))
-	(pointer->repository (dereference-pointer result))))))
-
 (define repository-head
   (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
     (lambda (repository)
@@ -99,12 +112,14 @@
 (define repository-discover
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
     (lambda (start-path across-fs ceiling-dirs)
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result
+      (let ((out (make-buffer)))
+	(proc out
 	      (string->pointer start-path)
 	      (if across-fs 1 0)
 	      (string->pointer ceiling-dirs))
-	(pointer->buf (dereference-pointer result))))))
+	(let ((out* (buffer-content/string out)))
+	  (free-buffer out)
+	  out)))))
 
 (define repository-free
   (let ((proc (libgit2->procedure* "git_repository_free" '(*))))
@@ -165,13 +180,53 @@
 (define repository-is-empty?
   (let ((proc (libgit2->procedure int "git_repository_is_empty" '(*))))
     (lambda (repository)
-      (eq? (proc (repository->pointer repository))))))
+      (eq? (proc (repository->pointer repository)) 1))))
+
+(define repository-is-shallow?
+  (let ((proc (libgit2->procedure int "git_repository_is_shallow" '(*))))
+    (lambda (repository)
+      (eq? (proc (repository->procedure repository)) 1))))
+
+(define open-repository
+  (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
+    (lambda (file)
+      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc result (string->pointer file))
+	(pointer->repository (dereference-pointer result))))))
+
+(define repository-path
+  (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
+    (lambda (repository)
+      (pointer->string (proc (repository->procedure repository))))))
+
+(define repository-refdb
+  (let ((proc (libgit2->procedure* "git_repository_refdb" `(* *))))
+    (lambda (repository)
+      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc out (repository->pointer repository))
+	(pointer->refdb (dereference-pointer out))))))
+
+(define repository-set-ident
+  (let ((proc (libgit2->procedure* "git_repository_set_ident" '(* * *))))
+    (lambda (repository name email) ;;; FIXE: make name and email optional
+      (proc (repository->pointer repository)
+	    (string->pointer name "UTF-8")
+	    (string->pointer email "UTF-8")))))
+
+(define repository-state
+  (let ((proc (libgit2->procedure int "git_repository_state" '(*))))
+    (lambda (repository)
+      (proc (repository->pointer repository)))))
+
+(define repository-workdir
+  (let ((proc (libgit2->procedure '* "git_repository_workdir" '(*))))
+    (lambda (repository)
+      (pointer->string (proc (repository->pointer repository))))))
 
 (define reference-target
   (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
     (lambda (reference)
       (pointer->oid (proc (reference->pointer reference))))))
-
 
 (define lookup-commit
   (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
@@ -185,30 +240,12 @@
     (lambda (commit)
       (pointer->string (proc (commit->pointer commit))))))
 
-(define %buffer-struct                            ;git_buf
-  (list '* size_t size_t))
-
-(define free-buffer
-  (libgit2->procedure void "git_buf_free" '(*)))
-
-(define (buffer-content buf)
-  (match (parse-c-struct buf %buffer-struct)
-    ((pointer asize size)
-     (pointer->bytevector pointer size))))
-
-(define (buffer-content/string buf)
-  (match (parse-c-struct buf %buffer-struct)
-    ((pointer asize size)
-     (pointer->string pointer size "UTF-8"))))
-
 (define commit-signature
   (let ((proc (libgit2->procedure* "git_commit_extract_signature"
 				   '(* * * * *))))
     (lambda* (repository oid #:optional (field "gpgsig"))
-      (let ((signature (make-c-struct %buffer-struct
-				      `(,%null-pointer 0 0)))
-	    (data      (make-c-struct %buffer-struct
-				      `(,%null-pointer 0 0))))
+      (let ((signature (make-buffer))
+	    (data      (make-buffer)))
 	(proc signature data (repository->pointer repository)
 	      (oid->pointer oid)
 	      (string->pointer field))
@@ -217,9 +254,6 @@
 	  (free-buffer signature)
 	  (free-buffer data)
 	  (values signature* data*))))))
-
-
-
 
 (define GIT_OBJ_ANY -2)
 
