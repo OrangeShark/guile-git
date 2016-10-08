@@ -128,6 +128,29 @@
 	(proc out (repository->pointer repository) (oid->pointer id))
 	(pointer->annotated-commit (dereference-pointer out))))))
 
+;; attr
+
+(define attr-add-macro
+  (let ((proc (libgit2->procedure* "git_attr_add_macro" '(* * *))))
+    (lambda (repository name values)
+      (proc (repository->pointer repository)
+	    (string->pointer name)
+	    (string->pointer values)))))
+
+(define attr-cache-flush
+  (let ((proc (libgit2->procedure void "git_attr_cache_flush" '(*))))
+    (lambda (repository)
+      (proc (repository->pointer repository)))))
+
+;; git_attr_foreach https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_foreach
+
+;; git_attr_get https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get
+
+;; git_attr_get_many https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get_many
+
+;; git_attr_value https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_value
+
+
 ;; repository
 
 (define repository-config
