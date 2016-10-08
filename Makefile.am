@@ -5,7 +5,7 @@ godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES =                           \
   git/config.scm                    \
-  git.scm
+  git/bindings.scm
 
 EXTRA_DIST +=                       \
   README.md                         \

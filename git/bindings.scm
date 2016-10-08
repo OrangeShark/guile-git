@@ -1,7 +1,7 @@
 ;;; Copyright © Ludovic Courtès <ludo@gnu.org>
 ;;; Released under the GNU GPL version 3 or later.
 
-(define-module (git)
+(define-module (git bindings)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (ice-9 match)
