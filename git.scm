@@ -179,6 +179,10 @@
 
 ;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_init_options
 
+;;; blob https://libgit2.github.com/libgit2/#HEAD/group/blob
+
+;;; branch https://libgit2.github.com/libgit2/#HEAD/group/branch
+
 ;;; repository
 
 (define repository-config
