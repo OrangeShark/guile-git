@@ -56,15 +56,23 @@
 (define-libgit2-type annotated-commit)
 (define-libgit2-type blame)
 (define-libgit2-type blame-options)
+(define-libgit2-type blob)
 (define-libgit2-type branch-iterator)
+(define-libgit2-type checkout-options)
 (define-libgit2-type commit)
 (define-libgit2-type config)
+(define-libgit2-type cred)
+(define-libgit2-type diff)
+(define-libgit2-type diff-delta)
+(define-libgit2-type diff-options)
 (define-libgit2-type index)
 (define-libgit2-type object)
 (define-libgit2-type oid)
 (define-libgit2-type refdb)
 (define-libgit2-type reference)
 (define-libgit2-type repository)
+(define-libgit2-type signature)
+(define-libgit2-type tree)
 
 (define %buffer-struct                            ;git_buf
   (list '* size_t size_t))
@@ -283,6 +291,318 @@
 	(proc out (reference->pointer branch))
 	(pointer->reference (dereference-pointer out))))))
 
+;;; checkout https://libgit2.github.com/libgit2/#HEAD/group/checkout
+
+(define checkout-head
+  (let ((proc (libgit2->procedure* "git_checkout_head" '(* *))))
+    (lambda (repository options)
+      (proc (repository->pointer repository) %null-pointer))))
+
+(define checkout-index
+  (let ((proc (libgit2->procedure* "git_checkout_index" '(* * *))))
+    (lambda (repository index options)
+      (proc (repository->pointer repository)
+	    (index->pointer index)
+	    %null-pointer))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/checkout/git_checkout_init_options
+
+(define checkout-tree
+  (let ((proc (libgit2->procedure* "git_checkout_tree" `(* * *))))
+    (lambda (repository treeish)
+      (proc (repository->pointer repository)
+	    (object->pointer treeish)
+	    %null-pointer))))
+
+;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
+
+(define cherrypick
+  (let ((proc (libgit2->procedure* "git_cherrypick" '(* * *))))
+    (lambda (repository commit)
+      (proc (repository->pointer repository)
+	    (commit->pointer commit)
+	    %null-pointer))))
+
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_commit
+
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_init_options
+
+;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
+
+(define clone
+  (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
+    (lambda (url local-path)
+      (let ((out (make-double-pointer)))
+	(proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
+
+;; commit https://libgit2.github.com/libgit2/#HEAD/group/commit
+
+(define commit-amend
+  (let ((proc (libgit2->procedure* "git_commit_amend" '(* * * * * * * *))))
+    (lambda (id commit update-ref author commiter message-encoding message tree)
+      (proc (oid->pointer id)
+	    (commit->pointer commit)
+	    (string->pointer update-ref)
+	    (signature->pointer author)
+	    (signature->pointer commiter)
+	    (string->pointer message-encoding)
+	    (string->pointer message)
+	    (tree->pointer tree)))))
+
+(define commit-author
+  (let ((proc (libgit2->procedure '* "git_commit_author" '(*))))
+    (lambda (commit)
+      (pointer->signature (proc (commit->pointer commit))))))
+
+(define commit-body
+  (let ((proc (libgit2->procedure '* "git_commit_body" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+(define commit-committer
+  (lambda ((proc (libgit2->procedure '* "git_commit_committer" '(*))))
+    (lambda (commit)
+      (pointer->signature (proc (commit->pointer commit))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create_buffer
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create_from_callback
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create_v
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create_with_signature
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_dup
+
+(define commit-extract-signature
+  (let ((proc (libgit2->procedure* "git_commit_extract_signature" '(* * * * *))))
+    (lambda* (repository oid #:optional (field "gpgsig"))
+      (let ((signature (make-buffer))
+	    (data      (make-buffer)))
+	(proc signature data (repository->pointer repository)
+	      (oid->pointer oid)
+	      (string->pointer field))
+	(let ((signature* (buffer-content/string signature))
+	      (data*      (buffer-content/string data)))
+	  (free-buffer signature)
+	  (free-buffer data)
+	  (values signature* data*))))))
+
+(define commit-free
+  (let ((proc (libgit2->procedure void "git_commit_free" '(*))))
+    (lambda (commit)
+      (proc (commit->pointer commit)))))
+
+(define commit-header-field
+  (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
+    (lambda (commit field)
+      (let ((out (make-buffer)))
+	(proc out (commit->pointer commit) (string->pointeger field))
+	(let ((out* (buffer-content/string out)))
+	  (free-buffer out)
+	  out*)))))
+
+(define commit-id
+  (let ((proc (libgit2->procedure '* "git_commit_id" '(*))))
+    (lambda (commit)
+      (pointer->oid (proc (commit->pointer commit))))))
+
+(define commit-lookup
+  (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
+    (lambda (repository oid)
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository) (oid->pointer oid))
+	(pointer->commit (dereference-pointer out))))))
+
+(define commit-lookup-prefix
+  (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t))))
+    (lambda (repository id len)
+      (let ((out (make-double-pointer)))
+	(proc out (repository->pointer repository) (oid->pointer id) len)))))
+
+(define commit-message
+  (let ((proc (libgit2->procedure '* "git_commit_message" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+(define commit-message-encoding
+  (let ((proc (libgit2->procedure '* "git_commit_message_encoding" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+(define commit-message-raw
+  (let ((proc (libgit2->procedure '* "git_commit_message_raw" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_nth_gen_ancestor
+
+(define commit-owner
+  (let ((proc (libgit2->procedure '* "git_commit_owner" '(*))))
+    (lambda (commit)
+      (pointer->repository (proc (commit->pointer commit))))))
+
+(define commit-parent
+  (let ((proc (libgit2->procedure* "git_commit_parent" `(* ,unsigned-int))))
+    (lambda (commit n)
+      (let ((out (make-double-pointer)))
+	(proc out (commit->pointer commit) n)
+	(pointer->commit (dereference-pointer out))))))
+
+(define commit-parent-id
+  (let ((proc (libgit2->procedure '* "git_commit_parent_id" `(* ,unsigned-int))))
+    (lambda (commit n)
+      (pointer->oid (proc (commit->pointer commit) n)))))
+
+(define commit-parentcount
+  (let ((proc (libgit2->procedure unsigned-int "git_commit_parentcount" '(*))))
+    (lambda (commit)
+      (proc (commit->pointer commit)))))
+
+(define commit-raw-header
+  (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+(define commit-summary
+  (let ((proc (libgit2->procedure '* "git_commit_summary" '(*))))
+    (lambda (commit)
+      (pointer->string (proc (commit->pointer commit))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_time
+
+(define commit-time-offset
+  (let ((proc (libgit2->procedure int "git_commit_time_offset" '(*))))
+    (lambda (commit)
+      (proc (commit->pointer commit)))))
+
+(define commit-tree
+  (let ((proc (libgit2->procedure* "git_commit_tree" '(*))))
+    (lambda (commit)
+      (let ((out (make-double-pointer)))
+	(proc out (commit->pointer commit))
+	(pointer->tree (dereference-pointer out))))))
+
+(define commit-tree-id
+  (let ((proc (libgit2->procedure '* "git_commit_tree_id" '(*))))
+    (lambda (commit)
+      (pointer->oid (proc (commit->pointer commit))))))
+
+;;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/config
+
+;;; https://libgit2.github.com/libgit2/#HEAD/group/cred
+
+(define cred-defaul-new
+  (let ((proc (libgit2->procedure* "git_cred_default_new" '(*))))
+    (lambda ()
+      (let ((out (make-double-pointer)))
+	(proc out)
+	(pointer->cred (dereference-pointer out))))))
+
+(define cred-free
+  (let ((proc (libgit2->procedure void "git_cred_free" '(*))))
+    (lambda (cred)
+      (proc (cred->pointer cred)))))
+
+(define cred-has-username?
+  (let ((proc (libgit2->procedure int "git_cred_has_username" '(*))))
+    (lambda (cred)
+      (eq? (proc (cred->pointer cred)) 1))))
+
+(define cred-ssh-custom-new
+  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" ,(* * * ,size_t * *))))
+    (lambda (username publickey sign-callback)
+      (let ((out (make-double-pointer)))
+	(proc out
+	      (string->pointer username)
+	      (string->pointer publickey)
+	      (string-length publickey)
+	      (procedure-pointer sign-callback))
+	(pointer->cred (dereference-pointer cred))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/cred/git_cred_ssh_interactive_new
+
+(define cred-ssh-key-from-agent
+  (let ((proc (libgit2->procedure* "git_cred_ssh_key_from_agent" '(* *))))
+    (lambda (username)
+      (let ((out (make-double-pointer)))
+	(proc out (string->pointer username))
+	(pointer->cred (dereference-pointer out))))))
+
+(define cred-ssh-key-from-memory-new
+  (let ((proc (libgit2->procedure* "git_cred_ssh_key_memory_new" '(* * * * *))))
+    (lambda (username publickey privatekey passphrase)
+      (let ((out (make-double-pointer)))
+	(proc out
+	      (string->pointer username)
+	      (string->pointer publickey)
+	      (string->pointer privatekey)
+	      (string->pointer passphrase))
+	(pointer->cred (dereference-pointer cred))))))
+
+;; XXX: duplicate of the above?
+(define cred-ssh-key-new
+  (let ((proc (libgit2->procedure* "git_cred_ssh_key_new" '(* * * * *))))
+    (lambda (username publickey privatekey passphrase)
+      (let ((out (make-double-pointer)))
+	(proc out
+	      (string->pointer username)
+	      (string->pointer publickey)
+	      (string->pointer privatekey)
+	      (string->pointer passphrase))
+	(pointer->cred (dereference-pointer cred))))))
+
+(define cred-username-new
+  (let ((proc (libgit2->procedure* "git_cred_username_new" '(* *))))
+    (lambda (username)
+      (let ((out (make-double-pointer)))
+	(proc out (string->pointer username))
+	(pointer->cred (dereference-pointer out))))))
+
+(define cred-userpass
+  (let ((proc (libgit2->procedure* "git_cred_userpass" `(* * * ,unsigned-int *))))
+    (lambda (url user-from-url allowed-types)
+      (let ((out (make-double-pointer)))
+	(proc out
+	      (string->pointer url)
+	      (string->pointer user-from-url)
+	      allowed-types
+	      %null-pointer)
+	(pointer->cred (dereference-pointer out))))))
+
+(define cred-userpass-paintext-new
+  (let ((proc (libgit2->procedure* "git_cred_userpass_paintext_new" '(* * *))))
+    (lambda (username password)
+      (let ((out (make-double-pointer)))
+	(proc out (string->pointer username) (string->pointer password))
+	(pointer->cred (dereference-pointer out))))))
+
+;;; FIXME: descript_commit https://libgit2.github.com/libgit2/#HEAD/group/describe
+
+;;; FIXME: diff https://libgit2.github.com/libgit2/#HEAD/group/diff
+ 
+(define diff-free
+  (let ((proc (libgit2->procedure void "git_diff_free" '(*))))
+    (lambda (diff)
+      (proc (diff->pointer diff)))))
+
+(define diff-get-delta
+  (let ((proc (libgit2->procedure '* "git_diff_get_delta" '(*))))
+    (lambda (diff)
+      (pointer->diff-delta (proc (diff->pointer diff))))))
+
+(define diff-num-deltas
+  (let ((proc (libgit2->procedure size_t "git_diff_num_deltas" '(*))))
+    (lambda (diff)
+      (proc (diff->pointer diff)))))
+
+;;; FIXME: fetch https://libgit2.github.com/libgit2/#HEAD/group/fetch
+
+;;; FIXME: filter https://libgit2.github.com/libgit2/#HEAD/group/filter
+
+
 ;;; repository
 
 (define repository-config
@@ -425,37 +745,14 @@
     (lambda (repository)
       (pointer->string (proc (repository->pointer repository))))))
 
+;;; reference
+
 (define reference-target
   (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
     (lambda (reference)
       (pointer->oid (proc (reference->pointer reference))))))
 
-(define lookup-commit
-  (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
-    (lambda (repository oid)
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository) (oid->pointer oid))
-	(pointer->commit (dereference-pointer out))))))
-
-(define commit-raw-header
-  (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
-    (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
-
-(define commit-signature
-  (let ((proc (libgit2->procedure* "git_commit_extract_signature"
-				   '(* * * * *))))
-    (lambda* (repository oid #:optional (field "gpgsig"))
-      (let ((signature (make-buffer))
-	    (data      (make-buffer)))
-	(proc signature data (repository->pointer repository)
-	      (oid->pointer oid)
-	      (string->pointer field))
-	(let ((signature* (buffer-content/string signature))
-	      (data*      (buffer-content/string data)))
-	  (free-buffer signature)
-	  (free-buffer data)
-	  (values signature* data*))))))
+;;; object
 
 (define GIT_OBJ_ANY -2)
 
