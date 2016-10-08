@@ -2,7 +2,11 @@
 (define-module (git tree)
   #:use-module (system foreign)
   #:use-module (git types)
-  #:use-module (git bindings))
+  #:use-module (git bindings)
+  #:export (tree-lookup
+            tree-dup
+            tree-entry-byid
+            tree-entry-byindex))
 
 (define tree-lookup
   (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *))))

@@ -7,6 +7,7 @@ SOURCES =                           \
   git/config.scm                    \
   git/types.scm                     \
   git/bindings.scm                  \
+  git/repository.scm                \
   git/tree.scm
 
 EXTRA_DIST +=                       \
