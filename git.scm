@@ -133,16 +133,16 @@
 (define repository-config
   (let ((proc (libgit2->procedure* "git_repository_config" '(* *))))
     (lambda (repository)
-      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc result (repository->pointer repository))
-	(pointer->config (dereference-pointer result))))))
+      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc out (repository->pointer repository))
+	(pointer->config (dereference-pointer out))))))
 
 (define repository-config-snapshot
   (let ((proc (libgit2->procedure* "git_repository_config_snapshot" '(* *))))
     (lambda (repository)
-      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc result (repository->pointer repository))
-	(pointer->config (dereference-pointer result))))))
+      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc out (repository->pointer repository))
+	(pointer->config (dereference-pointer out))))))
 
 (define repository-detach-head
   (let ((proc (libgit2->procedure* "git_repository_detach_head" '(*))))
@@ -152,9 +152,9 @@
 (define repository-head
   (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
     (lambda (repository)
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result (repository->pointer repository))
-	(pointer->reference (dereference-pointer result))))))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository))
+	(pointer->reference (dereference-pointer out))))))
 
 (define repository-discover
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
@@ -208,16 +208,16 @@
 (define repository-index
   (let ((proc (libgit2->procedure* "git_repository_index" '(* *))))
     (lambda (repository)
-      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
+      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
 	(proc (repository->pointer repository))
-	(pointer->index (dereference-pointer result))))))
+	(pointer->index (dereference-pointer out))))))
 
 (define repository-init
   (let ((proc (libgit2->procedure* "git_repository_init" `(* * ,int))))
     (lambda (path is-bare)
-      (let ((result ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc result (string->pointer path) (if is-bare 1 0))
-	(pointer->repository (dereference-pointer result))))))
+      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
+	(proc out (string->pointer path) (if is-bare 1 0))
+	(pointer->repository (dereference-pointer out))))))
 
 (define repository-is-bare?
   (let ((proc (libgit2->procedure int "git_repository_is_bare" '(*))))
@@ -237,9 +237,9 @@
 (define open-repository
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
     (lambda (file)
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result (string->pointer file))
-	(pointer->repository (dereference-pointer result))))))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (string->pointer file))
+	(pointer->repository (dereference-pointer out))))))
 
 (define repository-path
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
@@ -278,9 +278,9 @@
 (define lookup-commit
   (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
     (lambda (repository oid)
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result (repository->pointer repository) (oid->pointer oid))
-	(pointer->commit (dereference-pointer result))))))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository) (oid->pointer oid))
+	(pointer->commit (dereference-pointer out))))))
 
 (define commit-raw-header
   (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
@@ -307,9 +307,9 @@
 (define lookup-object
   (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
     (lambda* (repository oid #:optional (type GIT_OBJ_ANY))
-      (let ((result (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc result (repository->pointer repository) (oid->pointer oid)
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository) (oid->pointer oid)
 	      type)
-	(pointer->object (dereference-pointer result))))))
+	(pointer->object (dereference-pointer out))))))
 
 (initialize!)
