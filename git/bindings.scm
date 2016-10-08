@@ -6,15 +6,12 @@
   #:use-module (system foreign)
   #:use-module (ice-9 match)
   #:use-module (git config)
+  #:use-module (git types)
   #:export (libgit2->procedure
             libgit2->procedure*
-            define-libgit2-type
-            repository?
 	    open-repository
-	    reference?
 	    repository-head
 	    reference-target
-	    oid?
 	    commit-signature))
 
 ;; DRAFT!
@@ -32,48 +29,6 @@
 	(unless (zero? ret)
 	  (throw 'git-error ret))))))
 
-(define-syntax define-libgit2-type
-  (lambda (s)
-    "Define a wrapped pointer type for an opaque type of libgit2."
-    (syntax-case s ()
-      ((_ name)
-       (let ((symbol     (syntax->datum #'name))
-	     (identifier (lambda (symbol)
-			   (datum->syntax #'name symbol))))
-	 (with-syntax ((rtd    (identifier (symbol-append '< symbol '>)))
-		       (pred   (identifier (symbol-append symbol '?)))
-		       (wrap   (identifier (symbol-append 'pointer-> symbol)))
-		       (unwrap (identifier (symbol-append symbol '->pointer))))
-	   #`(define-wrapped-pointer-type rtd
-	       pred
-	       wrap unwrap
-	       (lambda (obj port)
-		 (format port "#<git-~a ~a>"
-			 #,(symbol->string symbol)
-			 (number->string (pointer-address (unwrap obj))
-					 16))))))))))
-
-(define-libgit2-type annotated-commit)
-(define-libgit2-type blame)
-(define-libgit2-type blame-options)
-(define-libgit2-type blob)
-(define-libgit2-type branch-iterator)
-(define-libgit2-type checkout-options)
-(define-libgit2-type commit)
-(define-libgit2-type config)
-(define-libgit2-type cred)
-(define-libgit2-type diff)
-(define-libgit2-type diff-delta)
-(define-libgit2-type diff-options)
-(define-libgit2-type index)
-(define-libgit2-type object)
-(define-libgit2-type oid)
-(define-libgit2-type patch)
-(define-libgit2-type refdb)
-(define-libgit2-type reference)
-(define-libgit2-type repository)
-(define-libgit2-type signature)
-(define-libgit2-type tree)
 
 (define %buffer-struct                            ;git_buf
   (list '* size_t size_t))
