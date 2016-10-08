@@ -85,7 +85,7 @@
 (define (make-double-pointer)
   (bytevector->pointer (make-bytevector (sizeof '*))))
 
-;; annotated
+;;; annotated
 
 (define annotated-commit-free
   (let ((proc (libgit2->procedure void "git_annotated_commit_free" '(*))))
@@ -128,7 +128,7 @@
 	(proc out (repository->pointer repository) (oid->pointer id))
 	(pointer->annotated-commit (dereference-pointer out))))))
 
-;; attr
+;;; attr
 
 (define attr-add-macro
   (let ((proc (libgit2->procedure* "git_attr_add_macro" '(* * *))))
@@ -151,7 +151,7 @@
 ;; git_attr_value https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_value
 
 
-;; repository
+;;; repository
 
 (define repository-config
   (let ((proc (libgit2->procedure* "git_repository_config" '(* *))))
