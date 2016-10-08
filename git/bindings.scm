@@ -89,7 +89,7 @@
       (pointer->oid (proc (annotated-commit->pointer commit))))))
 
 (define annotated-commit-lookup
-  (let ((proc (libgit2->procedure* "git_annotated_commit_lookup")))
+  (let ((proc (libgit2->procedure* "git_annotated_commit_lookup" '(* * *))))
     (lambda (repository id)
       (let ((out (make-double-pointer)))
 	(proc out (repository->pointer repository) (oid->pointer id))
@@ -316,7 +316,7 @@
       (pointer->string (proc (commit->pointer commit))))))
 
 (define commit-committer
-  (lambda ((proc (libgit2->procedure '* "git_commit_committer" '(*))))
+  (let ((proc (libgit2->procedure '* "git_commit_committer" '(*))))
     (lambda (commit)
       (pointer->signature (proc (commit->pointer commit))))))
 
@@ -355,7 +355,7 @@
   (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
     (lambda (commit field)
       (let ((out (make-buffer)))
-	(proc out (commit->pointer commit) (string->pointeger field))
+	(proc out (commit->pointer commit) (string->pointer field))
 	(let ((out* (buffer-content/string out)))
 	  (free-buffer out)
 	  out*)))))
@@ -468,15 +468,18 @@
       (eq? (proc (cred->pointer cred)) 1))))
 
 (define cred-ssh-custom-new
-  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" ,(* * * ,size_t * *))))
+  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" '(* * * ,size_t * *))))
     (lambda (username publickey sign-callback)
       (let ((out (make-double-pointer)))
 	(proc out
 	      (string->pointer username)
 	      (string->pointer publickey)
 	      (string-length publickey)
-	      (procedure-pointer sign-callback))
-	(pointer->cred (dereference-pointer cred))))))
+	      (procedure->pointer int
+                                  (lambda (session sig sig-len data data-len abstract)
+                                    (sign-callback session sig data abstract))
+                                  '(* * * * * *)))
+	(pointer->cred (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/cred/git_cred_ssh_interactive_new
 
@@ -496,7 +499,7 @@
 	      (string->pointer publickey)
 	      (string->pointer privatekey)
 	      (string->pointer passphrase))
-	(pointer->cred (dereference-pointer cred))))))
+	(pointer->cred (dereference-pointer out))))))
 
 ;; XXX: duplicate of the above?
 (define cred-ssh-key-new
@@ -508,7 +511,7 @@
 	      (string->pointer publickey)
 	      (string->pointer privatekey)
 	      (string->pointer passphrase))
-	(pointer->cred (dereference-pointer cred))))))
+	(pointer->cred (dereference-pointer out))))))
 
 (define cred-username-new
   (let ((proc (libgit2->procedure* "git_cred_username_new" '(* *))))
@@ -741,7 +744,7 @@
       (let ((out (make-buffer)))
 	(proc out (patch->pointer patch))
 	(let ((out* (buffer-content/string out)))
-	  (buffer-free out)
+	  (free-buffer out)
 	  out*)))))
 
 ;;; FIXME: pathspec https://libgit2.github.com/libgit2/#HEAD/group/pathspec
@@ -840,11 +843,11 @@
 (define repository-ident
   (let ((proc (libgit2->procedure* "git_repository_ident" '(* * *))))
     (lambda (repository)
-      (let ((name (make-bytevector (sizeof '*)))
-	    (name* ((bytevector->pointer name)))
-	    (email (make-bytevector (sizeof '*)))
-	    (email* ((bytevector->pointer email))))
-	(proc name mail (repository->pointer repository))
+      (let* ((name (make-bytevector (sizeof '*)))
+             (name* ((bytevector->pointer name)))
+             (email (make-bytevector (sizeof '*)))
+             (email* ((bytevector->pointer email))))
+	(proc name email (repository->pointer repository))
 	(values (pointer->string (make-pointer (u64vector-ref name 0)))
 		(pointer->string (make-pointer (u64vector-ref email 0))))))))
 
@@ -879,7 +882,7 @@
 (define repository-is-shallow?
   (let ((proc (libgit2->procedure int "git_repository_is_shallow" '(*))))
     (lambda (repository)
-      (eq? (proc (repository->procedure repository)) 1))))
+      (eq? (proc (repository->pointer repository)) 1))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_mergehead_foreach
 
@@ -905,7 +908,7 @@
 (define repository-path
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
     (lambda (repository)
-      (pointer->string (proc (repository->procedure repository))))))
+      (pointer->string (proc (repository->pointer repository))))))
 
 (define repository-refdb
   (let ((proc (libgit2->procedure* "git_repository_refdb" `(* *))))
