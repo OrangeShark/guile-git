@@ -187,7 +187,7 @@
 
 (define GIT-BRANCH-LOCAL 1)
 (define GIT-BRANCH-REMOTE 2)
-(define GIT-BRANCH-ALL (logior GIT-BRANCH-LOCAL GIT-BRANCH-ALL))
+(define GIT-BRANCH-ALL (logior GIT-BRANCH-LOCAL GIT-BRANCH-REMOTE))
 
 (define branch-iterator-new
   (let ((proc (libgit2->procedure* "git_branch_iterator_new" `(* * ,int))))
@@ -465,7 +465,7 @@
       (eq? (proc (cred->pointer cred)) 1))))
 
 (define cred-ssh-custom-new
-  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" '(* * * ,size_t * *))))
+  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" `(* * * ,size_t * *))))
     (lambda (username publickey sign-callback)
       (let ((out (make-double-pointer)))
 	(proc out
@@ -529,7 +529,7 @@
 	(pointer->cred (dereference-pointer out))))))
 
 (define cred-userpass-paintext-new
-  (let ((proc (libgit2->procedure* "git_cred_userpass_paintext_new" '(* * *))))
+  (let ((proc (libgit2->procedure* "git_cred_userpass_plaintext_new" '(* * *))))
     (lambda (username password)
       (let ((out (make-double-pointer)))
 	(proc out (string->pointer username) (string->pointer password))
