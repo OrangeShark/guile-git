@@ -49,9 +49,6 @@
     ((pointer asize size)
      (pointer->string pointer size "UTF-8"))))
 
-(define (make-double-pointer)
-  (bytevector->pointer (make-bytevector (sizeof '*))))
-
 ;;; annotated
 
 (define annotated-commit-free
