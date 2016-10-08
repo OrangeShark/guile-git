@@ -54,6 +54,8 @@
 					 16))))))))))
 
 (define-libgit2-type annotated-commit)
+(define-libgit2-type blame)
+(define-libgit2-type blame-options)
 (define-libgit2-type commit)
 (define-libgit2-type config)
 (define-libgit2-type index)
@@ -142,14 +144,40 @@
     (lambda (repository)
       (proc (repository->pointer repository)))))
 
-;; git_attr_foreach https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_foreach
+;; https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_foreach
 
-;; git_attr_get https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get
+;; https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get
 
-;; git_attr_get_many https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get_many
+;; https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_get_many
 
-;; git_attr_value https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_value
+;; https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_value
 
+;;; blame
+
+;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_buffer
+
+(define blame-file
+  (let ((proc (libgit2->procedure* "git_blame_file" '(* * * *))))
+    (lambda (repository path options)
+      (let ((out (make-double-pointer)))
+	(proc out
+	      (repository->pointer repository)
+	      (string->pointer path)
+	      (blame-options->pointer options))
+	(pointer->blame (dereference-pointer out))))))
+
+(define blame-free
+  (let ((proc (libgit2->procedure void "git_blame_free" '(*))))
+    (lambda (blame)
+      (proc (blame->pointer blame)))))
+
+;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_get_hunk_byindex
+
+;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_get_hunk_byline
+
+;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_get_hunk_count
+
+;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_init_options
 
 ;;; repository
 
