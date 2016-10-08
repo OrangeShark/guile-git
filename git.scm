@@ -29,9 +29,6 @@
 	(unless (zero? ret)
 	  (throw 'git-error ret))))))
 
-(define initialize!
-  (libgit2->procedure int "git_libgit2_init" '()))
-
 (define-syntax define-libgit2-type
   (lambda (s)
     "Define a wrapped pointer type for an opaque type of libgit2."
@@ -68,6 +65,7 @@
 (define-libgit2-type index)
 (define-libgit2-type object)
 (define-libgit2-type oid)
+(define-libgit2-type patch)
 (define-libgit2-type refdb)
 (define-libgit2-type reference)
 (define-libgit2-type repository)
@@ -602,6 +600,214 @@
 
 ;;; FIXME: filter https://libgit2.github.com/libgit2/#HEAD/group/filter
 
+;;; FIXME: giterr https://libgit2.github.com/libgit2/#HEAD/group/giterr
+
+;;; FIXME: graph https://libgit2.github.com/libgit2/#HEAD/group/graph
+
+;;; FIXME: hashsig https://libgit2.github.com/libgit2/#HEAD/group/hashsig
+
+;;; FIXME: ignore https://libgit2.github.com/libgit2/#HEAD/group/ignore
+
+;;; FIXME: index https://libgit2.github.com/libgit2/#HEAD/group/index
+
+;;; FIXME: indexer https://libgit2.github.com/libgit2/#HEAD/group/indexer
+
+;;; libgit2 
+
+(define libgit2-features
+  (libgit2->procedure int "git_libgit2_features" '()))
+
+(define libgit2-init!
+  (libgit2->procedure int "git_libgit2_init" '()))
+
+(define libgit2-opts
+  (libgit2->procedure int "git_libgit2_init" `(,int)))
+
+(define libgit2-shutdown
+  (libgit2->procedure int "git_libgit2_shutdown" '()))
+
+(define libgit2-version
+  (let ((proc (libgit2->procedure void "git_libgit2_version" '(* * *))))
+    (lambda ()
+      (let ((major (make-double-pointer))
+	    (minor (make-double-pointer))
+	    (rev (make-double-pointer)))
+	(proc major minor rev)
+	(map (compose pointer-address dereference-pointer) (list major minor rev))))))
+
+;;; FIXME: mempack https://libgit2.github.com/libgit2/#HEAD/group/mempack
+
+;;; FIXME: merge https://libgit2.github.com/libgit2/#HEAD/group/merge
+
+;;; FIXME: message https://libgit2.github.com/libgit2/#HEAD/group/message
+
+;;; FIXME: note https://libgit2.github.com/libgit2/#HEAD/group/note
+
+;;; object https://libgit2.github.com/libgit2/#HEAD/group/object
+
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object__size
+
+(define GIT_OBJ_ANY -2)
+
+(define object-dup
+  (let ((proc (libgit2->procedure* "git_object_dup" '(* *))))
+    (lambda (object)
+      (let ((out (make-double-pointer)))
+	(proc out (object->pointer object))
+	(pointer->object (dereference-pointer out))))))
+
+(define object-free
+  (let ((proc (libgit2->procedure void "git_object_free" '(*))))
+    (lambda (object)
+      (proc (object->pointer object)))))
+
+(define object-id
+  (let ((proc (libgit2->procedure '* "git_object_id" '(*))))
+    (lambda (object)
+      (pointer->oid (proc (object->pointer object))))))
+
+(define object-lookup
+  (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
+    (lambda* (repository oid #:optional (type GIT_OBJ_ANY))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository) (oid->pointer oid)
+	      type)
+	(pointer->object (dereference-pointer out))))))
+
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
+
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_prefix
+
+(define object-owner
+  (let ((proc (libgit2->procedure '* "git_object_owner" '(*))))
+    (lambda (object)
+      (pointer->repository (proc (object->pointer object))))))
+
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_peel
+
+(define object-short-id
+  (let ((proc (libgit2->procedure* "git_object_short_id" '(*))))
+    (lambda (object)
+      (let ((out (make-buffer)))
+	(proc out (object->pointer object))
+	(let ((out* (buffer-content/string out)))
+	  (free-buffer out)
+	  out)))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_string2type
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_type
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_type2string
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_typeisloose
+
+;;; FIXME: odb https://libgit2.github.com/libgit2/#HEAD/group/odb
+
+;;; oid https://libgit2.github.com/libgit2/#HEAD/group/oid
+
+(define oid-cmp
+  (let ((proc (libgit2->procedure int "git_oid_cmp" '(* *))))
+    (lambda (a b)
+      (proc (oid->pointer a) (oid->pointer b)))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_cpy
+
+(define (oid=? a b)
+  (let ((proc (libgit2->procedure int "git_oid_equal" '(* *))))
+    (lambda (a b)
+      (eq? (proc (oid->pointer a) (oid->pointer b)) 1))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fmt
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromraw
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstr
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrn
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrp
+
+(define oid-zero?
+  (let ((proc (libgit2->procedure int "git_oid_iszero" '(*))))
+    (lambda (id)
+      (eq? (proc (oid->pointer id)) 1))))
+
+(define oid-ncmp?
+  (let ((proc (libgit2->procedure int "git_oid_ncmp" `(* * ,size_t))))
+    (lambda (a b len)
+      (eq? (proc (oid->pointer a) (oid->pointer b) len) 0))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_nfmt
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_pathfmt
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_shorten_add
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_shorten_free
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_shorten_new
+
+(define oid-strcmp
+  (let ((proc (libgit2->procedure int "git_oid_strcmp" '(* *))))
+    (lambda (id string)
+      (proc (oid->pointer id) (string->pointer string)))))
+
+(define oid-str=?
+  (let ((proc (libgit2->procedure int "git_oid_streq" '(* *))))
+    (lambda (id string)
+      (proc (oid->pointer id) (string->pointer string)))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_tostr
+
+(define oid->string
+  (let ((proc (libgit2->procedure '* "git_oid_tostr_s" '(*))))
+    (lambda (id)
+      (pointer->string (proc (oid->pointer id))))))
+
+;;; FIXME: oidarray https://libgit2.github.com/libgit2/#HEAD/group/oidarray
+
+;;; FIXME: packbuilder https://libgit2.github.com/libgit2/#HEAD/group/packbuilder
+
+;;; FIXME: patch https://libgit2.github.com/libgit2/#HEAD/group/patch
+
+(define patch-free
+  (let ((proc (libgit2->procedure void "git_patch_free" '(*))))
+    (lambda (patch)
+      (proc (patch->pointer patch)))))
+
+(define patch->string
+  (let ((proc (libgit2->procedure* "git_patch_to_buf" '(*))))
+    (lambda (patch)
+      (let ((out (make-buffer)))
+	(proc out (patch->pointer patch))
+	(let ((out* (buffer-content/string out)))
+	  (buffer-free out)
+	  out*)))))
+
+;;; FIXME: pathspec https://libgit2.github.com/libgit2/#HEAD/group/pathspec
+
+;;; FIXME: proxy https://libgit2.github.com/libgit2/#HEAD/group/proxy
+
+;;; FIXME: push https://libgit2.github.com/libgit2/#HEAD/group/push
+
+;;; FIXME: rebase https://libgit2.github.com/libgit2/#HEAD/group/rebase
+
+;;; FIXME: refdb https://libgit2.github.com/libgit2/#HEAD/group/refdb
+
+;;; FIXME: reference https://libgit2.github.com/libgit2/#HEAD/group/reference
+
+(define reference-target
+  (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
+    (lambda (reference)
+      (pointer->oid (proc (reference->pointer reference))))))
+
+;;; FIXME: reflog https://libgit2.github.com/libgit2/#HEAD/group/reflog
+
+;;; FIXME: refspec https://libgit2.github.com/libgit2/#HEAD/group/refspec
+
+;;; FIXME: remote https://libgit2.github.com/libgit2/#HEAD/group/remote
 
 ;;; repository
 
@@ -624,13 +830,6 @@
     (lambda (repository)
       (proc (repository->pointer repository)))))
 
-(define repository-head
-  (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
-    (lambda (repository)
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository))
-	(pointer->reference (dereference-pointer out))))))
-
 (define repository-discover
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
     (lambda (start-path across-fs ceiling-dirs)
@@ -643,6 +842,8 @@
 	  (free-buffer out)
 	  out)))))
 
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_fetchhead_foreach
+
 (define repository-free
   (let ((proc (libgit2->procedure* "git_repository_free" '(*))))
     (lambda (repository)
@@ -652,6 +853,15 @@
   (let ((proc (libgit2->procedure '* "git_repository_get_namespace" '(*))))
     (lambda (repository)
       (pointer->string (proc (repository->pointer repository))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_hashfile
+
+(define repository-head
+  (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
+    (lambda (repository)
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+	(proc out (repository->pointer repository))
+	(pointer->reference (dereference-pointer out))))))
 
 (define repository-head-detached?
   (let ((proc (libgit2->procedure int "git_repository_head_detached" '(*))))
@@ -694,6 +904,10 @@
 	(proc out (string->pointer path) (if is-bare 1 0))
 	(pointer->repository (dereference-pointer out))))))
 
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_ext
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_init_options
+
 (define repository-is-bare?
   (let ((proc (libgit2->procedure int "git_repository_is_bare" '(*))))
     (lambda (repository)
@@ -709,12 +923,26 @@
     (lambda (repository)
       (eq? (proc (repository->procedure repository)) 1))))
 
-(define open-repository
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_mergehead_foreach
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_message
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_message_remove
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_new
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_odb
+
+(define repository-open
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
     (lambda (file)
       (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
 	(proc out (string->pointer file))
 	(pointer->repository (dereference-pointer out))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_ext
 
 (define repository-path
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
@@ -728,6 +956,18 @@
 	(proc out (repository->pointer repository))
 	(pointer->refdb (dereference-pointer out))))))
 
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_reinit_filesystem
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_bare
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_config
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_head
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_head_detached
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_head_detached_from_annotated
+
 (define repository-set-ident
   (let ((proc (libgit2->procedure* "git_repository_set_ident" '(* * *))))
     (lambda (repository name email) ;;; FIXE: make name and email optional
@@ -735,33 +975,27 @@
 	    (string->pointer name "UTF-8")
 	    (string->pointer email "UTF-8")))))
 
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_index
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_namespace
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_odb
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_refdb
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_workdir
+
 (define repository-state
   (let ((proc (libgit2->procedure int "git_repository_state" '(*))))
     (lambda (repository)
       (proc (repository->pointer repository)))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_state_cleanup
 
 (define repository-workdir
   (let ((proc (libgit2->procedure '* "git_repository_workdir" '(*))))
     (lambda (repository)
       (pointer->string (proc (repository->pointer repository))))))
 
-;;; reference
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_wrap_odb
 
-(define reference-target
-  (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
-    (lambda (reference)
-      (pointer->oid (proc (reference->pointer reference))))))
-
-;;; object
-
-(define GIT_OBJ_ANY -2)
-
-(define lookup-object
-  (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
-    (lambda* (repository oid #:optional (type GIT_OBJ_ANY))
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository) (oid->pointer oid)
-	      type)
-	(pointer->object (dereference-pointer out))))))
-
-(initialize!)
