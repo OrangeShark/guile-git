@@ -577,13 +577,13 @@
 (define libgit2-features
   (libgit2->procedure int "git_libgit2_features" '()))
 
-(define libgit2-init!
+(define-public libgit2-init!
   (libgit2->procedure int "git_libgit2_init" '()))
 
 (define libgit2-opts
   (libgit2->procedure int "git_libgit2_init" `(,int)))
 
-(define libgit2-shutdown
+(define-public libgit2-shutdown
   (libgit2->procedure int "git_libgit2_shutdown" '()))
 
 (define libgit2-version

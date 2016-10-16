@@ -62,7 +62,7 @@
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_fetchhead_foreach
 
 (define repository-free
-  (let ((proc (libgit2->procedure* "git_repository_free" '(*))))
+  (let ((proc (libgit2->procedure void "git_repository_free" '(*))))
     (lambda (repository)
       (proc (repository->pointer repository)))))
 
@@ -116,8 +116,8 @@
 
 (define repository-init
   (let ((proc (libgit2->procedure* "git_repository_init" `(* * ,int))))
-    (lambda (path is-bare)
-      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
+    (lambda* (path #:optional (is-bare #f))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
 	(proc out (string->pointer path) (if is-bare 1 0))
 	(pointer->repository (dereference-pointer out))))))
 
