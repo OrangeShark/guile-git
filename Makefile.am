@@ -10,6 +10,14 @@ SOURCES =                           \
   git/repository.scm                \
   git/tree.scm
 
+TESTS =                             \
+  tests/repository.scm
+
+TEST_EXTENSIONS = .scm
+
+SCM_LOG_COMPILER = $(top_builddir)/test-env $(GUILE)
+AM_SCM_LOG_FLAGS = --no-auto-compile -L "$(top_srcdir)"
+
 EXTRA_DIST +=                       \
   README.md                         \
   pre-inst-env.in                   \

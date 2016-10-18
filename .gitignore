@@ -8,6 +8,9 @@
 
 *.go
 
+*.log
+*.trs
+
 Makefile
 Makefile.in
 configure
@@ -17,4 +20,5 @@ build-aux/
 config.log
 config.status
 pre-inst-env
+test-env
 git/config.scm
