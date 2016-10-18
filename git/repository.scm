@@ -8,7 +8,6 @@
             repository-config-snapshot
             repository-detach-head
             repository-discover
-            repository-free
             repository-get-namespace
             repository-head
             repository-head-detached?
@@ -31,16 +30,16 @@
 (define repository-config
   (let ((proc (libgit2->procedure* "git_repository_config" '(* *))))
     (lambda (repository)
-      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc out (repository->pointer repository))
-	(pointer->config (dereference-pointer out))))))
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository))
+        (pointer->config (dereference-pointer out))))))
 
 (define repository-config-snapshot
   (let ((proc (libgit2->procedure* "git_repository_config_snapshot" '(* *))))
     (lambda (repository)
-      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc out (repository->pointer repository))
-	(pointer->config (dereference-pointer out))))))
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository))
+        (pointer->config (dereference-pointer out))))))
 
 (define repository-detach-head
   (let ((proc (libgit2->procedure* "git_repository_detach_head" '(*))))
@@ -51,20 +50,17 @@
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
     (lambda (start-path across-fs ceiling-dirs)
       (let ((out (make-buffer)))
-	(proc out
-	      (string->pointer start-path)
-	      (if across-fs 1 0)
-	      (string->pointer ceiling-dirs))
-	(let ((out* (buffer-content/string out)))
-	  (free-buffer out)
-	  out)))))
+        (proc out
+              (string->pointer start-path)
+              (if across-fs 1 0)
+              (string->pointer ceiling-dirs))
+        (let ((out* (buffer-content/string out)))
+          (free-buffer out)
+          out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_fetchhead_foreach
 
-(define repository-free
-  (let ((proc (libgit2->procedure void "git_repository_free" '(*))))
-    (lambda (repository)
-      (proc (repository->pointer repository)))))
+(define %repository-free (dynamic-func "git_repository_free" libgit2))
 
 (define repository-get-namespace
   (let ((proc (libgit2->procedure '* "git_repository_get_namespace" '(*))))
@@ -76,25 +72,25 @@
 (define repository-head
   (let ((proc (libgit2->procedure* "git_repository_head" '(* *))))
     (lambda (repository)
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository))
-	(pointer->reference (dereference-pointer out))))))
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository))
+        (pointer->reference (dereference-pointer out))))))
 
 (define repository-head-detached?
   (let ((proc (libgit2->procedure int "git_repository_head_detached" '(*))))
     (lambda (repository)
       (case (proc (repository->pointer repository))
-	((0) #f)
-	((1) #t)
-	(else => (lambda (code) (throw 'git-error code)))))))
+        ((0) #f)
+        ((1) #t)
+        (else => (lambda (code) (throw 'git-error code)))))))
 
 (define repository-head-unborn?
   (let ((proc (libgit2->procedure int "git_repository_head_unborn" '(*))))
     (lambda (repository)
       (case (proc (repository->pointer repository))
-	((0) #f)
-	((1) #t)
-	(else => (lambda (code) (throw 'git-error code)))))))
+        ((0) #f)
+        ((1) #t)
+        (else => (lambda (code) (throw 'git-error code)))))))
 
 (define repository-ident
   (let ((proc (libgit2->procedure* "git_repository_ident" '(* * *))))
@@ -103,23 +99,23 @@
              (name* ((bytevector->pointer name)))
              (email (make-bytevector (sizeof '*)))
              (email* ((bytevector->pointer email))))
-	(proc name email (repository->pointer repository))
-	(values (pointer->string (make-pointer (u64vector-ref name 0)))
-		(pointer->string (make-pointer (u64vector-ref email 0))))))))
+        (proc name email (repository->pointer repository))
+        (values (pointer->string (make-pointer (u64vector-ref name 0)))
+                (pointer->string (make-pointer (u64vector-ref email 0))))))))
 
 (define repository-index
   (let ((proc (libgit2->procedure* "git_repository_index" '(* *))))
     (lambda (repository)
-      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc (repository->pointer repository))
-	(pointer->index (dereference-pointer out))))))
+      (let ((out ((make-double-pointer))))
+        (proc (repository->pointer repository))
+        (pointer->index (dereference-pointer out))))))
 
 (define repository-init
   (let ((proc (libgit2->procedure* "git_repository_init" `(* * ,int))))
     (lambda* (path #:optional (is-bare #f))
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (string->pointer path) (if is-bare 1 0))
-	(pointer->repository (dereference-pointer out))))))
+      (let ((out (make-double-pointer)))
+        (proc out (string->pointer path) (if is-bare 1 0))
+        (pointer->repository (pointer-gc (dereference-pointer out) %repository-free))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_ext
 
@@ -153,9 +149,9 @@
 (define repository-open
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
     (lambda (file)
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (string->pointer file))
-	(pointer->repository (dereference-pointer out))))))
+      (let ((out (make-double-pointer)))
+        (proc out (string->pointer file))
+        (pointer->repository (pointer-gc (dereference-pointer out) %repository-free))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
 
@@ -169,9 +165,9 @@
 (define repository-refdb
   (let ((proc (libgit2->procedure* "git_repository_refdb" `(* *))))
     (lambda (repository)
-      (let ((out ((bytevector->pointer (make-bytevector (sizeof '*))))))
-	(proc out (repository->pointer repository))
-	(pointer->refdb (dereference-pointer out))))))
+      (let ((out ((make-double-pointer))))
+        (proc out (repository->pointer repository))
+        (pointer->refdb (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_reinit_filesystem
 
@@ -189,8 +185,8 @@
   (let ((proc (libgit2->procedure* "git_repository_set_ident" '(* * *))))
     (lambda (repository name email) ;;; FIXE: make name and email optional
       (proc (repository->pointer repository)
-	    (string->pointer name "UTF-8")
-	    (string->pointer email "UTF-8")))))
+            (string->pointer name "UTF-8")
+            (string->pointer email "UTF-8")))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_index
 

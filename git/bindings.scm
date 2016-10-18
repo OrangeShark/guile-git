@@ -7,14 +7,15 @@
   #:use-module (ice-9 match)
   #:use-module (git config)
   #:use-module (git types)
-  #:export (libgit2->procedure
+  #:export (libgit2
+            libgit2->procedure
             libgit2->procedure*
             make-buffer
             free-buffer
             buffer-content
             buffer-content/string
-	    reference-target
-	    commit-signature))
+            reference-target
+            commit-signature))
 
 ;; DRAFT!
 

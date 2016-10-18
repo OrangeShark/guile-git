@@ -24,7 +24,8 @@
             signature? pointer->signature signature->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
-            make-double-pointer))
+            make-double-pointer
+            pointer-gc))
 
 
 (define-syntax define-libgit2-type
@@ -73,3 +74,6 @@
 
 (define (make-double-pointer)
   (bytevector->pointer (make-bytevector (sizeof '*))))
+
+(define (pointer-gc pointer finalizer)
+  (make-pointer (pointer-address pointer) finalizer))
