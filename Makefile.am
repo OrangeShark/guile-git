@@ -13,6 +13,7 @@ SOURCES =                           \
   git/attr.scm                      \
   git/blame.scm                     \
   git/branch.scm                    \
+  git/checkout.scm                  \
   git/tree.scm
 
 TESTS =                             \
