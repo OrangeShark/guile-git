@@ -10,6 +10,7 @@ SOURCES =                           \
   git/reference.scm                 \
   git/repository.scm                \
   git/annotated.scm                 \
+  git/attr.scm                      \
   git/tree.scm
 
 TESTS =                             \
