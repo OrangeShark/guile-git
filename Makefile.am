@@ -12,6 +12,7 @@ SOURCES =                           \
   git/annotated.scm                 \
   git/attr.scm                      \
   git/blame.scm                     \
+  git/branch.scm                    \
   git/tree.scm
 
 TESTS =                             \
