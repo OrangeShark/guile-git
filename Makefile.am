@@ -9,6 +9,7 @@ SOURCES =                           \
   git/bindings.scm                  \
   git/reference.scm                 \
   git/repository.scm                \
+  git/annotated.scm                 \
   git/tree.scm
 
 TESTS =                             \
