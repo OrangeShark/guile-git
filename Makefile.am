@@ -18,6 +18,7 @@ SOURCES =                           \
   git/tree.scm
 
 TESTS =                             \
+  tests/commit.scm                  \
   tests/reference.scm               \
   tests/repository.scm
 

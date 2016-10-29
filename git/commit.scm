@@ -10,7 +10,7 @@
             commit-committer
             commit-extract-signature
             commit-header-field
-            commid-id
+            commit-id
             commit-lookup
             commit-lookup-prefix
             commit-message
@@ -48,7 +48,10 @@
 (define commit-body
   (let ((proc (libgit2->procedure '* "git_commit_body" '(*))))
     (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+      (let ((out (proc (commit->pointer commit))))
+        (if (eq? out %null-pointer)
+            ""
+            (pointer->string out))))))
 
 (define commit-committer
   (let ((proc (libgit2->procedure '* "git_commit_committer" '(*))))
@@ -71,20 +74,19 @@
   (let ((proc (libgit2->procedure* "git_commit_extract_signature" '(* * * * *))))
     (lambda* (repository oid #:optional (field "gpgsig"))
       (let ((signature (make-buffer))
-	    (data      (make-buffer)))
-	(proc signature data (repository->pointer repository)
-	      (oid->pointer oid)
-	      (string->pointer field))
-	(let ((signature* (buffer-content/string signature))
-	      (data*      (buffer-content/string data)))
-	  (free-buffer signature)
-	  (free-buffer data)
-	  (values signature* data*))))))
+            (data (make-buffer)))
+        (proc signature
+              data
+              (repository->pointer repository)
+              (oid->pointer oid)
+              (string->pointer field))
+        (let ((signature* (buffer-content/string signature))
+              (data*      (buffer-content/string data)))
+          (free-buffer signature)
+          (free-buffer data)
+          (values signature* data*))))))
 
-(define %commit-free
-  (let ((proc (libgit2->procedure void "git_commit_free" '(*))))
-    (lambda (commit)
-      (proc (commit->pointer commit)))))
+(define %commit-free (dynamic-func "git_commit_free" libgit2))
 
 (define commit-header-field
   (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
@@ -103,9 +105,9 @@
 (define commit-lookup
   (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
     (lambda (repository oid)
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository) (oid->pointer oid))
-	(pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (oid->pointer oid))
+        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
 
 (define commit-lookup-prefix
   (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t))))
@@ -122,7 +124,10 @@
 (define commit-message-encoding
   (let ((proc (libgit2->procedure '* "git_commit_message_encoding" '(*))))
     (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+      (let ((out (proc (commit->pointer commit))))
+        (if (eq? out %null-pointer)
+            #f
+            (pointer->string out))))))
 
 (define commit-message-raw
   (let ((proc (libgit2->procedure '* "git_commit_message_raw" '(*))))
@@ -137,15 +142,15 @@
       (pointer->repository (proc (commit->pointer commit))))))
 
 (define commit-parent
-  (let ((proc (libgit2->procedure* "git_commit_parent" `(* ,unsigned-int))))
-    (lambda (commit n)
+  (let ((proc (libgit2->procedure* "git_commit_parent" `(* * ,unsigned-int))))
+    (lambda* (commit #:optional (n 0))
       (let ((out (make-double-pointer)))
-	(proc out (commit->pointer commit) n)
-	(pointer->commit (dereference-pointer out))))))
+        (proc out (commit->pointer commit) n)
+        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
 
 (define commit-parent-id
   (let ((proc (libgit2->procedure '* "git_commit_parent_id" `(* ,unsigned-int))))
-    (lambda (commit n)
+    (lambda* (commit #:optional (n 0))
       (pointer->oid (proc (commit->pointer commit) n)))))
 
 (define commit-parentcount
