@@ -52,10 +52,7 @@
      (pointer->string pointer size "UTF-8"))))
 
 
-
 ;;; blob https://libgit2.github.com/libgit2/#HEAD/group/blob
-
-
 
 ;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
 

@@ -3,7 +3,9 @@
 (eval-when (eval load compile)
   (begin
     (define %public-modules
-      '((git repository)
+      '((git oid)
+        (git reference)
+        (git repository)
         (git bindings)))
 
     (for-each (let ((i (module-public-interface (current-module))))

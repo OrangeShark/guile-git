@@ -1,4 +1,3 @@
-
 (define-module (git reference)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)

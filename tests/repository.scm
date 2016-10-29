@@ -46,7 +46,6 @@
     (let* ((repository (repository-open "tmp/empty-repo/"))
            (out (repository-path repository)))
       out))
-
   )
 
 (libgit2-shutdown)

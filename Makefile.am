@@ -17,6 +17,7 @@ SOURCES =                           \
   git/tree.scm
 
 TESTS =                             \
+  tests/reference.scm               \
   tests/repository.scm
 
 TEST_EXTENSIONS = .scm
