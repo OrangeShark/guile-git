@@ -14,7 +14,6 @@
             free-buffer
             buffer-content
             buffer-content/string
-            reference-target
             commit-signature))
 
 ;; DRAFT!
