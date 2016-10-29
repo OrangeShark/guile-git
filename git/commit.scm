@@ -81,7 +81,7 @@
 	  (free-buffer data)
 	  (values signature* data*))))))
 
-(define commit-free
+(define %commit-free
   (let ((proc (libgit2->procedure void "git_commit_free" '(*))))
     (lambda (commit)
       (proc (commit->pointer commit)))))
@@ -105,13 +105,15 @@
     (lambda (repository oid)
       (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
 	(proc out (repository->pointer repository) (oid->pointer oid))
-	(pointer->commit (dereference-pointer out))))))
+	(pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
 
 (define commit-lookup-prefix
   (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t))))
     (lambda (repository id len)
       (let ((out (make-double-pointer)))
-	(proc out (repository->pointer repository) (oid->pointer id) len)))))
+        (proc out (repository->pointer repository) (oid->pointer id) len)
+        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
+        
 
 (define commit-message
   (let ((proc (libgit2->procedure '* "git_commit_message" '(*))))
