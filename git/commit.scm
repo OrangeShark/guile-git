@@ -1,5 +1,7 @@
 
 (define-module (git commit)
+  #:use-module (rnrs bytevectors)
+  #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
   #:export (commit-amend
