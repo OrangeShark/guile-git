@@ -3,7 +3,8 @@
 (eval-when (eval load compile)
   (begin
     (define %public-modules
-      '((git oid)
+      '((git commit)
+        (git oid)
         (git reference)
         (git repository)
         (git bindings)))
