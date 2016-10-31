@@ -12,3 +12,5 @@ git clone https://gitlab.com/amirouche/guile-git.git
 - Create a pull request on gitlab
 - Send a patch to one of the maintainer
 - Come and ping `amz3` or `OrangeShark` about it at `#guile@irc.freenode.net`.
+
+And don't forget to add a unit test!
