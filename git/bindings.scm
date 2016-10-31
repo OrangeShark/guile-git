@@ -13,8 +13,7 @@
             make-buffer
             free-buffer
             buffer-content
-            buffer-content/string
-            commit-signature))
+            buffer-content/string))
 
 ;; DRAFT!
 
