@@ -4,19 +4,19 @@ moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES =                           \
-  git/commit.scm                    \
-  git/config.scm                    \
-  git/types.scm                     \
-  git/bindings.scm                  \
-  git/reference.scm                 \
-  git/repository.scm                \
   git/annotated.scm                 \
   git/attr.scm                      \
+  git/bindings.scm                  \
   git/blame.scm                     \
   git/branch.scm                    \
   git/checkout.scm                  \
+  git/commit.scm                    \
+  git/config.scm                    \
+  git/reference.scm                 \
+  git/repository.scm                \
   git/struct.scm                    \
-  git/tree.scm
+  git/tree.scm                      \
+  git/types.scm
 
 TESTS =                             \
   tests/commit.scm                  \
