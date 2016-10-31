@@ -15,7 +15,7 @@ SOURCES =                           \
   git/enums.scm                     \
   git/reference.scm                 \
   git/repository.scm                \
-  git/struct.scm                    \
+  git/structs.scm                   \
   git/tree.scm                      \
   git/types.scm
 

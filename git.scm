@@ -9,7 +9,7 @@
         (git oid)
         (git reference)
         (git repository)
-        (git struct)
+        (git structs)
         (git tree)))
 
     (for-each (let ((i (module-public-interface (current-module))))

@@ -3,7 +3,7 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
-  #:use-module (git struct)
+  #:use-module (git structs)
   #:use-module (git tree)
   #:use-module (git types)
   #:export (commit-amend

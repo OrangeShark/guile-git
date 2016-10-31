@@ -1,5 +1,5 @@
 
-(define-module (git struct)
+(define-module (git structs)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-9)
   #:use-module ((system foreign) #:select (bytevector->pointer
