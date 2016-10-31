@@ -37,6 +37,25 @@
            (oid (reference-target (repository-head repository))))
       (commit-body (commit-lookup repository oid))))
 
+  (test-equal "commit-committer signature-name"
+    "Amirouche"
+    (let* ((repository (repository-open "tmp/empty-repo/"))
+           (oid (reference-target (repository-head repository))))
+      (signature-name (commit-committer (commit-lookup repository oid)))))
+
+  (test-equal "commit-committer signature-email"
+    "amirouche@hypermove.net"
+    (let* ((repository (repository-open "tmp/empty-repo/"))
+           (oid (reference-target (repository-head repository))))
+      (signature-email (commit-committer (commit-lookup repository oid)))))
+
+  (test-equal "commit-committer signature-when"
+    '(1476014645 120)
+    (let* ((repository (repository-open "tmp/empty-repo/"))
+           (oid (reference-target (repository-head repository)))
+           (when* (signature-when (commit-committer (commit-lookup repository oid)))))
+      (list (time-time when*) (time-offset when*))))
+  
   (test-equal "commit-id"
     "4a53b71060aa9b11ecf4050d2e7379456f0fbfb1"
     (let* ((repository (repository-open "tmp/empty-repo/"))
