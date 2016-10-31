@@ -105,7 +105,7 @@
            (oid (reference-target (repository-head repository))))
       (commit-time-offset (commit-lookup repository oid))))
 
-  (test-equal "commit-time-offset"
+  (test-equal "commit-tree-id"
     "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
     (let* ((repository (repository-open "tmp/empty-repo/"))
            (oid (reference-target (repository-head repository))))
