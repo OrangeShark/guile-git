@@ -3,6 +3,7 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
+  #:use-module (git struct)
   #:use-module (git types)
   #:export (commit-amend
             commit-author
@@ -32,13 +33,13 @@
   (let ((proc (libgit2->procedure* "git_commit_amend" '(* * * * * * * *))))
     (lambda (id commit update-ref author commiter message-encoding message tree)
       (proc (oid->pointer id)
-	    (commit->pointer commit)
-	    (string->pointer update-ref)
-	    (signature->pointer author)
-	    (signature->pointer commiter)
-	    (string->pointer message-encoding)
-	    (string->pointer message)
-	    (tree->pointer tree)))))
+            (commit->pointer commit)
+            (string->pointer update-ref)
+            (signature->pointer author)
+            (signature->pointer commiter)
+            (string->pointer message-encoding)
+            (string->pointer message)
+            (tree->pointer tree)))))
 
 (define commit-author
   (let ((proc (libgit2->procedure '* "git_commit_author" '(*))))
@@ -92,10 +93,10 @@
   (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
     (lambda (commit field)
       (let ((out (make-buffer)))
-	(proc out (commit->pointer commit) (string->pointer field))
-	(let ((out* (buffer-content/string out)))
-	  (free-buffer out)
-	  out*)))))
+        (proc out (commit->pointer commit) (string->pointer field))
+        (let ((out* (buffer-content/string out)))
+          (free-buffer out)
+          out*)))))
 
 (define commit-id
   (let ((proc (libgit2->procedure '* "git_commit_id" '(*))))
@@ -179,8 +180,8 @@
   (let ((proc (libgit2->procedure* "git_commit_tree" '(*))))
     (lambda (commit)
       (let ((out (make-double-pointer)))
-	(proc out (commit->pointer commit))
-	(pointer->tree (dereference-pointer out))))))
+        (proc out (commit->pointer commit))
+        (pointer->tree (dereference-pointer out))))))
 
 (define commit-tree-id
   (let ((proc (libgit2->procedure '* "git_commit_tree_id" '(*))))
