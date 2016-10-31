@@ -4,6 +4,7 @@ moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES =                           \
+  git.scm                           \
   git/annotated.scm                 \
   git/attr.scm                      \
   git/bindings.scm                  \
