@@ -8,14 +8,8 @@
             tree-entry-byid
             tree-entry-byindex))
 
-(define tree-lookup
-  (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *))))
-    (lambda (repository id)
-      (let ((out (make-double-pointer)))
-        (proc out
-              (repository->pointer repository)
-              (oid->pointer id))
-        (pointer->tree (dereference-pointer out))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_create_updated
 
 (define tree-dup
   (let ((proc (libgit2->procedure* "git_tree_dup" '(* *))))
@@ -24,8 +18,6 @@
         (proc out
               (tree->pointer source))
         (pointer->tree (dereference-pointer out))))))
-
-(define %tree-entry-free (dynamic-func "git_tree_entry_free" libgit2))
 
 (define tree-entry-byid
   (let ((proc (libgit2->procedure '* "git_tree_entry_byid" '(* *))))
@@ -43,7 +35,7 @@
             #f
             (pointer->tree-entry ret))))))
 
-(define tree-entry-byindex
+(define tree-entry-byname
   (let ((proc (libgit2->procedure '* "git_tree_entry_byname" '(* *))))
     (lambda (tree filename)
       (let ((ret (proc (tree->pointer tree) (string->pointer filename))))
@@ -63,7 +55,7 @@
     (lambda (e1 e2)
       (proc (tree-entry->pointer e1) (tree-entry->pointer e2)))))
 
-(define tree-entry-bypath
+(define tree-entry-dup
   (let ((proc (libgit2->procedure* "git_tree_entry_dup" '(* *))))
     (lambda (source)
       (let ((dest (make-double-pointer)))
@@ -73,6 +65,8 @@
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode_raw
+
+(define %tree-entry-free (dynamic-func "git_tree_entry_free" libgit2))
 
 (define tree-entry-id
   (let ((proc (libgit2->procedure '* "git_tree_entry_id" '(*))))
@@ -92,3 +86,26 @@
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (tree-entry->pointer entry))
         (pointer->object (dereference-pointer out))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_type
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entrycount
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_free
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_id
+
+(define tree-lookup
+  (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *))))
+    (lambda (repository id)
+      (let ((out (make-double-pointer)))
+        (proc out
+              (repository->pointer repository)
+              (oid->pointer id))
+        (pointer->tree (dereference-pointer out))))))
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_lookup_prefix
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_owner
+
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_walk
