@@ -27,9 +27,10 @@
   (let ((proc (libgit2->procedure int name params)))
     (lambda args
       (let ((ret (apply proc args)))
-	(unless (zero? ret)
-	  (throw 'git-error ret))))))
+        (unless (zero? ret)
+          (throw 'git-error ret))))))
 
+;;; git-buf
 
 (define %buffer-struct                            ;git_buf
   (list '* size_t size_t))
@@ -50,7 +51,6 @@
     ((pointer asize size)
      (pointer->string pointer size "UTF-8"))))
 
-
 ;;; blob https://libgit2.github.com/libgit2/#HEAD/group/blob
 
 ;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
@@ -59,8 +59,8 @@
   (let ((proc (libgit2->procedure* "git_cherrypick" '(* * *))))
     (lambda (repository commit)
       (proc (repository->pointer repository)
-	    (commit->pointer commit)
-	    %null-pointer))))
+            (commit->pointer commit)
+            %null-pointer))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_commit
 
@@ -72,7 +72,7 @@
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
     (lambda (url local-path)
       (let ((out (make-double-pointer)))
-	(proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
+        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
 
 ;;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/config
 
@@ -82,8 +82,8 @@
   (let ((proc (libgit2->procedure* "git_cred_default_new" '(*))))
     (lambda ()
       (let ((out (make-double-pointer)))
-	(proc out)
-	(pointer->cred (dereference-pointer out))))))
+        (proc out)
+        (pointer->cred (dereference-pointer out))))))
 
 (define cred-free
   (let ((proc (libgit2->procedure void "git_cred_free" '(*))))
@@ -99,15 +99,15 @@
   (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" `(* * * ,size_t * *))))
     (lambda (username publickey sign-callback)
       (let ((out (make-double-pointer)))
-	(proc out
-	      (string->pointer username)
-	      (string->pointer publickey)
-	      (string-length publickey)
-	      (procedure->pointer int
+        (proc out
+              (string->pointer username)
+              (string->pointer publickey)
+              (string-length publickey)
+              (procedure->pointer int
                                   (lambda (session sig sig-len data data-len abstract)
                                     (sign-callback session sig data abstract))
                                   '(* * * * * *)))
-	(pointer->cred (dereference-pointer out))))))
+        (pointer->cred (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/cred/git_cred_ssh_interactive_new
 
@@ -115,61 +115,61 @@
   (let ((proc (libgit2->procedure* "git_cred_ssh_key_from_agent" '(* *))))
     (lambda (username)
       (let ((out (make-double-pointer)))
-	(proc out (string->pointer username))
-	(pointer->cred (dereference-pointer out))))))
+        (proc out (string->pointer username))
+        (pointer->cred (dereference-pointer out))))))
 
 (define cred-ssh-key-from-memory-new
   (let ((proc (libgit2->procedure* "git_cred_ssh_key_memory_new" '(* * * * *))))
     (lambda (username publickey privatekey passphrase)
       (let ((out (make-double-pointer)))
-	(proc out
-	      (string->pointer username)
-	      (string->pointer publickey)
-	      (string->pointer privatekey)
-	      (string->pointer passphrase))
-	(pointer->cred (dereference-pointer out))))))
+        (proc out
+              (string->pointer username)
+              (string->pointer publickey)
+              (string->pointer privatekey)
+              (string->pointer passphrase))
+        (pointer->cred (dereference-pointer out))))))
 
 ;; XXX: duplicate of the above?
 (define cred-ssh-key-new
   (let ((proc (libgit2->procedure* "git_cred_ssh_key_new" '(* * * * *))))
     (lambda (username publickey privatekey passphrase)
       (let ((out (make-double-pointer)))
-	(proc out
-	      (string->pointer username)
-	      (string->pointer publickey)
-	      (string->pointer privatekey)
-	      (string->pointer passphrase))
-	(pointer->cred (dereference-pointer out))))))
+        (proc out
+              (string->pointer username)
+              (string->pointer publickey)
+              (string->pointer privatekey)
+              (string->pointer passphrase))
+        (pointer->cred (dereference-pointer out))))))
 
 (define cred-username-new
   (let ((proc (libgit2->procedure* "git_cred_username_new" '(* *))))
     (lambda (username)
       (let ((out (make-double-pointer)))
-	(proc out (string->pointer username))
-	(pointer->cred (dereference-pointer out))))))
+        (proc out (string->pointer username))
+        (pointer->cred (dereference-pointer out))))))
 
 (define cred-userpass
   (let ((proc (libgit2->procedure* "git_cred_userpass" `(* * * ,unsigned-int *))))
     (lambda (url user-from-url allowed-types)
       (let ((out (make-double-pointer)))
-	(proc out
-	      (string->pointer url)
-	      (string->pointer user-from-url)
-	      allowed-types
-	      %null-pointer)
-	(pointer->cred (dereference-pointer out))))))
+        (proc out
+              (string->pointer url)
+              (string->pointer user-from-url)
+              allowed-types
+              %null-pointer)
+        (pointer->cred (dereference-pointer out))))))
 
 (define cred-userpass-paintext-new
   (let ((proc (libgit2->procedure* "git_cred_userpass_plaintext_new" '(* * *))))
     (lambda (username password)
       (let ((out (make-double-pointer)))
-	(proc out (string->pointer username) (string->pointer password))
-	(pointer->cred (dereference-pointer out))))))
+  (proc out (string->pointer username) (string->pointer password))
+  (pointer->cred (dereference-pointer out))))))
 
 ;;; FIXME: descript_commit https://libgit2.github.com/libgit2/#HEAD/group/describe
 
 ;;; FIXME: diff https://libgit2.github.com/libgit2/#HEAD/group/diff
- 
+
 (define diff-free
   (let ((proc (libgit2->procedure void "git_diff_free" '(*))))
     (lambda (diff)
@@ -201,7 +201,7 @@
 
 ;;; FIXME: indexer https://libgit2.github.com/libgit2/#HEAD/group/indexer
 
-;;; libgit2 
+;;; libgit2
 
 (define libgit2-features
   (libgit2->procedure int "git_libgit2_features" '()))
@@ -219,10 +219,10 @@
   (let ((proc (libgit2->procedure void "git_libgit2_version" '(* * *))))
     (lambda ()
       (let ((major (make-double-pointer))
-	    (minor (make-double-pointer))
-	    (rev (make-double-pointer)))
-	(proc major minor rev)
-	(map (compose pointer-address dereference-pointer) (list major minor rev))))))
+      (minor (make-double-pointer))
+      (rev (make-double-pointer)))
+        (proc major minor rev)
+        (map (compose pointer-address dereference-pointer) (list major minor rev))))))
 
 ;;; FIXME: mempack https://libgit2.github.com/libgit2/#HEAD/group/mempack
 
@@ -243,8 +243,8 @@
   (let ((proc (libgit2->procedure* "git_object_dup" '(* *))))
     (lambda (object)
       (let ((out (make-double-pointer)))
-	(proc out (object->pointer object))
-	(pointer->object (dereference-pointer out))))))
+        (proc out (object->pointer object))
+        (pointer->object (dereference-pointer out))))))
 
 (define object-free
   (let ((proc (libgit2->procedure void "git_object_free" '(*))))
@@ -260,9 +260,9 @@
   (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
     (lambda* (repository oid #:optional (type GIT_OBJ_ANY))
       (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-	(proc out (repository->pointer repository) (oid->pointer oid)
-	      type)
-	(pointer->object (dereference-pointer out))))))
+        (proc out (repository->pointer repository) (oid->pointer oid)
+              type)
+        (pointer->object (dereference-pointer out))))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
 
@@ -279,10 +279,10 @@
   (let ((proc (libgit2->procedure* "git_object_short_id" '(*))))
     (lambda (object)
       (let ((out (make-buffer)))
-	(proc out (object->pointer object))
-	(let ((out* (buffer-content/string out)))
-	  (free-buffer out)
-	  out)))))
+        (proc out (object->pointer object))
+        (let ((out* (buffer-content/string out)))
+          (free-buffer out)
+          out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_string2type
 
@@ -307,10 +307,10 @@
   (let ((proc (libgit2->procedure* "git_patch_to_buf" '(*))))
     (lambda (patch)
       (let ((out (make-buffer)))
-	(proc out (patch->pointer patch))
-	(let ((out* (buffer-content/string out)))
-	  (free-buffer out)
-	  out*)))))
+        (proc out (patch->pointer patch))
+        (let ((out* (buffer-content/string out)))
+          (free-buffer out)
+          out*)))))
 
 ;;; FIXME: pathspec https://libgit2.github.com/libgit2/#HEAD/group/pathspec
 
@@ -328,5 +328,3 @@
 ;;; FIXME: refspec https://libgit2.github.com/libgit2/#HEAD/group/refspec
 
 ;;; FIXME: remote https://libgit2.github.com/libgit2/#HEAD/group/remote
-
-
