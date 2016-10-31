@@ -15,6 +15,7 @@ SOURCES =                           \
   git/blame.scm                     \
   git/branch.scm                    \
   git/checkout.scm                  \
+  git/struct.scm                    \
   git/tree.scm
 
 TESTS =                             \
