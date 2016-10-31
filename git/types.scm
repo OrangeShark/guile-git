@@ -21,7 +21,6 @@
             refdb? pointer->refdb refdb->pointer
             reference? pointer->reference reference->pointer
             repository? pointer->repository repository->pointer
-            signature? pointer->signature signature->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
             make-double-pointer
@@ -68,9 +67,10 @@
 (define-libgit2-type refdb)
 (define-libgit2-type reference)
 (define-libgit2-type repository)
-(define-libgit2-type signature)
 (define-libgit2-type tree)
 (define-libgit2-type tree-entry)
+
+;;; helpers
 
 (define (make-double-pointer)
   (bytevector->pointer (make-bytevector (sizeof '*))))
