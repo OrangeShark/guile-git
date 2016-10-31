@@ -1,8 +1,14 @@
 
 (define-module (git branch)
+  #:use-module (ice-9 receive)
   #:use-module (system foreign)
   #:use-module (git bindings)
-  #:use-module (git types))
+  #:use-module (git enums)
+  #:use-module (git reference)
+  #:use-module (git types)
+  #:export (branch-list
+            branch-lookup
+            branch-name))
 
 ;;; branch https://libgit2.github.com/libgit2/#HEAD/group/branch
 
@@ -46,10 +52,6 @@
     (lambda (iterator)
       (proc (branch-iterator->pointer iterator)))))
 
-(define GIT-BRANCH-LOCAL 1)
-(define GIT-BRANCH-REMOTE 2)
-(define GIT-BRANCH-ALL (logior GIT-BRANCH-LOCAL GIT-BRANCH-REMOTE))
-
 (define branch-iterator-new
   (let ((proc (libgit2->procedure* "git_branch_iterator_new" `(* * ,int))))
     (lambda (repository flags)
@@ -59,7 +61,7 @@
 
 (define branch-lookup
   (let ((proc (libgit2->procedure* "git_branch_lookup" `(* * * ,int))))
-    (lambda (repository branch-name type)
+    (lambda* (repository branch-name #:optional (type GIT-BRANCH-ALL))
       (let ((out (make-double-pointer)))
         (proc out
               (repository->pointer repository)
@@ -104,3 +106,17 @@
       (let ((out (make-double-pointer)))
         (proc out (reference->pointer branch))
         (pointer->reference (dereference-pointer out))))))
+
+(define* (branch-list repository #:optional (flag GIT-BRANCH-ALL))
+  (let ((iterator (branch-iterator-new repository flag)))
+    (let ((lst (let loop ((lst '()))
+                 (catch 'git-error
+                   (lambda ()
+                     (receive (reference _) (branch-next iterator)
+                       (loop (cons (branch-name reference) lst))))
+                   (lambda (key code)
+                     (if (eq? code -31)
+                         lst
+                         (throw 'git-error code)))))))
+      (branch-iterator-free iterator)
+      lst)))

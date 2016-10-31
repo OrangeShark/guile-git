@@ -21,6 +21,7 @@ SOURCES =                           \
   git/types.scm
 
 TESTS =                             \
+  tests/branch.scm                  \
   tests/commit.scm                  \
   tests/reference.scm               \
   tests/repository.scm              \

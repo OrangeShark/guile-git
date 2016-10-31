@@ -4,6 +4,7 @@
   (begin
     (define %public-modules
       '((git bindings)
+        (git branch)
         (git commit)
         (git enums)
         (git oid)
