@@ -7,6 +7,10 @@ This is the repository of guile bindings of git hosted
 git clone https://gitlab.com/amirouche/guile-git.git
 ```
 
+## Documentation
+
+Read the source and have a look at [libgit2 reference](http://libgit2.github.com/)
+
 ## How to contribute
 
 - Create a pull request on gitlab
