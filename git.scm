@@ -5,10 +5,12 @@
     (define %public-modules
       '((git bindings)
         (git commit)
+        (git enums)
         (git oid)
         (git reference)
         (git repository)
-        (git struct)))
+        (git struct)
+        (git tree)))
 
     (for-each (let ((i (module-public-interface (current-module))))
                 (lambda (m)

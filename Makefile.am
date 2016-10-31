@@ -12,6 +12,7 @@ SOURCES =                           \
   git/checkout.scm                  \
   git/commit.scm                    \
   git/config.scm                    \
+  git/enums.scm                     \
   git/reference.scm                 \
   git/repository.scm                \
   git/struct.scm                    \
@@ -21,7 +22,8 @@ SOURCES =                           \
 TESTS =                             \
   tests/commit.scm                  \
   tests/reference.scm               \
-  tests/repository.scm
+  tests/repository.scm              \
+  tests/tree.scm
 
 TEST_EXTENSIONS = .scm
 

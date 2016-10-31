@@ -4,6 +4,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git struct)
+  #:use-module (git tree)
   #:use-module (git types)
   #:export (commit-amend
             commit-author
@@ -177,11 +178,11 @@
       (proc (commit->pointer commit)))))
 
 (define commit-tree
-  (let ((proc (libgit2->procedure* "git_commit_tree" '(*))))
+  (let ((proc (libgit2->procedure* "git_commit_tree" '(* *))))
     (lambda (commit)
       (let ((out (make-double-pointer)))
         (proc out (commit->pointer commit))
-        (pointer->tree (dereference-pointer out))))))
+        (pointer->tree (pointer-gc (dereference-pointer out) %tree-free))))))
 
 (define commit-tree-id
   (let ((proc (libgit2->procedure '* "git_commit_tree_id" '(*))))

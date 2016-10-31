@@ -3,21 +3,27 @@
   #:use-module (system foreign)
   #:use-module (git types)
   #:use-module (git bindings)
-  #:export (tree-lookup
+  #:export (%tree-free
+            tree-lookup
             tree-dup
-            tree-entry-byid
-            tree-entry-byindex))
+            tree-entry-byid            
+            tree-entry-byindex
+            tree-entry-name
+            tree-id
+            tree-walk))
 
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_create_updated
 
-(define tree-dup
-  (let ((proc (libgit2->procedure* "git_tree_dup" '(* *))))
-    (lambda (source)
-      (let ((out (make-double-pointer)))
-        (proc out
-              (tree->pointer source))
-        (pointer->tree (dereference-pointer out))))))
+;; XXX: only found in HEAD
+;;
+;; (define tree-dup
+;;   (let ((proc (libgit2->procedure* "git_tree_dup" '(* *))))
+;;     (lambda (source)
+;;       (let ((out (make-double-pointer)))
+;;         (proc out
+;;               (tree->pointer source))
+;;         (pointer->tree (dereference-pointer out))))))
 
 (define tree-entry-byid
   (let ((proc (libgit2->procedure '* "git_tree_entry_byid" '(* *))))
@@ -91,9 +97,12 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entrycount
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_free
+(define %tree-free (dynamic-func "git_tree_free" libgit2))
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_id
+(define tree-id
+  (let ((proc (libgit2->procedure '* "git_tree_id" '(*))))
+    (lambda (tree)
+      (pointer->oid (proc (tree->pointer tree))))))
 
 (define tree-lookup
   (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *))))
@@ -108,4 +117,15 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_owner
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_walk
+(define tree-walk
+  (let ((proc (libgit2->procedure* "git_tree_walk" `(* ,int * *))))
+    (lambda (tree mode callback)
+      ;; If the callback returns a positive value, the passed entry will
+      ;; be skipped on the traversal (in pre mode). A negative value stops
+      ;; the walk.
+      (let ((callback* (procedure->pointer int
+                                           (lambda (root entry _)
+                                             (callback (pointer->string root)
+                                                       (pointer->tree-entry entry)))
+                                           (list '* '* '*))))
+        (proc (tree->pointer tree) mode callback* %null-pointer)))))
