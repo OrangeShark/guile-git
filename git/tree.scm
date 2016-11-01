@@ -1,15 +1,18 @@
-
 (define-module (git tree)
   #:use-module (system foreign)
-  #:use-module (git types)
   #:use-module (git bindings)
+  #:use-module (git enums)
+  #:use-module (git types)
   #:export (%tree-free
-            tree-lookup
             tree-dup
-            tree-entry-byid            
+            tree-fold
+            tree-entry-byid
             tree-entry-byindex
+            tree-entry-bypath
             tree-entry-name
             tree-id
+            tree-list
+            tree-lookup
             tree-walk))
 
 
@@ -129,3 +132,16 @@
                                                        (pointer->tree-entry entry)))
                                            (list '* '* '*))))
         (proc (tree->pointer tree) mode callback* %null-pointer)))))
+
+(define (tree-fold proc knil tree)
+  (let ((out knil))
+    (tree-walk tree GIT-TREEWALK-PRE
+               (lambda (root entry)
+                 ;; XXX: this is not portable
+                 (let ((filepath (string-append root (tree-entry-name entry))))
+                   (set! out (proc filepath out))
+                   0)))
+    out))
+
+(define (tree-list tree)
+  (tree-fold cons '() tree))

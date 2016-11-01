@@ -30,6 +30,21 @@
                                            0))
         files)))
 
+  (test-equal "tree-list"
+    (list "directory/message" "directory" "README")
+    (let* ((repository (repository-open "tmp/simple"))
+           (oid (reference-target (repository-head repository)))
+           (commit (commit-lookup repository oid))
+           (tree (commit-tree commit)))
+      (tree-list tree)))
+
+  (test-equal "tree-entry-bypath"
+    "message"
+    (let* ((repository (repository-open "tmp/simple"))
+           (oid (reference-target (repository-head repository)))
+           (commit (commit-lookup repository oid))
+           (tree (commit-tree commit)))
+      (tree-entry-name (tree-entry-bypath tree "directory/message"))))
   )
 
 
