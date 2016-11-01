@@ -8,6 +8,8 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 GUILE_PKG([2.2 2.0])
 GUILE_PROGS
 
+GUILE_MODULE_REQUIRED([bytestructures guile])
+
 PKG_CHECK_MODULES([LIBGIT2], [libgit2])
 PKG_CHECK_VAR([LIBGIT2_LIBDIR], [libgit2], [libdir])
 AC_MSG_CHECKING([libgit2 library path])
