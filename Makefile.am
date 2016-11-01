@@ -14,6 +14,7 @@ SOURCES =                           \
   git/commit.scm                    \
   git/config.scm                    \
   git/enums.scm                     \
+  git/oid.scm                       \
   git/reference.scm                 \
   git/repository.scm                \
   git/structs.scm                   \
