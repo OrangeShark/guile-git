@@ -22,28 +22,28 @@
            (out (repository-is-bare? repository)))
       out)))
 
-(with-repository "empty-repo"
+(with-repository "simple"
 
   (test-equal "repository-is-empty?"
     #f
-    (let* ((repository (repository-open "tmp/empty-repo/"))
+    (let* ((repository (repository-open "tmp/simple/"))
            (empty? (repository-is-empty? repository)))
       empty?))
 
   (test-equal "repository-is-bare?"
     #f
-    (let* ((repository (repository-open "tmp/empty-repo/"))
+    (let* ((repository (repository-open "tmp/simple/"))
            (bare? (repository-is-bare? repository)))
       bare?))
   (test-equal "repository-is-shallow?"
     #f
-    (let* ((repository (repository-open "tmp/empty-repo/"))
+    (let* ((repository (repository-open "tmp/simple/"))
            (shallow? (repository-is-shallow? repository)))
       shallow?))
 
   (test-equal "repository-path"
-    (string-append (getcwd) "/tmp/empty-repo/.git/")
-    (let* ((repository (repository-open "tmp/empty-repo/"))
+    (string-append (getcwd) "/tmp/simple/.git/")
+    (let* ((repository (repository-open "tmp/simple/"))
            (out (repository-path repository)))
       out))
   )

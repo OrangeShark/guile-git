@@ -8,26 +8,26 @@
 
 (libgit2-init!)
 
-(with-repository "empty-repo"
+(with-repository "simple"
 
   (test-equal "reference-name"
     "refs/heads/master"
-    (let* ((repository (repository-open "tmp/empty-repo/")))
+    (let* ((repository (repository-open "tmp/simple/")))
       (reference-name (repository-head repository))))
 
   (test-equal "reference-target"
-    "4a53b71060aa9b11ecf4050d2e7379456f0fbfb1"
-    (let* ((repository (repository-open "tmp/empty-repo/")))
+    "3f848a1a52416ac99a5c5bf2e6bd55eb7b99d55b"
+    (let* ((repository (repository-open "tmp/simple/")))
       (oid->string (reference-target (repository-head repository)))))
 
   (test-equal "reference-name->oid"
-    "4a53b71060aa9b11ecf4050d2e7379456f0fbfb1"
-    (let* ((repository (repository-open "tmp/empty-repo/")))
+    "3f848a1a52416ac99a5c5bf2e6bd55eb7b99d55b"
+    (let* ((repository (repository-open "tmp/simple/")))
       (oid->string (reference-name->oid repository "refs/heads/master"))))
 
   (test-equal "reference-shorthand"
     "master"
-    (let* ((repository (repository-open "tmp/empty-repo/")))
+    (let* ((repository (repository-open "tmp/simple/")))
       (reference-shorthand (repository-head repository))))
 
   )
