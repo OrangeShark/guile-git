@@ -19,7 +19,11 @@ SOURCES =                           \
   git/repository.scm                \
   git/structs.scm                   \
   git/tree.scm                      \
-  git/types.scm
+  git/types.scm                     \
+  git/web.scm                       \
+  git/web/html.scm                  \
+  git/web/mime-types.scm            \
+  git/web/querystring.scm
 
 TESTS =                             \
   tests/branch.scm                  \
@@ -36,4 +40,7 @@ AM_SCM_LOG_FLAGS = --no-auto-compile -L "$(top_srcdir)"
 EXTRA_DIST +=                       \
   README.md                         \
   pre-inst-env.in                   \
-  guix.scm
+  guix.scm                          \
+  git/web/static/bg.png             \
+  git/web/static/main.css           \
+  git/web/static/normalize.css
