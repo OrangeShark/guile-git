@@ -11,7 +11,7 @@
 (with-repository "simple"
 
   (test-equal "commit-tree tree-id"
-    "f68558a3c807fc657528a466b4f051596e7ca182"
+    "d40674e05d114e5eb0df0f358ebeec47b8782ced"
     (let* ((repository (repository-open "tmp/simple/"))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
@@ -19,7 +19,7 @@
       (oid->string (tree-id tree))))
 
   (test-equal "tree-walk list files"
-    (list "README")
+    (list "message" "directory" "README")
     (let* ((repository (repository-open "tmp/simple"))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
