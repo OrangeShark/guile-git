@@ -23,7 +23,11 @@ SOURCES =                           \
   git/web.scm                       \
   git/web/html.scm                  \
   git/web/mime-types.scm            \
-  git/web/querystring.scm
+  git/web/querystring.scm           \
+  git/web/http.scm                  \
+  git/web/repository.scm            \
+  git/web/routes.scm                \
+  git/web/app.scm
 
 TESTS =                             \
   tests/branch.scm                  \
