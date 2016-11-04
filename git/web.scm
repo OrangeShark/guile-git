@@ -22,6 +22,8 @@
   #:use-module (git web html)
   #:use-module (git web mime-types)
   #:use-module (git web querystring)
+  #:use-module (git web http)
+  #:use-module (git web repository)
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 format)
   #:use-module (ice-9 ftw)
@@ -35,7 +37,8 @@
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web server)
-  #:use-module (web uri))
+  #:use-module (web uri)
+  #:export (run-gitweb))
 
 (define (request-path-components request)
   "Split the URI path of REQUEST into a list of component strings.  For
@@ -63,12 +66,12 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
 ;;; template
 ;;;
 
-(define (template body-class body)
+(define* (template title body #:optional (body-class "index"))
   `((doctype "html")
     (html
      (head
       (meta (@ (charset "utf-8")))
-      (title "hypermove")
+      (title ,title)
       (link (@ (rel "stylesheet") (href "/static/normalize.css")))
       (link (@ (rel "stylesheet") (href "/static/main.css"))))
      (body (@ (class ,body-class))
@@ -116,9 +119,16 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
 (define (handler request body)
   (let ((context (make-context request body)))
     (match (request-path-components request)
-      (() (render-html (template "index" "Hello World")))
+      (() (respond "Hello World"
+                   #:title "guile-git"
+                   #:template (cut template <> <> "index")))
       (("static" path ...) (render-static-asset path))
+      ((repo path ...) (repo-handler repo path))
       (_ (render-static-asset (list "index.html"))))))
 
-(format #t "server running on http://localhost:8080")
-(run-server handler)
+(define* (run-gitweb #:key (port 8080))
+  (format #t "server running on http://localhost:~d" port)
+  (run-server (lambda args (apply handler args))
+              'http `(#:port , port)))
+
+(run-gitweb)
