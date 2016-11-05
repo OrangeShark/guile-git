@@ -17,23 +17,17 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with Guile-Git.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (git))
+(define-module (git bindings)
+  #:use-module (rnrs bytevectors)
+  #:use-module (system foreign)
+  #:use-module (git bindings)
+  #:use-module (git types)
+  #:export (clone))
 
-(eval-when (eval load compile)
-  (begin
-    (define %public-modules
-      '((git bindings)
-        (git branch)
-        (git clone)
-        (git commit)
-        (git enums)
-        (git oid)
-        (git reference)
-        (git repository)
-        (git structs)
-        (git tree)))
+;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
 
-    (for-each (let ((i (module-public-interface (current-module))))
-                (lambda (m)
-                  (module-use! i (resolve-interface m))))
-              %public-modules)))
+(define clone
+  (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
+    (lambda (url local-path)
+      (let ((out (make-double-pointer)))
+        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))

@@ -83,13 +83,6 @@
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_init_options
 
-;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
-
-(define clone
-  (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
-    (lambda (url local-path)
-      (let ((out (make-double-pointer)))
-        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
 
 ;;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/config
 

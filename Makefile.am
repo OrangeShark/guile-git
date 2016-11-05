@@ -11,6 +11,7 @@ SOURCES =                           \
   git/blame.scm                     \
   git/branch.scm                    \
   git/checkout.scm                  \
+  git/clone.scm                     \
   git/commit.scm                    \
   git/config.scm                    \
   git/enums.scm                     \
