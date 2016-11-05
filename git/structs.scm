@@ -31,7 +31,7 @@
 
 ;;; bytestructures helper
 
-(define bytestructure-pointer
+(define bytestructure->pointer
   (compose bytevector->pointer bytestructure-bytevector))
 
 (define (pointer->bytestructure pointer struct)
@@ -53,7 +53,7 @@
   (%make-time (pointer->bytestructure pointer %time)))
 
 (define (time->pointer time)
-  (bytestructure-pointer (time-bytestructure time)))
+  (bytestructure->pointer (time-bytestructure time)))
 
 (define (time-time time)
   (bytestructure-ref (time-bytestructure time) 'time))
@@ -76,7 +76,7 @@
   (%make-signature (pointer->bytestructure pointer %signature)))
 
 (define (signature->pointer signature)
-  (bytestructure-pointer (signature-bytestructure signature)))
+  (bytestructure->pointer (signature-bytestructure signature)))
 
 (define (signature-name signature)
   (pointer->string (make-pointer (bytestructure-ref (signature-bytestructure signature) 'name))))
