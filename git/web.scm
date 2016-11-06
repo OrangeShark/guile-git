@@ -24,6 +24,7 @@
   #:use-module (git web querystring)
   #:use-module (git web http)
   #:use-module (git web repository)
+  #:use-module (git web config)
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 format)
   #:use-module (ice-9 ftw)
@@ -87,7 +88,7 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
   (string=? filename (dirname filename)))
 
 (define (render-static-asset path)
-  (let ((filename (string-join (cons* (dirname (current-filename)) "web/static" path) "/")))
+  (let ((filename (string-join (cons* (static-dir) "static" path) "/")))
     (if (and (file-exists? filename) (not (directory? filename)))
         (values `((content-type ,(mime-type filename)))
                 (call-with-input-file filename get-bytevector-all))

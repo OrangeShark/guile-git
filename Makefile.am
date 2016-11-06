@@ -25,6 +25,7 @@ SOURCES =                           \
   git/web/mime-types.scm            \
   git/web/querystring.scm           \
   git/web/http.scm                  \
+  git/web/config.scm                \
   git/web/repository.scm
 
 TESTS =                             \
@@ -43,6 +44,6 @@ EXTRA_DIST +=                       \
   README.md                         \
   pre-inst-env.in                   \
   guix.scm                          \
-  git/web/static/bg.png             \
-  git/web/static/main.css           \
-  git/web/static/normalize.css
+  static/bg.png                     \
+  static/main.css                   \
+  static/normalize.css
