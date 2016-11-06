@@ -25,6 +25,7 @@ SOURCES =                           \
   git/web/mime-types.scm            \
   git/web/querystring.scm           \
   git/web/http.scm                  \
+  git/web/template.scm              \
   git/web/config.scm                \
   git/web/repository.scm
 

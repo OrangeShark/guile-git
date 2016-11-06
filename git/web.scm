@@ -24,6 +24,7 @@
   #:use-module (git web querystring)
   #:use-module (git web http)
   #:use-module (git web repository)
+  #:use-module (git web template)
   #:use-module (git web config)
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 format)
@@ -63,22 +64,6 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
           "Server error"))
 
 
-;;;
-;;; template
-;;;
-
-(define* (template title body #:optional (body-class "index"))
-  `((doctype "html")
-    (html
-     (head
-      (meta (@ (charset "utf-8")))
-      (title ,title)
-      (link (@ (rel "stylesheet") (href "/static/normalize.css")))
-      (link (@ (rel "stylesheet") (href "/static/main.css"))))
-     (body (@ (class ,body-class))
-           (div (h1 "guile-git web"))
-           (div (@ (id "container"))
-                ,body)))))
 
 ;;;
 ;;; static assets rendering
@@ -122,7 +107,7 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
     (match (request-path-components request)
       (() (respond "Hello World"
                    #:title "guile-git"
-                   #:template (cut template <> <> "index")))
+                   #:template (cut main-template <> <> "index")))
       (("static" path ...) (render-static-asset path))
       ((repo path ...) (repo-handler repo path))
       (_ (render-static-asset (list "index.html"))))))
@@ -131,5 +116,3 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
   (format #t "server running on http://localhost:~d" port)
   (run-server (lambda args (apply handler args))
               'http `(#:port , port)))
-
-(run-gitweb)
