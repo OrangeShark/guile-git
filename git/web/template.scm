@@ -34,6 +34,6 @@
       (link (@ (rel "stylesheet") (href "/static/normalize.css")))
       (link (@ (rel "stylesheet") (href "/static/main.css"))))
      (body (@ (class ,body-class))
-           (div (h1 "guile-git web"))
+           (div (h1 ,title))
            (div (@ (id "container"))
                 ,body)))))

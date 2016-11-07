@@ -25,29 +25,37 @@
   #:use-module (git enums)
   #:use-module (git web http)
   #:use-module (git web html)
+  #:use-module (git web config)
+  #:use-module (git web template)
   #:export (repo-handler
             repositories))
 
 (libgit2-init!)
 
-(define repositories (make-parameter '()))
 
-(define (repository-path name)
-  (assoc-ref (repositories) name))
-
-(define (render-repo-index repository)
+(define (render-repo-index repo-name repository)
   (let ((branches (branch-list repository GIT-BRANCH-LOCAL)))
-    (respond `(ul ,@(map (lambda (branch) `(li ,branch)) branches)))))
+    (respond `(ul ,@(map (lambda (branch) `(li ,branch)) branches))
+             #:title repo-name
+             #:template main-template)))
 
-(define (handle-repo repository path)
-  (let ((repo (repository-open repository)))
-    (match path
-      (() (render-repo-index repo))
-      (rest (respond (string-append " path:"
-                                    (fold (lambda (str prev) (string-append prev "/" str)) "" path)))))))
+(define (handle-repo repo-name repository path)
+  (match path
+    (() (render-repo-index repo-name repository))
+    (rest (respond (string-append " path:"
+                                  (fold (lambda (str prev) (string-append prev "/" str)) "" path))
+                   #:title repo-name
+                   #:template main-template))))
+
+(define (get-repository repo)
+  (false-if-exception
+   (repository-open (string-append (repository-dir) "/" repo))))
 
 (define (repo-handler repo path)
-  (let ((repository (repository-path repo)))
+  (let ((repository (get-repository repo)))
     (if repository
-       (handle-repo repository path)
-       (respond "Repo not found" #:status 404))))
+       (handle-repo repo repository path)
+       (respond "Repo not found"
+                #:title repo
+                #:status 404
+                #:template main-template))))
