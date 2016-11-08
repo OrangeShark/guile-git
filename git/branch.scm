@@ -25,6 +25,7 @@
   #:use-module (git reference)
   #:use-module (git types)
   #:export (branch-list
+            branch-fold
             branch-lookup
             branch-name))
 
@@ -65,17 +66,14 @@
         ((1) #t)
         (else => (lambda (code) (throw 'git-error code)))))))
 
-(define branch-iterator-free
-  (let ((proc (libgit2->procedure void "git_branch_iterator_free" '(*))))
-    (lambda (iterator)
-      (proc (branch-iterator->pointer iterator)))))
+(define %branch-iterator-free (dynamic-func "git_branch_iterator_free" libgit2))
 
 (define branch-iterator-new
   (let ((proc (libgit2->procedure* "git_branch_iterator_new" `(* * ,int))))
     (lambda (repository flags)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) flags)
-        (pointer->branch-iterator (dereference-pointer out))))))
+        (pointer->branch-iterator (pointer-gc (dereference-pointer out) %branch-iterator-free))))))
 
 (define branch-lookup
   (let ((proc (libgit2->procedure* "git_branch_lookup" `(* * * ,int))))
@@ -125,16 +123,14 @@
         (proc out (reference->pointer branch))
         (pointer->reference (dereference-pointer out))))))
 
-(define* (branch-list repository #:optional (flag GIT-BRANCH-ALL))
+
+(define* (branch-fold proc init repository #:optional (flag GIT-BRANCH-ALL))
   (let ((iterator (branch-iterator-new repository flag)))
-    (let ((lst (let loop ((lst '()))
-                 (catch 'git-error
-                   (lambda ()
-                     (receive (reference _) (branch-next iterator)
-                       (loop (cons (branch-name reference) lst))))
-                   (lambda (key code)
-                     (if (eq? code -31)
-                         lst
-                         (throw 'git-error code)))))))
-      (branch-iterator-free iterator)
-      lst)))
+    (let loop ((acc init))
+      (let ((branch (false-if-exception (branch-next iterator))))
+        (if branch
+            (loop (proc branch acc))
+            acc)))))
+
+(define* (branch-list repository #:optional (flag GIT-BRANCH-ALL))
+  (branch-fold cons '() repository flag))
