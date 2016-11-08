@@ -61,3 +61,7 @@ body > div {
 #container.repositories a p {
     margin-top: 10px;
 }
+
+.branches > ul {
+    list-style: outside none none;
+}
