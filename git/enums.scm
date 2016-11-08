@@ -26,3 +26,15 @@
 (define-public GIT-BRANCH-LOCAL 1)
 (define-public GIT-BRANCH-REMOTE 2)
 (define-public GIT-BRANCH-ALL (logior GIT-BRANCH-LOCAL GIT-BRANCH-REMOTE))
+
+;; Git Object types
+(define-public GIT-OBJ-ANY -2)
+(define-public GIT-OBJ-BAD -1)
+(define-public GIT-OBJ-EXT1 0)
+(define-public GIT-OBJ-COMMIT 1)
+(define-public GIT-OBJ-TREE 2)
+(define-public GIT-OBJ-BLOB 3)
+(define-public GIT-OBJ-TAG 4)
+(define-public GIT-OBJ-EXT2 5)
+(define-public GIT-OBJ-OFS-DELTA 6)
+(define-public GIT-OBJ-REF-DELTA 7)

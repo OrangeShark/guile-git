@@ -25,7 +25,8 @@
   #:export (reference-name
             reference-target
             reference-name->oid
-            reference-shorthand))
+            reference-shorthand
+            reference-peel))
 
 
 ;;; FIXME: reference https://libgit2.github.com/libgit2/#HEAD/group/reference
@@ -53,3 +54,10 @@
   (let ((proc (libgit2->procedure '* "git_reference_shorthand" '(*))))
     (lambda (reference)
       (pointer->string (proc (reference->pointer reference))))))
+
+(define reference-peel
+  (let ((proc (libgit2->procedure* "git_reference_peel" `(* * ,int))))
+    (lambda (reference obj-type)
+      (let ((out (make-double-pointer)))
+        (proc out (reference->pointer reference) obj-type)
+        (pointer->object (dereference-pointer out))))))
