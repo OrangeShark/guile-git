@@ -252,62 +252,6 @@
 ;;; object https://libgit2.github.com/libgit2/#HEAD/group/object
 
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object__size
-
-(define GIT_OBJ_ANY -2)
-
-(define object-dup
-  (let ((proc (libgit2->procedure* "git_object_dup" '(* *))))
-    (lambda (object)
-      (let ((out (make-double-pointer)))
-        (proc out (object->pointer object))
-        (pointer->object (dereference-pointer out))))))
-
-(define object-free
-  (let ((proc (libgit2->procedure void "git_object_free" '(*))))
-    (lambda (object)
-      (proc (object->pointer object)))))
-
-(define object-id
-  (let ((proc (libgit2->procedure '* "git_object_id" '(*))))
-    (lambda (object)
-      (pointer->oid (proc (object->pointer object))))))
-
-(define object-lookup
-  (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
-    (lambda* (repository oid #:optional (type GIT_OBJ_ANY))
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-        (proc out (repository->pointer repository) (oid->pointer oid)
-              type)
-        (pointer->object (dereference-pointer out))))))
-
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
-
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_prefix
-
-(define object-owner
-  (let ((proc (libgit2->procedure '* "git_object_owner" '(*))))
-    (lambda (object)
-      (pointer->repository (proc (object->pointer object))))))
-
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_peel
-
-(define object-short-id
-  (let ((proc (libgit2->procedure* "git_object_short_id" '(*))))
-    (lambda (object)
-      (let ((out (make-buffer)))
-        (proc out (object->pointer object))
-        (let ((out* (buffer-content/string out)))
-          (free-buffer out)
-          out)))))
-
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_string2type
-
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_type
-
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_type2string
-
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_typeisloose
 
 ;;; FIXME: odb https://libgit2.github.com/libgit2/#HEAD/group/odb
 
