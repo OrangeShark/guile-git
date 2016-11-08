@@ -24,7 +24,10 @@
   #:use-module (git structs)
   #:use-module (git tree)
   #:use-module (git types)
-  #:export (commit-amend
+  #:use-module (git enums)
+  #:use-module (git object)
+  #:export (object->commit
+            commit-amend
             commit-author
             commit-body
             commit-committer
@@ -42,11 +45,16 @@
             commit-parentcount
             commit-raw-header
             commit-summary
+            commit-time
             commit-time-offset
             commit-tree
             commit-tree-id))
 
 ;; commit https://libgit2.github.com/libgit2/#HEAD/group/commit
+
+(define (object->commit object)
+  (and (= (object-type object) GIT-OBJ-COMMIT)
+       (pointer->commit (object->pointer object))))
 
 (define commit-amend
   (let ((proc (libgit2->procedure* "git_commit_amend" '(* * * * * * * *))))
@@ -188,7 +196,10 @@
     (lambda (commit)
       (pointer->string (proc (commit->pointer commit))))))
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_time
+(define commit-time
+  (let ((proc (libgit2->procedure int64 "git_commit_time" '(*))))
+    (lambda (commit)
+      (proc (commit->pointer commit)))))
 
 (define commit-time-offset
   (let ((proc (libgit2->procedure int "git_commit_time_offset" '(*))))
