@@ -37,6 +37,12 @@
             repository-is-empty?
             repository-is-shallow?
             repository-open
+            REPOSITORY-OPEN-NO-SEARCH
+            REPOSITORY-OPEN-CROSS-FS
+            REPOSITORY-OPEN-BARE
+            REPOSITORY-OPEN-NO-DOTGIT
+            REPOSITORY-OPEN-FROM-ENV
+            repository-open-ext
             repository-path
             repository-refdb
             repository-set-ident
@@ -173,7 +179,20 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_ext
+(define REPOSITORY-OPEN-NO-SEARCH (ash #b1 0))
+(define REPOSITORY-OPEN-CROSS-FS  (ash #b1 1))
+(define REPOSITORY-OPEN-BARE      (ash #b1 2))
+(define REPOSITORY-OPEN-NO-DOTGIT (ash #b1 3))
+(define REPOSITORY-OPEN-FROM-ENV  (ash #b1 4))
+
+(define repository-open-ext
+  (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
+    (lambda (path flags ceiling-dirs)
+      (let ((out (make-double-pointer)))
+        (proc out (string->pointer path) flags (string->pointer ceiling-dirs))
+        (if (null-pointer? out)
+            #f
+            (pointer->repository (pointer-gc (dereference-pointer out) %repository-free)))))))
 
 (define repository-path
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
