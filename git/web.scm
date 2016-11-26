@@ -102,12 +102,15 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
   "get request method from CONTEXT"
   (request-method (assoc-ref context 'request)))
 
+(define (render-index)
+  (respond "Hello World"
+           #:title "guile-git"
+           #:template (cut main-template <> <> "index")))
+
 (define (handler request body)
   (let ((context (make-context request body)))
     (match (request-path-components request)
-      (() (respond "Hello World"
-                   #:title "guile-git"
-                   #:template (cut main-template <> <> "index")))
+      (() (render-index))
       (("static" path ...) (render-static-asset path))
       ((repo path ...) (repo-handler repo path))
       (_ (render-static-asset (list "index.html"))))))

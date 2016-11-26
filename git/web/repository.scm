@@ -32,9 +32,10 @@
 
 (libgit2-init!)
 
-(define (render-summary branches)
+(define (render-summary repo-name branches)
   (define (render-branch branch)
-    `(li (div ,(branch-name branch))))
+    (let ((name (branch-name branch)))
+      `(li (div (a (@ (href ,(string-append "/" repo-name "/" name))) ,name)))))
   `(div (@ (class "branches"))
         (h2 "Branches")
         (ul ,(map render-branch branches))))
@@ -42,7 +43,7 @@
 
 (define (render-repo-index repo-name repository)
   (let ((branches (branch-list repository GIT-BRANCH-LOCAL)))
-    (respond (render-summary branches)
+    (respond (render-summary repo-name branches)
              #:title repo-name
              #:template main-template)))
 
