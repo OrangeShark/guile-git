@@ -38,6 +38,7 @@
             patch? pointer->patch patch->pointer
             refdb? pointer->refdb refdb->pointer
             reference? pointer->reference reference->pointer
+            reference-iterator? pointer->reference-iterator reference-iterator->pointer
             repository? pointer->repository repository->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
@@ -84,6 +85,7 @@
 (define-libgit2-type patch)
 (define-libgit2-type refdb)
 (define-libgit2-type reference)
+(define-libgit2-type reference-iterator)
 (define-libgit2-type repository)
 (define-libgit2-type tree)
 (define-libgit2-type tree-entry)

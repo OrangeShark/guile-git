@@ -27,7 +27,16 @@
             reference-name->oid
             reference-shorthand
             reference-peel
-            reference-lookup))
+            reference-lookup
+            reference-iterator-new
+            reference-iterator-glob-new
+            reference-next
+            reference-fold
+            reference-branch?
+            reference-note?
+            reference-remote?
+            reference-tag?
+            reference-eq?))
 
 
 ;;; FIXME: reference https://libgit2.github.com/libgit2/#HEAD/group/reference
@@ -72,3 +81,71 @@
         (proc out (repository->pointer repository) (string->pointer name))
         (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
 
+
+(define %reference-iterator-free (dynamic-func "git_reference_iterator_free" libgit2))
+
+(define reference-iterator-new
+  (let ((proc (libgit2->procedure* "git_reference_iterator_new" '(* *))))
+    (lambda (repository)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository))
+        (pointer->reference-iterator (pointer-gc (dereference-pointer out) %reference-iterator-free))))))
+
+(define reference-iterator-glob-new
+  (let ((proc (libgit2->procedure* "git_reference_iterator_glob_new" '(* * *))))
+    (lambda (repository glob)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (string->pointer glob))
+        (pointer->reference-iterator (pointer-gc (dereference-pointer out) %reference-iterator-free))))))
+
+(define reference-next
+  (let ((proc (libgit2->procedure* "git_reference_next" '(* *))))
+    (lambda (iterator)
+      (let ((out (make-double-pointer)))
+        (proc out (reference-iterator->pointer iterator))
+        (pointer->reference (dereference-pointer out))))))
+
+(define* (reference-fold proc init repository #:key (glob #f))
+  (let ((iterator (if glob
+                      (reference-iterator-glob-new repository glob)
+                      (reference-iterator-new repository))))
+    (let loop ((acc init))
+      (let ((reference (false-if-exception (reference-next iterator))))
+        (if reference
+            (loop (proc reference acc))
+            acc)))))
+
+(define reference-branch?
+  (let ((proc (libgit2->procedure int "git_reference_is_branch" '(*))))
+    (lambda (reference)
+      (case (proc (reference->pointer reference))
+        ((1) #t)
+        (else #f)))))
+
+(define reference-note?
+  (let ((proc (libgit2->procedure int "git_reference_is_note" '(*))))
+    (lambda (reference)
+      (case (proc (reference->pointer reference))
+        ((1) #t)
+        (else #f)))))
+
+(define reference-remote?
+  (let ((proc (libgit2->procedure int "git_reference_is_remote" '(*))))
+    (lambda (reference)
+      (case (proc (reference->pointer reference))
+        ((1) #t)
+        (else #f)))))
+
+(define reference-tag?
+  (let ((proc (libgit2->procedure int "git_reference_is_tag" '(*))))
+    (lambda (reference)
+      (case (proc (reference->pointer reference))
+        ((1) #t)
+        (else #f)))))
+
+(define reference-eq?
+  (let ((proc (libgit2->procedure int "git_reference_cmp" '(* *))))
+    (lambda (ref1 ref2)
+      (case (proc (reference->pointer ref1) (reference->pointer ref2))
+        ((0) #t)
+        (else #f)))))
