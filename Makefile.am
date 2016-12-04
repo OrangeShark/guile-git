@@ -20,6 +20,7 @@ SOURCES =                           \
   git/reference.scm                 \
   git/repository.scm                \
   git/structs.scm                   \
+  git/tag.scm                       \
   git/tree.scm                      \
   git/types.scm                     \
   git/web.scm                       \
