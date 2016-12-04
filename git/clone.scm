@@ -17,7 +17,7 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with Guile-Git.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (git bindings)
+(define-module (git clone)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
