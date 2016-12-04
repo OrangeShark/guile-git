@@ -24,6 +24,7 @@
   #:use-module (git types)
   #:export (oid-cmp
             oid=?
+            string->oid
             oid-zero?
             oid-ncmp?
             oid-strcmp
@@ -48,7 +49,12 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromraw
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstr
+(define string->oid
+  (let ((proc (libgit2->procedure* "git_oid_fromstr" '(* *))))
+    (lambda (str)
+      (let ((out (make-double-pointer)))
+        (proc (string->pointer str))
+        (pointer->oid out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrn
 
