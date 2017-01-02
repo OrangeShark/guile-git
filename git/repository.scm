@@ -43,6 +43,7 @@
             REPOSITORY-OPEN-NO-DOTGIT
             REPOSITORY-OPEN-FROM-ENV
             repository-open-ext
+            openable-repository?
             repository-path
             repository-refdb
             repository-set-ident
@@ -187,12 +188,23 @@
 
 (define repository-open-ext
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
-    (lambda (path flags ceiling-dirs)
+    (lambda* (path flags #:optional ceiling-dirs)
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer path) flags (string->pointer ceiling-dirs))
+        (proc out (string->pointer path) flags (if ceiling-dirs
+                                                   (string->pointer ceiling-dirs)
+                                                   %null-pointer))
         (if (null-pointer? out)
             #f
             (pointer->repository (pointer-gc (dereference-pointer out) %repository-free)))))))
+
+(define openable-repository?
+  (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
+    (lambda (path)
+      (catch 'git-error
+        (lambda ()
+          (proc %null-pointer (string->pointer path) REPOSITORY-OPEN-NO-SEARCH %null-pointer)
+          #t)
+        (lambda _ #f)))))
 
 (define repository-path
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
