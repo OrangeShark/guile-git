@@ -42,26 +42,32 @@ body > div {
     text-align: justify;
 }
 
-#container.repositories {
+#container{
     padding: 0px;
     background: none;
 }
 
-#container.repositories a {
+#container .repositories a {
     display: block;
     padding: 30px;
     border-bottom: 1px solid hsla(0, 0%, 0%, 0.7);
     background: linear-gradient(0deg, hsla(0, 0%, 0%, 0.1) 5px, hsla(0, 0%, 100%, 0.1));    
 }
 
-#container.repositories a:last-child {
+#container .repositories a:last-child {
     border-bottom: none;
 }
 
-#container.repositories a p {
+#container .repositories a p {
     margin-top: 10px;
+}
+
+.branches {
+    padding: 15px;
+    background: linear-gradient(0deg, hsla(0, 0%, 0%, 0.1) 5px, hsla(0, 0%, 100%, 0.1));
 }
 
 .branches > ul {
     list-style: outside none none;
+    padding-left: 10px;
 }

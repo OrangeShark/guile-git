@@ -26,6 +26,8 @@
   #:use-module (git web repository)
   #:use-module (git web template)
   #:use-module (git web config)
+  #:use-module (git bindings)
+  #:use-module (git repository)
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 format)
   #:use-module (ice-9 ftw)
@@ -102,9 +104,25 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
   "get request method from CONTEXT"
   (request-method (assoc-ref context 'request)))
 
+(define (render-repo-list)
+  (define (description repo)
+    "no description")
+
+  (define (valid-repo? name)
+    (openable-repository? (string-append (repository-dir) "/" name)))
+
+  (define (render-repo-div repo)
+    `(a (@ (href ,(string-append "/" repo)))
+        (h3 ,repo)
+        (p ,(description repo))))
+
+  (let ((maybe-repos (scandir (repository-dir))))
+    `(div (@ (class "repositories"))
+          ,(map render-repo-div (filter valid-repo? maybe-repos)))))
+
 (define (render-index)
-  (respond "Hello World"
-           #:title "guile-git"
+  (respond (render-repo-list)
+           #:title "guile git"
            #:template (cut main-template <> <> "index")))
 
 (define (handler request body)
@@ -117,5 +135,7 @@ example: \"/foo/bar\" yields '(\"foo\" \"bar\")."
 
 (define* (run-gitweb #:key (port 8080))
   (format #t "server running on http://localhost:~d" port)
+  (newline)
+  (libgit2-init!)
   (run-server (lambda args (apply handler args))
               'http `(#:port , port)))

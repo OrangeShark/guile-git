@@ -25,7 +25,7 @@
 ;;; template
 ;;;
 
-(define* (main-template title body #:optional (body-class "index"))
+(define* (main-template title body #:optional (body-class "index") (sub-title "Projects"))
   `((doctype "html")
     (html
      (head
@@ -35,5 +35,6 @@
       (link (@ (rel "stylesheet") (href "/static/main.css"))))
      (body (@ (class ,body-class))
            (div (h1 ,title))
-           (div (@ (id "container"))
-                ,body)))))
+           (div (h2 ,sub-title))
+           (div (@ (id "container")) ,body)
+           (div (span "Powered by GNU Guile"))))))

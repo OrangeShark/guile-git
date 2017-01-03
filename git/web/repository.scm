@@ -19,6 +19,7 @@
 (define-module (git web repository)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-26)
   #:use-module (git bindings)
   #:use-module (git repository)
   #:use-module (git branch)
@@ -27,10 +28,10 @@
   #:use-module (git web html)
   #:use-module (git web config)
   #:use-module (git web template)
-  #:export (repo-handler
-            repositories))
+  #:export (repo-handler))
 
-(libgit2-init!)
+
+(define (render-commits foo) foo)
 
 (define (render-summary repo-name branches)
   (define (render-branch branch)
@@ -45,7 +46,7 @@
   (let ((branches (branch-list repository GIT-BRANCH-LOCAL)))
     (respond (render-summary repo-name branches)
              #:title repo-name
-             #:template main-template)))
+             #:template (cut main-template <> <> "summary" "Summary"))))
 
 (define (handle-repo repo-name repository path)
   (match path
