@@ -13,7 +13,7 @@
   (test-equal "branch-list"
     (list "master")
     (let* ((repository (repository-open "tmp/simple/")))
-      (branch-list repository)))
+      (map branch-name (branch-list repository))))
 
   (test-equal "branch-lookup"
     #t

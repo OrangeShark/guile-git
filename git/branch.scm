@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -24,10 +24,19 @@
   #:use-module (git enums)
   #:use-module (git reference)
   #:use-module (git types)
-  #:export (branch-list
+  #:export (branch-create
+            branch-create-from-annotated
+            branch-delete
+            branch-is-head?
+            branch-iterator-new
+            branch-list
             branch-fold
             branch-lookup
-            branch-name))
+            branch-move
+            branch-name
+            branch-next
+            branch-set-upstream
+            branch-upstream))
 
 ;;; branch https://libgit2.github.com/libgit2/#HEAD/group/branch
 
@@ -40,7 +49,7 @@
               (string->pointer branch-name)
               (commit->pointer target)
               (if force 1 0))
-        (pointer->reference (dereference-pointer out))))))
+        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
 
 (define branch-create-from-annotated
   (let ((proc (libgit2->procedure* "git_branch_create_from_annotated" `(* * * * ,int))))
@@ -51,7 +60,7 @@
               (string->pointer branch-name)
               (annotated-commit->pointer commit)
               (if force 1 0))
-        (pointer->reference (dereference-pointer out))))))
+        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
 
 (define branch-delete
   (let ((proc (libgit2->procedure* "git_branch_delete" '(*))))
@@ -83,7 +92,7 @@
               (repository->pointer repository)
               (string->pointer branch-name)
               type)
-        (pointer->reference (dereference-pointer out))))))
+        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
 
 (define branch-move
   (let ((proc (libgit2->procedure* "git_branch_move" `(* * * ,int))))
@@ -93,7 +102,7 @@
               (reference->pointer reference)
               (string->pointer new-branch-name)
               (if force 1 0))
-        (pointer->reference (dereference-pointer out))))))
+        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
 
 (define branch-name
   (let ((proc (libgit2->procedure* "git_branch_name" '(* *))))
