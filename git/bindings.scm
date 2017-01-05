@@ -69,20 +69,6 @@
      (pointer->string pointer size "UTF-8"))))
 
 
-;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
-
-(define cherrypick
-  (let ((proc (libgit2->procedure* "git_cherrypick" '(* * *))))
-    (lambda (repository commit)
-      (proc (repository->pointer repository)
-            (commit->pointer commit)
-            %null-pointer))))
-
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_commit
-
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_init_options
-
-
 ;;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/config
 
 ;;; https://libgit2.github.com/libgit2/#HEAD/group/cred
