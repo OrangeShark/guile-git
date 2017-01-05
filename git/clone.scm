@@ -31,3 +31,6 @@
     (lambda (url local-path)
       (let ((out (make-double-pointer)))
         (proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
+
+;;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/clone/git_clone_init_options
+
