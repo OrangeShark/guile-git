@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
@@ -68,7 +68,6 @@
     ((pointer asize size)
      (pointer->string pointer size "UTF-8"))))
 
-;;; blob https://libgit2.github.com/libgit2/#HEAD/group/blob
 
 ;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
 
