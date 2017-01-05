@@ -9,8 +9,10 @@ SOURCES =                           \
   git/attr.scm                      \
   git/bindings.scm                  \
   git/blame.scm                     \
+  git/blob.scm                      \
   git/branch.scm                    \
   git/checkout.scm                  \
+  git/cherrypick.scm                \
   git/clone.scm                     \
   git/commit.scm                    \
   git/config.scm                    \
