@@ -22,6 +22,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (annotated-commit-from-fetchhead
             annotated-commit-from-ref
             annotated-commit-from-revspec

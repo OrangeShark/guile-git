@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -22,6 +22,7 @@
   #:use-module (git bindings)
   #:use-module (git enums)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (%tree-free
             tree-dup
             tree-fold

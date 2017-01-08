@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -34,7 +34,6 @@
             diff-options? pointer->diff-options diff-options->pointer
             index? pointer->index index->pointer
             object? pointer->object object->pointer
-            oid? pointer->oid oid->pointer
             patch? pointer->patch patch->pointer
             refdb? pointer->refdb refdb->pointer
             reference? pointer->reference reference->pointer
@@ -82,7 +81,6 @@
 (define-libgit2-type diff-options)
 (define-libgit2-type index)
 (define-libgit2-type object)
-(define-libgit2-type oid)
 (define-libgit2-type patch)
 (define-libgit2-type refdb)
 (define-libgit2-type reference)

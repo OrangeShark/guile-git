@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -21,6 +21,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (tag-lookup
             tag-lookup-prefix
             tag-id

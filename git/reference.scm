@@ -22,6 +22,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (reference-name
             reference-target
             reference-name->oid
@@ -55,7 +56,7 @@
 (define reference-name->oid
   (let ((proc (libgit2->procedure* "git_reference_name_to_id" '(* * *))))
     (lambda (repository name)
-      (let ((out (make-double-pointer)))
+      (let ((out (make-oid-pointer)))
         (proc out
               (repository->pointer repository)
               (string->pointer name))

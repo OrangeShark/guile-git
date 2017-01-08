@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -26,7 +26,8 @@
                                            pointer->string))
   #:use-module (bytestructures guile)
   #:export (time->pointer pointer->time time-time time-offset
-            signature->pointer pointer->signature signature-name signature-email signature-when))
+            signature->pointer pointer->signature signature-name signature-email signature-when
+            oid? oid->pointer pointer->oid make-oid-pointer))
 
 
 ;;; bytestructures helper
@@ -87,3 +88,25 @@
 (define (signature-when signature)
   (let ((when* (bytestructure-ref (signature-bytestructure signature) 'when)))
     (%make-time when*)))
+
+;;; git oid
+
+(define GIT-OID-RAWSZ 20)
+
+(define %oid (bs:struct `((id ,(bs:vector GIT-OID-RAWSZ uint8)))))
+
+(define-record-type <oid>
+  (%make-oid bytestructure)
+  oid?
+  (bytestructure oid-bytestructure))
+
+(define (pointer->oid pointer)
+  (%make-oid (pointer->bytestructure pointer %oid)))
+
+(define (oid->pointer oid)
+  (bytestructure->pointer (oid-bytestructure oid)))
+
+(define (make-oid-pointer)
+  (bytestructure->pointer (bytestructure %oid)))
+
+

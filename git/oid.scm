@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -22,6 +22,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (oid-cmp
             oid=?
             string->oid
@@ -38,7 +39,12 @@
     (lambda (a b)
       (proc (oid->pointer a) (oid->pointer b)))))
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_cpy
+(define oid-copy
+  (let ((proc (libgit2->procedure void "git_oid_cpy" '(* *))))
+    (lambda (src)
+      (let ((out (make-oid-pointer)))
+        (proc out (oid->pointer src))
+        (pointer->oid out)))))
 
 (define (oid=? a b)
   (let ((proc (libgit2->procedure int "git_oid_equal" '(* *))))
@@ -52,8 +58,8 @@
 (define string->oid
   (let ((proc (libgit2->procedure* "git_oid_fromstr" '(* *))))
     (lambda (str)
-      (let ((out (make-double-pointer)))
-        (proc (string->pointer str))
+      (let ((out (make-oid-pointer)))
+        (proc out (string->pointer str))
         (pointer->oid out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrn
