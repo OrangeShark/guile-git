@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -24,7 +24,6 @@
   #:use-module (git structs)
   #:use-module (git tree)
   #:use-module (git types)
-  #:use-module (git enums)
   #:use-module (git object)
   #:export (object->commit
             commit-amend
@@ -53,7 +52,7 @@
 ;; commit https://libgit2.github.com/libgit2/#HEAD/group/commit
 
 (define (object->commit object)
-  (and (= (object-type object) GIT-OBJ-COMMIT)
+  (and (= (object-type object) OBJ-COMMIT)
        (pointer->commit (object->pointer object))))
 
 (define commit-amend

@@ -20,10 +20,11 @@
 (define-module (git tree)
   #:use-module (system foreign)
   #:use-module (git bindings)
-  #:use-module (git enums)
   #:use-module (git types)
   #:use-module (git structs)
-  #:export (%tree-free
+  #:export (TREEWALK-PRE
+            TREEWALK-POST
+            %tree-free
             tree-dup
             tree-fold
             tree-entry-byid
@@ -35,6 +36,8 @@
             tree-lookup
             tree-walk))
 
+(define TREEWALK-PRE 0)
+(define TREEWALK-POST 1)
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_create_updated
 
@@ -155,7 +158,7 @@
 
 (define (tree-fold proc knil tree)
   (let ((out knil))
-    (tree-walk tree GIT-TREEWALK-PRE
+    (tree-walk tree TREEWALK-PRE
                (lambda (root entry)
                  ;; XXX: this is not portable
                  (let ((filepath (string-append root (tree-entry-name entry))))

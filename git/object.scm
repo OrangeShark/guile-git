@@ -25,12 +25,33 @@
   #:use-module (git config)
   #:use-module (git types)
   #:use-module (git structs)
-  #:use-module (git enums)
-  #:export (object-id
+  #:export (OBJ-ANY
+            OBJ-BAD
+            OBJ-EXT1
+            OBJ-COMMIT
+            OBJ-TREE
+            OBJ-BLOB
+            OBJ-TAG
+            OBJ-EXT2
+            OBJ-OFS-DELTA
+            OBJ-REF-DELTA
+            object-id
             object-lookup
             object-owner
             object-short-id
             object-type))
+
+;; Git Object types
+(define OBJ-ANY -2)
+(define OBJ-BAD -1)
+(define OBJ-EXT1 0)
+(define OBJ-COMMIT 1)
+(define OBJ-TREE 2)
+(define OBJ-BLOB 3)
+(define OBJ-TAG 4)
+(define OBJ-EXT2 5)
+(define OBJ-OFS-DELTA 6)
+(define OBJ-REF-DELTA 7)
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object__size
 

@@ -25,7 +25,7 @@
            (commit (commit-lookup repository oid))
            (tree (commit-tree commit)))
       (let ((files '()))
-        (tree-walk tree GIT-TREEWALK-PRE (lambda (root entry)
+        (tree-walk tree TREEWALK-PRE (lambda (root entry)
                                            (set! files (cons (tree-entry-name entry) files))
                                            0))
         files)))

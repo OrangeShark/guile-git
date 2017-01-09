@@ -21,10 +21,12 @@
   #:use-module (ice-9 receive)
   #:use-module (system foreign)
   #:use-module (git bindings)
-  #:use-module (git enums)
   #:use-module (git reference)
   #:use-module (git types)
-  #:export (branch-create
+  #:export (BRANCH-LOCAL
+            BRANCH-REMOTE
+            BRANCH-ALL
+            branch-create
             branch-create-from-annotated
             branch-delete
             branch-is-head?
@@ -39,6 +41,10 @@
             branch-upstream))
 
 ;;; branch https://libgit2.github.com/libgit2/#HEAD/group/branch
+
+(define BRANCH-LOCAL 1)
+(define BRANCH-REMOTE 2)
+(define BRANCH-ALL (logior BRANCH-LOCAL BRANCH-REMOTE))
 
 (define branch-create
   (let ((proc (libgit2->procedure* "git_branch_create" `(* * * * ,int))))
@@ -86,7 +92,7 @@
 
 (define branch-lookup
   (let ((proc (libgit2->procedure* "git_branch_lookup" `(* * * ,int))))
-    (lambda* (repository branch-name #:optional (type GIT-BRANCH-ALL))
+    (lambda* (repository branch-name #:optional (type BRANCH-ALL))
       (let ((out (make-double-pointer)))
         (proc out
               (repository->pointer repository)
@@ -133,7 +139,7 @@
         (pointer->reference (dereference-pointer out))))))
 
 
-(define* (branch-fold proc init repository #:optional (flag GIT-BRANCH-ALL))
+(define* (branch-fold proc init repository #:optional (flag BRANCH-ALL))
   (let ((iterator (branch-iterator-new repository flag)))
     (let loop ((acc init))
       (let ((branch (false-if-exception (branch-next iterator))))
@@ -141,5 +147,5 @@
             (loop (proc branch acc))
             acc)))))
 
-(define* (branch-list repository #:optional (flag GIT-BRANCH-ALL))
+(define* (branch-list repository #:optional (flag BRANCH-ALL))
   (branch-fold cons '() repository flag))

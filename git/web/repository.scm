@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -23,7 +23,6 @@
   #:use-module (git bindings)
   #:use-module (git repository)
   #:use-module (git branch)
-  #:use-module (git enums)
   #:use-module (git web http)
   #:use-module (git web html)
   #:use-module (git web config)
@@ -43,7 +42,7 @@
 
 
 (define (render-repo-index repo-name repository)
-  (let ((branches (branch-list repository GIT-BRANCH-LOCAL)))
+  (let ((branches (branch-list repository BRANCH-LOCAL)))
     (respond (render-summary repo-name branches)
              #:title repo-name
              #:template (cut main-template <> <> "summary" "Summary"))))
