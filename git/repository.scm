@@ -22,6 +22,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git reference)
   #:export (repository-config
             repository-config-snapshot
             repository-detach-head
@@ -108,7 +109,7 @@
     (lambda (repository)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository))
-        (pointer->reference (dereference-pointer out))))))
+        (pointer->reference* out)))))
 
 (define repository-head-detached?
   (let ((proc (libgit2->procedure int "git_repository_head_detached" '(*))))
