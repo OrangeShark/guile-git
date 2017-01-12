@@ -1,6 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
-;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -48,7 +48,8 @@
             repository-refdb
             repository-set-ident
             repository-state
-            repository-workdir))
+            repository-workdir
+            pointer->repository*))
 
 ;;; repository
 
@@ -73,24 +74,32 @@
 
 (define repository-discover
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
-    (lambda (start-path across-fs ceiling-dirs)
+    (lambda* (start-path #:optional (across-fs #t) ceiling-dirs)
       (let ((out (make-buffer)))
         (proc out
               (string->pointer start-path)
               (if across-fs 1 0)
-              (string->pointer ceiling-dirs))
+              (if ceiling-dirs
+                  (string->pointer ceiling-dirs)
+                  %null-pointer))
         (let ((out* (buffer-content/string out)))
           (free-buffer out)
-          out)))))
+          out*)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_fetchhead_foreach
 
 (define %repository-free (dynamic-func "git_repository_free" libgit2))
 
+(define (pointer->repository* pointer)
+   (pointer->repository (pointer-gc (dereference-pointer pointer) %repository-free)))
+
 (define repository-get-namespace
   (let ((proc (libgit2->procedure '* "git_repository_get_namespace" '(*))))
     (lambda (repository)
-      (pointer->string (proc (repository->pointer repository))))))
+      (let ((res (proc (repository->pointer repository))))
+        (if (null-pointer? res)
+            #f
+            (pointer->string res))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_hashfile
 
@@ -140,7 +149,7 @@
     (lambda* (path #:optional (is-bare #f))
       (let ((out (make-double-pointer)))
         (proc out (string->pointer path) (if is-bare 1 0))
-        (pointer->repository (pointer-gc (dereference-pointer out) %repository-free))))))
+        (pointer->repository* out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_ext
 
@@ -176,7 +185,7 @@
     (lambda (file)
       (let ((out (make-double-pointer)))
         (proc out (string->pointer file))
-        (pointer->repository (pointer-gc (dereference-pointer out) %repository-free))))))
+        (pointer->repository* out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
 
@@ -195,7 +204,7 @@
                                                    %null-pointer))
         (if (null-pointer? out)
             #f
-            (pointer->repository (pointer-gc (dereference-pointer out) %repository-free)))))))
+            (pointer->repository* out))))))
 
 (define openable-repository?
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
