@@ -28,7 +28,7 @@
             reference-name->oid
             reference-shorthand
             reference-peel
-            %reference-free
+            pointer->reference*
             reference-lookup
             reference-iterator-new
             reference-iterator-glob-new
@@ -76,12 +76,15 @@
 
 (define %reference-free (dynamic-func "git_reference_free" libgit2))
 
+(define (pointer->reference* pointer)
+  (pointer->reference (pointer-gc (dereference-pointer pointer) %reference-free)))
+
 (define reference-lookup
   (let ((proc (libgit2->procedure* "git_reference_lookup" '(* * *))))
     (lambda (repository name)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (string->pointer name))
-        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
+        (pointer->reference* out)))))
 
 
 (define %reference-iterator-free (dynamic-func "git_reference_iterator_free" libgit2))

@@ -55,7 +55,7 @@
               (string->pointer branch-name)
               (commit->pointer target)
               (if force 1 0))
-        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
+        (pointer->reference* out)))))
 
 (define branch-create-from-annotated
   (let ((proc (libgit2->procedure* "git_branch_create_from_annotated" `(* * * * ,int))))
@@ -66,7 +66,7 @@
               (string->pointer branch-name)
               (annotated-commit->pointer commit)
               (if force 1 0))
-        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
+        (pointer->reference* out)))))
 
 (define branch-delete
   (let ((proc (libgit2->procedure* "git_branch_delete" '(*))))
@@ -98,7 +98,7 @@
               (repository->pointer repository)
               (string->pointer branch-name)
               type)
-        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
+        (pointer->reference* out)))))
 
 (define branch-move
   (let ((proc (libgit2->procedure* "git_branch_move" `(* * * ,int))))
@@ -108,7 +108,7 @@
               (reference->pointer reference)
               (string->pointer new-branch-name)
               (if force 1 0))
-        (pointer->reference (pointer-gc (dereference-pointer out) %reference-free))))))
+        (pointer->reference* out)))))
 
 (define branch-name
   (let ((proc (libgit2->procedure* "git_branch_name" '(* *))))
