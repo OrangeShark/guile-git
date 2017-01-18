@@ -46,7 +46,19 @@
     (let* ((repository (repository-open "tmp/simple/"))
            (out (repository-path repository)))
       out))
-  )
+
+  (test-equal "repository-discover"
+    (string-append (getcwd) "/tmp/simple/.git/")
+    (let ((path (repository-discover "tmp/simple/directory/")))
+      path)))
+
+(with-repository "simple-bare"
+
+  (test-equal "repository-is-bare?"
+    #t
+    (let* ((repository (repository-open "tmp/simple-bare/"))
+           (bare? (repository-is-bare? repository)))
+      bare?)))
 
 (libgit2-shutdown)
 
