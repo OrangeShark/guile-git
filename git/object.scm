@@ -74,7 +74,7 @@
 
 (define object-lookup
   (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
-    (lambda* (repository oid #:optional (type GIT-OBJ-ANY))
+    (lambda* (repository oid #:optional (type OBJ-ANY))
       (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
         (proc out (repository->pointer repository) (oid->pointer oid)
               type)

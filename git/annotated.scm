@@ -33,6 +33,10 @@
 
 (define %annotated-commit-free (dynamic-func "git_annotated_commit_free" libgit2))
 
+(define (pointer->annotated-commit! pointer)
+  (set-pointer-finalizer! pointer %annotated-commit-free)
+  (pointer->annotated-commit pointer))
+
 (define annotated-commit-from-fetchhead
   (let ((proc (libgit2->procedure* "git_annotated_commit_from_fetchhead" '(* * * * *))))
     (lambda (repository branch-name remote-url id)
@@ -42,14 +46,14 @@
               (string->pointer branch-name)
               (string->pointer remote-url)
               (oid->pointer id))
-        (pointer->annotated-commit (pointer-gc (dereference-pointer out) %annotated-commit-free))))))
+        (pointer->annotated-commit! (dereference-pointer out))))))
 
 (define annotated-commit-from-ref
   (let ((proc (libgit2->procedure* "git_annotated_commit_from_ref" '(* * *))))
     (lambda (repository reference)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (reference->pointer reference))
-        (pointer->annotated-commit (pointer-gc (dereference-pointer out) %annotated-commit-free))))))
+        (pointer->annotated-commit! (dereference-pointer out))))))
 
 (define annotated-commit-from-revspec
   (let ((proc (libgit2->procedure* "git_annotated_commit_from_revspec" '(* * *))))
@@ -68,4 +72,4 @@
     (lambda (repository id)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (oid->pointer id))
-        (pointer->annotated-commit (pointer-gc (dereference-pointer out) %annotated-commit-free))))))
+        (pointer->annotated-commit! (dereference-pointer out))))))

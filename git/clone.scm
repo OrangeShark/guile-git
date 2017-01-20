@@ -22,6 +22,7 @@
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git types)
+  #:use-module (git repository)
   #:export (clone))
 
 ;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
@@ -30,7 +31,8 @@
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
     (lambda (url local-path)
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)))))
+        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)
+        (pointer->repository! (dereference-pointer out))))))
 
 ;;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/clone/git_clone_init_options
 

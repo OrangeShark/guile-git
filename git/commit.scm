@@ -115,6 +115,10 @@
 
 (define %commit-free (dynamic-func "git_commit_free" libgit2))
 
+(define (pointer->commit! pointer)
+  (set-pointer-finalizer! pointer %commit-free)
+  (pointer->commit pointer))
+
 (define commit-header-field
   (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
     (lambda (commit field)
@@ -134,14 +138,14 @@
     (lambda (repository oid)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (oid->pointer oid))
-        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
+        (pointer->commit! (dereference-pointer out))))))
 
 (define commit-lookup-prefix
   (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t))))
     (lambda (repository id len)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (oid->pointer id) len)
-        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
+        (pointer->commit! (dereference-pointer out))))))
 
 (define commit-message
   (let ((proc (libgit2->procedure '* "git_commit_message" '(*))))
@@ -173,7 +177,7 @@
     (lambda* (commit #:optional (n 0))
       (let ((out (make-double-pointer)))
         (proc out (commit->pointer commit) n)
-        (pointer->commit (pointer-gc (dereference-pointer out) %commit-free))))))
+        (pointer->commit! (dereference-pointer out))))))
 
 (define commit-parent-id
   (let ((proc (libgit2->procedure '* "git_commit_parent_id" `(* ,unsigned-int))))
@@ -210,7 +214,7 @@
     (lambda (commit)
       (let ((out (make-double-pointer)))
         (proc out (commit->pointer commit))
-        (pointer->tree (pointer-gc (dereference-pointer out) %tree-free))))))
+        (pointer->tree! (dereference-pointer out))))))
 
 (define commit-tree-id
   (let ((proc (libgit2->procedure '* "git_commit_tree_id" '(*))))

@@ -24,7 +24,7 @@
   #:use-module (git structs)
   #:export (TREEWALK-PRE
             TREEWALK-POST
-            %tree-free
+            pointer->tree!
             tree-dup
             tree-fold
             tree-entry-byid
@@ -80,7 +80,7 @@
     (lambda (tree path)
       (let ((out (make-double-pointer)))
         (proc out (tree->pointer tree) (string->pointer path))
-        (pointer->tree-entry (pointer-gc (dereference-pointer out) %tree-entry-free))))))
+        (pointer->tree-entry! (dereference-pointer out))))))
 
 (define tree-entry-cmp
   (let ((proc (libgit2->procedure int "git_tree_entry_cmp" '(* *))))
@@ -92,13 +92,17 @@
     (lambda (source)
       (let ((dest (make-double-pointer)))
         (proc dest (tree-entry->pointer source))
-        (pointer->tree-entry (pointer-gc (dereference-pointer dest) %tree-entry-free))))))
+        (pointer->tree-entry! (dereference-pointer dest))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode_raw
 
 (define %tree-entry-free (dynamic-func "git_tree_entry_free" libgit2))
+
+(define (pointer->tree-entry! pointer)
+  (set-pointer-finalizer! pointer %tree-entry-free)
+  (pointer->tree-entry pointer))
 
 (define tree-entry-id
   (let ((proc (libgit2->procedure '* "git_tree_entry_id" '(*))))
@@ -125,6 +129,10 @@
 
 (define %tree-free (dynamic-func "git_tree_free" libgit2))
 
+(define (pointer->tree! pointer)
+  (set-pointer-finalizer! pointer %tree-free)
+  (pointer->tree pointer))
+
 (define tree-id
   (let ((proc (libgit2->procedure '* "git_tree_id" '(*))))
     (lambda (tree)
@@ -137,7 +145,7 @@
         (proc out
               (repository->pointer repository)
               (oid->pointer id))
-        (pointer->tree (dereference-pointer out))))))
+        (pointer->tree! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_lookup_prefix
 

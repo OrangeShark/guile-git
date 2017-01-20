@@ -55,7 +55,7 @@
               (string->pointer branch-name)
               (commit->pointer target)
               (if force 1 0))
-        (pointer->reference* out)))))
+        (pointer->reference! (dereference-pointer out))))))
 
 (define branch-create-from-annotated
   (let ((proc (libgit2->procedure* "git_branch_create_from_annotated" `(* * * * ,int))))
@@ -66,7 +66,7 @@
               (string->pointer branch-name)
               (annotated-commit->pointer commit)
               (if force 1 0))
-        (pointer->reference* out)))))
+        (pointer->reference! (dereference-pointer out))))))
 
 (define branch-delete
   (let ((proc (libgit2->procedure* "git_branch_delete" '(*))))
@@ -83,12 +83,16 @@
 
 (define %branch-iterator-free (dynamic-func "git_branch_iterator_free" libgit2))
 
+(define (pointer->branch-iterator! pointer)
+  (set-pointer-finalizer! pointer %branch-iterator-free)
+  (pointer->branch-iterator pointer))
+
 (define branch-iterator-new
   (let ((proc (libgit2->procedure* "git_branch_iterator_new" `(* * ,int))))
     (lambda (repository flags)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) flags)
-        (pointer->branch-iterator (pointer-gc (dereference-pointer out) %branch-iterator-free))))))
+        (pointer->branch-iterator (dereference-pointer out))))))
 
 (define branch-lookup
   (let ((proc (libgit2->procedure* "git_branch_lookup" `(* * * ,int))))
@@ -98,7 +102,7 @@
               (repository->pointer repository)
               (string->pointer branch-name)
               type)
-        (pointer->reference* out)))))
+        (pointer->reference! (dereference-pointer out))))))
 
 (define branch-move
   (let ((proc (libgit2->procedure* "git_branch_move" `(* * * ,int))))
@@ -108,7 +112,7 @@
               (reference->pointer reference)
               (string->pointer new-branch-name)
               (if force 1 0))
-        (pointer->reference* out)))))
+        (pointer->reference! (dereference-pointer out))))))
 
 (define branch-name
   (let ((proc (libgit2->procedure* "git_branch_name" '(* *))))

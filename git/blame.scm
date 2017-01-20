@@ -32,13 +32,17 @@
   (let ((proc (libgit2->procedure* "git_blame_file" '(* * * *))))
     (lambda (repository path options)
       (let ((out (make-double-pointer)))
-	(proc out
-	      (repository->pointer repository)
-	      (string->pointer path)
-	      (blame-options->pointer options))
-	(pointer->blame (pointer-gc (dereference-pointer out) %blame-free))))))
+        (proc out
+              (repository->pointer repository)
+              (string->pointer path)
+              (blame-options->pointer options))
+        (pointer->blame! (dereference-pointer out))))))
 
 (define %blame-free (dynamic-func "git_blame_free" libgit2))
+
+(define (pointer->blame! pointer)
+  (set-pointer-finalizer! pointer %blame-free)
+  (pointer->blame pointer))
 
 ;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_get_hunk_byindex
 

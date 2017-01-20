@@ -50,7 +50,7 @@
             repository-set-ident
             repository-state
             repository-workdir
-            pointer->repository*))
+            pointer->repository!))
 
 ;;; repository
 
@@ -91,8 +91,9 @@
 
 (define %repository-free (dynamic-func "git_repository_free" libgit2))
 
-(define (pointer->repository* pointer)
-   (pointer->repository (pointer-gc (dereference-pointer pointer) %repository-free)))
+(define (pointer->repository! pointer)
+  (set-pointer-finalizer! pointer %repository-free)
+  (pointer->repository pointer))
 
 (define repository-get-namespace
   (let ((proc (libgit2->procedure '* "git_repository_get_namespace" '(*))))
@@ -109,7 +110,7 @@
     (lambda (repository)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository))
-        (pointer->reference* out)))))
+        (pointer->reference! (dereference-pointer out))))))
 
 (define repository-head-detached?
   (let ((proc (libgit2->procedure int "git_repository_head_detached" '(*))))
@@ -150,7 +151,7 @@
     (lambda* (path #:optional (is-bare #f))
       (let ((out (make-double-pointer)))
         (proc out (string->pointer path) (if is-bare 1 0))
-        (pointer->repository* out)))))
+        (pointer->repository! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_ext
 
@@ -184,9 +185,10 @@
 (define repository-open
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
     (lambda (file)
+      "Open repository found at FILE"
       (let ((out (make-double-pointer)))
         (proc out (string->pointer file))
-        (pointer->repository* out)))))
+        (pointer->repository! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
 
@@ -205,7 +207,7 @@
                                                    %null-pointer))
         (if (null-pointer? out)
             #f
-            (pointer->repository* out))))))
+            (pointer->repository! (dereference-pointer out)))))))
 
 (define openable-repository?
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
