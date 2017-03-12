@@ -39,14 +39,14 @@
   (let ((proc (libgit2->procedure* "git_tag_lookup" '(* * *))))
     (lambda (repository oid)
       (let ((out (make-double-pointer)))
-        (proc out (repository->pointer out) (oid->pointer oid))
+        (proc out (repository->pointer repository) (oid->pointer oid))
         (pointer->tag! (dereference-pointer out))))))
 
 (define tag-lookup-prefix
   (let ((proc (libgit2->procedure* "git_tag_lookup_prefix" `(* * * ,size_t))))
     (lambda (repository oid length)
       (let ((out (make-double-pointer)))
-        (proc out (repository->pointer out) (oid->pointer oid) length)
+        (proc out (repository->pointer repository) (oid->pointer oid) length)
         (pointer->tag! (dereference-pointer out))))))
 
 (define tag-id
