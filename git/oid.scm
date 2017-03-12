@@ -23,6 +23,7 @@
   #:use-module (git bindings)
   #:use-module (git types)
   #:use-module (git structs)
+  #:use-module (srfi srfi-9 gnu)
   #:export (oid-cmp
             oid=?
             string->oid
@@ -102,5 +103,10 @@
   (let ((proc (libgit2->procedure '* "git_oid_tostr_s" '(*))))
     (lambda (id)
       (pointer->string (proc (oid->pointer id))))))
+
+(define (print-oid oid port)
+  (format port "#<oid ~a>" (oid->string oid)))
+
+(set-record-type-printer! (@@ (git structs) <oid>) print-oid)
 
 ;;; FIXME: oidarray https://libgit2.github.com/libgit2/#HEAD/group/oidarray
