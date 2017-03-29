@@ -9,11 +9,11 @@
 
 (libgit2-init!)
 
-(with-repository "simple"
+(with-repository "simple" directory
 
   (test-equal "commit-tree tree-id"
     "d40674e05d114e5eb0df0f358ebeec47b8782ced"
-    (let* ((repository (repository-open "tmp/simple/"))
+    (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
            (tree (commit-tree commit)))
@@ -21,7 +21,7 @@
 
   (test-equal "tree-walk list files"
     (list "message" "directory" "README")
-    (let* ((repository (repository-open "tmp/simple"))
+    (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
            (tree (commit-tree commit)))
@@ -33,7 +33,7 @@
 
   (test-equal "tree-list"
     (list "directory/message" "directory" "README")
-    (let* ((repository (repository-open "tmp/simple"))
+    (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
            (tree (commit-tree commit)))
@@ -41,7 +41,7 @@
 
   (test-equal "tree-entry-bypath"
     "message"
-    (let* ((repository (repository-open "tmp/simple"))
+    (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
            (tree (commit-tree commit)))

@@ -70,10 +70,16 @@
 
 (export with-directory)
 
-(define-syntax-rule (with-repository name body ...)
-  (with-directory "tmp"
-    (let ((path (string-append "tests/data/" name ".tgz")))
-      (system* "tar" "xvf" path "-C" "tmp"))
-    body ...))
+(define-syntax-rule (with-repository name directory body ...)
+  "Extract the repository NAME, evaluate BODY, and remove the extracted
+repository.  Bind DIRECTORY to the directory where the repository is
+extracted."
+  (let ((directory (string-append "tmp-" name "-"
+                                  (number->string (getpid)))))
+    (with-directory directory
+      (let ((path (string-append "tests/data/" name ".tgz")))
+        (system* "tar" "xvf" path "-C" directory))
+      (let ((directory (string-append directory "/" name)))
+        body ...))))
 
 (export with-repository)

@@ -23,41 +23,42 @@
            (out (repository-is-bare? repository)))
       out)))
 
-(with-repository "simple"
+(with-repository "simple" directory
 
   (test-equal "repository-is-empty?"
     #f
-    (let* ((repository (repository-open "tmp/simple/"))
+    (let* ((repository (repository-open directory))
            (empty? (repository-is-empty? repository)))
       empty?))
 
   (test-equal "repository-is-bare?"
     #f
-    (let* ((repository (repository-open "tmp/simple/"))
+    (let* ((repository (repository-open directory))
            (bare? (repository-is-bare? repository)))
       bare?))
   (test-equal "repository-is-shallow?"
     #f
-    (let* ((repository (repository-open "tmp/simple/"))
+    (let* ((repository (repository-open directory))
            (shallow? (repository-is-shallow? repository)))
       shallow?))
 
   (test-equal "repository-path"
-    (string-append (getcwd) "/tmp/simple/.git/")
-    (let* ((repository (repository-open "tmp/simple/"))
+    (canonicalize-path (string-append directory "/.git"))
+    (let* ((repository (repository-open directory))
            (out (repository-path repository)))
-      out))
+      (string-trim-right out #\/)))
 
   (test-equal "repository-discover"
-    (string-append (getcwd) "/tmp/simple/.git/")
-    (let ((path (repository-discover "tmp/simple/directory/")))
-      path)))
+    (canonicalize-path (string-append directory "/.git"))
+    (let ((path (repository-discover
+                 (string-append directory "/directory"))))
+      (string-trim-right path #\/))))
 
-(with-repository "simple-bare"
+(with-repository "simple-bare" directory
 
   (test-equal "repository-is-bare?"
     #t
-    (let* ((repository (repository-open "tmp/simple-bare/"))
+    (let* ((repository (repository-open directory))
            (bare? (repository-is-bare? repository)))
       bare?)))
 
