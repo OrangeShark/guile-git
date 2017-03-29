@@ -1,5 +1,6 @@
 (define-module (tests commit)
-  #:use-module (srfi srfi-64))
+  #:use-module (srfi srfi-64)
+  #:use-module (ice-9 match))
 
 (use-modules (ice-9 receive))
 
@@ -105,7 +106,18 @@
            (oid (reference-target (repository-head repository))))
       (commit-parentcount (commit-lookup repository oid))))
 
-  )
+  (test-equal "commit-parents"
+    "354bcdf85d661533f28dae0e78ce0be99a9dfb9d"    ;root commit
+    (let* ((repository (repository-open "tmp/simple/"))
+           (oid (reference-target (repository-head repository))))
+      (let loop ((commit (commit-lookup repository oid)))
+        (match (commit-parents commit)
+          (()
+           (oid->string (commit-id commit)))
+          ((parent)
+           ;; There are no merge commits in this repo, so each commit but the
+           ;; root commit has exactly one parent.
+           (loop parent)))))))
 
 
 (libgit2-shutdown)

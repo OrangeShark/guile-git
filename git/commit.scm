@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -18,6 +19,8 @@
 ;;; along with Guile-Git.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (git commit)
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-26)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
@@ -42,6 +45,7 @@
             commit-parent
             commit-parent-id
             commit-parentcount
+            commit-parents
             commit-raw-header
             commit-summary
             commit-time
@@ -188,6 +192,13 @@
   (let ((proc (libgit2->procedure unsigned-int "git_commit_parentcount" '(*))))
     (lambda (commit)
       (proc (commit->pointer commit)))))
+
+(define (commit-parents commit)
+  "Return the list of all the parent commits of COMMIT."
+  (unfold (cute >= <> (commit-parentcount commit))
+          (cut commit-parent commit <>)
+          1+
+          0))
 
 (define commit-raw-header
   (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
