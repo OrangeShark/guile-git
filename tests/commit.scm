@@ -45,6 +45,20 @@
            (oid (reference-target (repository-head repository))))
       (oid->string (commit-id (commit-lookup repository oid)))))
 
+  (test-assert "commit & eq?"
+    ;; Make sure identical commits yield commit objects that are 'eq?'.
+    (let* ((repository (repository-open directory))
+           (oid        (reference-target (repository-head repository)))
+           (head       (commit-lookup repository oid))
+           (parent     (commit-parent head)))
+      (and (eq? head
+                (commit-lookup repository oid)
+                (commit-lookup repository oid))
+           (eq? parent
+                (commit-parent head)
+                (let ((oid (commit-id parent)))
+                  (commit-lookup repository oid))))))
+
   (test-equal "commit-message"
     "Add directory/message\n"
     (let* ((repository (repository-open directory))
