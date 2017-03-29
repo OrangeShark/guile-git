@@ -131,7 +131,25 @@
           ((parent)
            ;; There are no merge commits in this repo, so each commit but the
            ;; root commit has exactly one parent.
-           (loop parent)))))))
+           (loop parent))))))
+
+  (test-assert "fold-commits"
+    (let* ((repository (repository-open directory))
+           (oid (reference-target (repository-head repository)))
+           (head (commit-lookup repository oid)))
+      (equal? (fold-commits cons '() repository)
+              (let* ((head^ (commit-parent head))
+                     (root  (commit-parent head^)))
+                (list root head^ head)))))
+
+  (test-assert "fold-commits with #:end"
+    (let* ((repository (repository-open directory))
+           (oid (reference-target (repository-head repository)))
+           (head (commit-lookup repository oid))
+           (head^ (commit-parent head)))
+      (equal? (fold-commits cons '() repository
+                            #:end (commit-id head^))
+              (list head^ head)))))
 
 
 (libgit2-shutdown)

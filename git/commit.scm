@@ -24,12 +24,16 @@
   #:use-module (srfi srfi-26)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
+  #:use-module (ice-9 match)
+  #:use-module (ice-9 vlist)
   #:use-module (git bindings)
   #:use-module (git structs)
   #:use-module (git oid)
   #:use-module (git tree)
   #:use-module (git types)
   #:use-module (git object)
+  #:use-module (git reference)
+  #:use-module (git repository)
   #:export (object->commit
             commit-amend
             commit-author
@@ -53,7 +57,9 @@
             commit-time
             commit-time-offset
             commit-tree
-            commit-tree-id))
+            commit-tree-id
+
+            fold-commits))
 
 ;; commit https://libgit2.github.com/libgit2/#HEAD/group/commit
 
@@ -209,6 +215,34 @@
           (cut commit-parent commit <>)
           1+
           0))
+
+(define* (fold-commits proc seed repo
+                       #:key
+                       (start (reference-target
+                               (repository-head repo)))
+                       end)
+  "Call PROC once on each commit of REPO, starting at START (an OID) and
+until END (an OID) included; if END is omitted, stop at the root commit.
+This procedure performs a breadth-first traversal of the commit graph."
+  ;; Note: We rely on the fact that identical commits yield commit objects
+  ;; that are 'eq?'.
+  (let loop ((commits (list (commit-lookup repo start)))
+             (result seed)
+             (visited vlist-null))
+    (match commits
+      ((commit . rest)
+       (cond ((vhash-assq commit visited)
+              (loop rest result visited))
+             ((and end (oid=? (commit-id commit) end))
+              (loop rest
+                    (proc commit result)
+                    (vhash-consq commit #t visited)))
+             (else
+              (loop (append (commit-parents commit) rest)
+                    (proc commit result)
+                    (vhash-consq commit #t visited)))))
+      (()
+       result))))
 
 (define commit-raw-header
   (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
