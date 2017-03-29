@@ -1,4 +1,5 @@
-(define-module (tests branch))
+(define-module (tests branch)
+  #:use-module (srfi srfi-64))
 
 (use-modules (tests helpers))
 (use-modules (git))

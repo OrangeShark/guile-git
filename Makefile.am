@@ -42,13 +42,22 @@ TESTS =                             \
 
 TEST_EXTENSIONS = .scm
 
-SCM_LOG_COMPILER = $(top_builddir)/test-env $(GUILE)
+SCM_LOG_DRIVER =                                \
+  $(top_builddir)/pre-inst-env                  \
+  $(GUILE) --no-auto-compile -e main            \
+      $(top_srcdir)/build-aux/test-driver.scm
+
+# Tell 'build-aux/test-driver.scm' to display only source file names,
+# not indivdual test names.
+AM_SCM_LOG_DRIVER_FLAGS = --brief=yes
+
 AM_SCM_LOG_FLAGS = --no-auto-compile -L "$(top_srcdir)"
 
 EXTRA_DIST +=                       \
   README.md                         \
   pre-inst-env.in                   \
   guix.scm                          \
+  build-aux/test-driver.scm		  		\
   static/bg.png                     \
   static/main.css                   \
   static/normalize.css

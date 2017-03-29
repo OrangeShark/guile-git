@@ -8,6 +8,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 GUILE_PKG([2.2 2.0])
 GUILE_PROGS
 
+dnl (srfi srfi-64) appeared in Guile 2.0.11.
+GUILE_MODULE_REQUIRED([srfi srfi-64])
+
 GUILE_MODULE_REQUIRED([bytestructures guile])
 
 PKG_CHECK_MODULES([LIBGIT2], [libgit2])

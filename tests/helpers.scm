@@ -77,27 +77,3 @@
     body ...))
 
 (export with-repository)
-
-;; srfi 64 replacement
-
-(define-syntax-rule (test-begin name)
-  (begin
-    (format #t "* Testing ~a\n" name)
-    (define HAS-FAILED-TESTS #f)))
-
-(define-syntax-rule (test-end)
-  (if HAS-FAILED-TESTS
-      (exit 1)
-      (exit 0)))
-
-(define-syntax-rule (test-equal name expected produced)
-  (begin
-    (format #t "** Checking ~a\n" name)
-    (let* ((expected* expected)
-	   (produced* produced))
-      (when (not (equal? expected* produced*))
-	(format #t "*** Expected: ~s\n" expected*)
-	(format #t "*** Computed: ~s\n" produced*)
-	(set! HAS-FAILED-TESTS #t)))))
-      
-(export test-begin test-end test-equal)

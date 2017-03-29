@@ -1,4 +1,5 @@
-(define-module (tests commit))
+(define-module (tests commit)
+  #:use-module (srfi srfi-64))
 
 (use-modules (ice-9 receive))
 
