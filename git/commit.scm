@@ -20,11 +20,13 @@
 
 (define-module (git commit)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-26)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
   #:use-module (git structs)
+  #:use-module (git oid)
   #:use-module (git tree)
   #:use-module (git types)
   #:use-module (git object)
@@ -54,6 +56,14 @@
             commit-tree-id))
 
 ;; commit https://libgit2.github.com/libgit2/#HEAD/group/commit
+
+(define (print-commit commit port)
+  ;; Don't print the address of COMMIT since identical commits are 'eq?'.
+  (format port "#<git-commit ~a>"
+          (oid->string (commit-id commit))))
+
+(set-record-type-printer! (@@ (git types) <commit>)
+                          print-commit)
 
 (define (object->commit object)
   (and (= (object-type object) OBJ-COMMIT)
