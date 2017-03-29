@@ -51,20 +51,20 @@
     (syntax-case s ()
       ((_ name)
        (let ((symbol     (syntax->datum #'name))
-	     (identifier (lambda (symbol)
-			   (datum->syntax #'name symbol))))
-	 (with-syntax ((rtd    (identifier (symbol-append '< symbol '>)))
-		       (pred   (identifier (symbol-append symbol '?)))
-		       (wrap   (identifier (symbol-append 'pointer-> symbol)))
-		       (unwrap (identifier (symbol-append symbol '->pointer))))
-	   #`(define-wrapped-pointer-type rtd
-	       pred
-	       wrap unwrap
-	       (lambda (obj port)
-		 (format port "#<git-~a ~a>"
-			 #,(symbol->string symbol)
-			 (number->string (pointer-address (unwrap obj))
-					 16))))))))))
+             (identifier (lambda (symbol)
+                           (datum->syntax #'name symbol))))
+         (with-syntax ((rtd    (identifier (symbol-append '< symbol '>)))
+                       (pred   (identifier (symbol-append symbol '?)))
+                       (wrap   (identifier (symbol-append 'pointer-> symbol)))
+                       (unwrap (identifier (symbol-append symbol '->pointer))))
+           #`(define-wrapped-pointer-type rtd
+               pred
+               wrap unwrap
+               (lambda (obj port)
+                 (format port "#<git-~a ~a>"
+                         #,(symbol->string symbol)
+                         (number->string (pointer-address (unwrap obj))
+                                         16))))))))))
 
 (define-libgit2-type annotated-commit)
 (define-libgit2-type blame)
