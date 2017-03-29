@@ -47,7 +47,7 @@
         (proc out (oid->pointer src))
         (pointer->oid out)))))
 
-(define (oid=? a b)
+(define oid=?
   (let ((proc (libgit2->procedure int "git_oid_equal" '(* *))))
     (lambda (a b)
       (eq? (proc (oid->pointer a) (oid->pointer b)) 1))))

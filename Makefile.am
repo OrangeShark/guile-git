@@ -33,11 +33,12 @@ SOURCES =                           \
   git/web/config.scm                \
   git/web/repository.scm
 
-TESTS =                             \
-  tests/branch.scm                  \
-  tests/commit.scm                  \
-  tests/reference.scm               \
-  tests/repository.scm              \
+TESTS =                                         \
+  tests/branch.scm                              \
+  tests/commit.scm                              \
+  tests/oid.scm                                 \
+  tests/reference.scm                           \
+  tests/repository.scm                          \
   tests/tree.scm
 
 TEST_EXTENSIONS = .scm
