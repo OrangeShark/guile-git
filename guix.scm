@@ -18,7 +18,7 @@
      ("automake" ,automake)
      ("pkg-config" ,pkg-config)))
   (inputs
-   `(("guile" ,guile-2.0)
+   `(("guile" ,guile-2.2)
      ("libgit2" ,libgit2)
      ("openssl" ,openssl)
      ("zlib" ,zlib)
