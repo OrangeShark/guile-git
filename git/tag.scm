@@ -25,6 +25,7 @@
   #:export (tag-lookup
             tag-lookup-prefix
             tag-id
+            tag-target-id
             tag-message
             tag-name))
 
@@ -51,6 +52,11 @@
 
 (define tag-id
   (let ((proc (libgit2->procedure '* "git_tag_id" '(*))))
+    (lambda (tag)
+      (pointer->oid (proc (tag->pointer tag))))))
+
+(define tag-target-id
+  (let ((proc (libgit2->procedure '* "git_tag_target_id" '(*))))
     (lambda (tag)
       (pointer->oid (proc (tag->pointer tag))))))
 
