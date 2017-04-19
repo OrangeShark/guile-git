@@ -30,6 +30,7 @@
         (git reference)
         (git repository)
         (git structs)
+        (git tag)
         (git tree)))
 
     (for-each (let ((i (module-public-interface (current-module))))
