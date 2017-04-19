@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -91,22 +92,19 @@
 
 ;;; git oid
 
-(define GIT-OID-RAWSZ 20)
-
-(define %oid (bs:struct `((id ,(bs:vector GIT-OID-RAWSZ uint8)))))
+(define-syntax GIT-OID-RAWSZ
+  (identifier-syntax 20))
 
 (define-record-type <oid>
-  (%make-oid bytestructure)
+  (%make-oid bytevector)
   oid?
-  (bytestructure oid-bytestructure))
+  (bytevector oid-bytevector))
 
 (define (pointer->oid pointer)
-  (%make-oid (pointer->bytestructure pointer %oid)))
+  (%make-oid (pointer->bytevector pointer GIT-OID-RAWSZ)))
 
 (define (oid->pointer oid)
-  (bytestructure->pointer (oid-bytestructure oid)))
+  (bytevector->pointer (oid-bytevector oid)))
 
 (define (make-oid-pointer)
-  (bytestructure->pointer (bytestructure %oid)))
-
-
+  (bytevector->pointer (make-bytevector GIT-OID-RAWSZ)))
