@@ -29,6 +29,7 @@
         (git oid)
         (git reference)
         (git repository)
+        (git reset)
         (git structs)
         (git tree)))
 
