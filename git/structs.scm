@@ -101,7 +101,11 @@
   (bytevector oid-bytevector))
 
 (define (pointer->oid pointer)
-  (%make-oid (pointer->bytevector pointer GIT-OID-RAWSZ)))
+  ;; C functions typically return 'const git_oid *' and the OID's memory
+  ;; belongs to the object it is associated with.  Thus, always copy the OID
+  ;; contents to make sure it's not modified or freed behind our back.
+  (%make-oid (bytevector-copy
+              (pointer->bytevector pointer GIT-OID-RAWSZ))))
 
 (define (oid->pointer oid)
   (bytevector->pointer (oid-bytevector oid)))
