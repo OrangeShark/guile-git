@@ -24,8 +24,8 @@
   #:use-module (git types)
   #:use-module (git structs)
   #:use-module (srfi srfi-9 gnu)
+  #:re-export (oid=?)
   #:export (oid-cmp
-            oid=?
             string->oid
             oid-zero?
             oid-ncmp?
@@ -46,11 +46,6 @@
       (let ((out (make-oid-pointer)))
         (proc out (oid->pointer src))
         (pointer->oid out)))))
-
-(define oid=?
-  (let ((proc (libgit2->procedure int "git_oid_equal" '(* *))))
-    (lambda (a b)
-      (eq? (proc (oid->pointer a) (oid->pointer b)) 1))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fmt
 

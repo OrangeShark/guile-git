@@ -28,7 +28,7 @@
   #:use-module (bytestructures guile)
   #:export (time->pointer pointer->time time-time time-offset
             signature->pointer pointer->signature signature-name signature-email signature-when
-            oid? oid->pointer pointer->oid make-oid-pointer))
+            oid? oid->pointer pointer->oid make-oid-pointer oid=?))
 
 
 ;;; bytestructures helper
@@ -108,3 +108,9 @@
 
 (define (make-oid-pointer)
   (bytevector->pointer (make-bytevector GIT-OID-RAWSZ)))
+
+(define (oid=? oid1 oid2)
+  "Return true if OID1 and OID2 are equal."
+  ;; This is more efficient than calling 'git_oid_equal' through the FFI.
+  (bytevector=? (oid-bytevector oid1)
+                (oid-bytevector oid2)))
