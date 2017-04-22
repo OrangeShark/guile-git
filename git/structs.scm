@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
+;;; Copyright © 2016, 2017 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;;
@@ -28,7 +28,8 @@
   #:use-module (bytestructures guile)
   #:export (time->pointer pointer->time time-time time-offset
             signature->pointer pointer->signature signature-name signature-email signature-when
-            oid? oid->pointer pointer->oid make-oid-pointer oid=?))
+            oid? oid->pointer pointer->oid make-oid-pointer oid=?
+            bytestructure->pointer pointer->bytestructure))
 
 
 ;;; bytestructures helper

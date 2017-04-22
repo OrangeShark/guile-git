@@ -24,6 +24,7 @@ SOURCES =                           \
   git/remote.scm                    \
   git/reset.scm	                    \
   git/structs.scm                   \
+  git/strarray.scm                  \
   git/tag.scm                       \
   git/tree.scm                      \
   git/types.scm                     \
