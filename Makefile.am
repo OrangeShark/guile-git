@@ -21,6 +21,7 @@ SOURCES =                           \
   git/reference.scm                 \
   git/repository.scm                \
   git/reset.scm	                    \
+  git/remote.scm                    \
   git/structs.scm                   \
   git/tag.scm                       \
   git/tree.scm                      \
@@ -41,6 +42,7 @@ TESTS =                                         \
   tests/reference.scm                           \
   tests/repository.scm                          \
   tests/reset.scm                               \
+  tests/remote.scm                              \
   tests/tree.scm
 
 TEST_EXTENSIONS = .scm

@@ -30,6 +30,7 @@
         (git reference)
         (git repository)
         (git reset)
+        (git remote)
         (git structs)
         (git tag)
         (git tree)))
