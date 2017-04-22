@@ -73,7 +73,7 @@
 
 ;;; https://libgit2.github.com/libgit2/#HEAD/group/cred
 
-(define cred-defaul-new
+(define cred-default-new
   (let ((proc (libgit2->procedure* "git_cred_default_new" '(*))))
     (lambda ()
       (let ((out (make-double-pointer)))
