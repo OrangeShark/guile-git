@@ -17,7 +17,7 @@ To start hacking on guile-git install [guix](https://gnu.org/s/guix) and run the
 following command:
 
 ```bash
-> guix environement -l guix.scm
+> guix environment -l guix.scm
 ```
 
 You can then:
