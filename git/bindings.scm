@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2016, 2017 Amirouche Boubekki <amirouche@hypermove.net>
+;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
 ;;;
@@ -22,7 +22,6 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (ice-9 match)
-  #:use-module ((bytestructures guile) #:prefix bs:)
   #:use-module (git config)
   #:use-module (git types)
   #:export (libgit2
@@ -31,11 +30,7 @@
             make-buffer
             free-buffer
             buffer-content
-            buffer-content/string
-            address))
-
-
-(define address (case (sizeof '*) ((8) bs:uint64) ((4) bs:uint32)))
+            buffer-content/string))
 
 ;; DRAFT!
 
