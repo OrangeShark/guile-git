@@ -31,7 +31,6 @@
         (git repository)
         (git reset)
         (git remote)
-        (git reset)
         (git structs)
         (git tag)
         (git tree)))
