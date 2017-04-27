@@ -24,7 +24,6 @@
     (define %public-modules
       '((git bindings)
         (git branch)
-        (git checkout)
         (git clone)
         (git commit)
         (git oid)
