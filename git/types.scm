@@ -40,6 +40,7 @@
             reference-iterator? pointer->reference-iterator reference-iterator->pointer
             repository? pointer->repository repository->pointer
             remote? pointer->remote remote->pointer
+            status-list? pointer->status-list status-list->pointer
             tag? pointer->tag tag->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
@@ -87,6 +88,7 @@
 (define-libgit2-type reference-iterator)
 (define-libgit2-type repository)
 (define-libgit2-type remote)
+(define-libgit2-type status-list)
 (define-libgit2-type tag)
 (define-libgit2-type tree)
 (define-libgit2-type tree-entry)

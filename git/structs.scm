@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -20,15 +21,26 @@
 
 (define-module (git structs)
   #:use-module (rnrs bytevectors)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
-  #:use-module ((system foreign) #:select (bytevector->pointer
+  #:use-module ((system foreign) #:select (null-pointer?
+                                           bytevector->pointer
                                            make-pointer
                                            pointer->bytevector
                                            pointer->string))
   #:use-module (bytestructures guile)
+  #:use-module (ice-9 match)
   #:export (time->pointer pointer->time time-time time-offset
             signature->pointer pointer->signature signature-name signature-email signature-when
-            oid? oid->pointer pointer->oid make-oid-pointer oid=?))
+            oid? oid->pointer pointer->oid make-oid-pointer oid=?
+
+            diff-file? diff-file-oid diff-file-path diff-file-size diff-file-flags diff-file-mode diff-file-id-abbrev
+
+            diff-delta? diff-delta-status diff-delta-flags diff-delta-status diff-delta-nfiles diff-delta-old-file diff-delta-new-file
+
+            status-entry? status-entry-status status-entry-head-to-index status-entry-index-to-workdir pointer->status-entry
+
+            make-status-options status-options->pointer set-status-options-show! set-status-options-flags!))
 
 
 ;;; bytestructures helper
@@ -118,3 +130,141 @@
   ;; This is more efficient than calling 'git_oid_equal' through the FFI.
   (bytevector=? (oid-bytevector oid1)
                 (oid-bytevector oid2)))
+
+;;; git status options
+
+(define %strarray
+  (bs:struct `((strings ,(bs:pointer
+                          (bs:pointer uint8)))
+               (count ,size_t))))
+
+(define %status-options
+  (bs:struct `((version ,unsigned-int)
+               (status-show ,int)
+               (flags ,unsigned-int)
+               (pathspec ,%strarray))))
+
+(define %diff-file
+  (bs:struct `((oid ,(bs:vector 20 uint8))
+               (path ,(bs:pointer uint8))
+               (size ,int64)
+               (flags ,uint32)
+               (mode ,uint16)
+               (id-abbrev ,uint16))))
+
+(define %diff-delta
+  (bs:struct `((status ,int)
+               (flags ,uint32)
+               (similarity ,uint16)
+               (nfiles ,uint16)
+               (old-file ,%diff-file)
+               (new-file ,%diff-file))))
+
+(define %status-entry
+  (bs:struct `((status ,int)
+               (head-to-index ,(bs:pointer %diff-delta))
+               (index-to-workdir ,(bs:pointer %diff-delta)))))
+
+(define (flags->symbols flags map-list)
+  (fold (lambda (flag-map symbols)
+          (match flag-map
+            ((flag symbol)
+             (if (> (logand flag flags) 0)
+                 (cons symbol symbols)
+                 symbols))))
+        '()
+        map-list))
+
+(define (status-names status)
+  (flags->symbols status
+                  '((1     index-new)
+                    (2     index-modified)
+                    (4     index-deleted)
+                    (8     index-renamed)
+                    (16    index-typechange)
+                    (128   wt-new)
+                    (256   wt-modified)
+                    (512   wt-deleted)
+                    (1024  wt-typechange)
+                    (2048  wt-renamed)
+                    (4096  wt-unreadable)
+                    (16384 ignored)
+                    (32768 conflicted))))
+
+(define-record-type <diff-file>
+  (%make-diff-file oid path size flags mode id-abbrev)
+  diff-file?
+  (oid diff-file-oid)
+  (path diff-file-path)
+  (size diff-file-size)
+  (flags diff-file-flags)
+  (mode diff-file-mode)
+  (id-abbrev diff-file-id-abbrev))
+
+(define-record-type <diff-delta>
+  (%make-diff-delta status flags similarity nfiles old-file new-file)
+  diff-delta?
+  (status diff-delta-status)
+  (flags diff-delta-flags)
+  (similarity diff-delta-similarity)
+  (nfiles diff-delta-nfiles)
+  (old-file diff-delta-old-file)
+  (new-file diff-delta-new-file))
+
+(define-record-type <status-entry>
+  (%make-status-entry status head-to-index index-to-workdir)
+  status-entry?
+  (status status-entry-status)
+  (head-to-index status-entry-head-to-index)
+  (index-to-workdir status-entry-index-to-workdir))
+
+(define-record-type <status-options>
+  (%make-status-options bytestructure)
+  status-options?
+  (bytestructure status-options-bytestructure))
+
+(define (make-status-options)
+  (%make-status-options (bytestructure %status-options)))
+
+(define (status-options->pointer status-options)
+  (bytestructure->pointer (status-options-bytestructure status-options)))
+
+(define (set-status-options-show! status-options show)
+  (bytestructure-set! (status-options-bytestructure status-options)
+                      'status-show show))
+
+(define (set-status-options-flags! status-options flags)
+  (bytestructure-set! (status-options-bytestructure status-options)
+                      'flags flags))
+
+(define (bs-diff-file->diff-file bs)
+  (%make-diff-file
+   (%make-oid (bytestructure-bytevector
+               (bytestructure-ref bs 'oid)))
+   (pointer->string
+    (make-pointer (bytestructure-ref bs 'path)))
+   (bytestructure-ref bs 'size)
+   (bytestructure-ref bs 'flags)
+   (bytestructure-ref bs 'mode)
+   (bytestructure-ref bs 'id-abbrev)))
+
+(define (pointer->diff-delta pointer)
+  (if (null-pointer? pointer)
+      #f
+      (let ((bs (pointer->bytestructure pointer %diff-delta)))
+        (%make-diff-delta
+         (bytestructure-ref bs 'status)
+         (bytestructure-ref bs 'flags)
+         (bytestructure-ref bs 'similarity)
+         (bytestructure-ref bs 'nfiles)
+         (bs-diff-file->diff-file (bytestructure-ref bs 'old-file))
+         (bs-diff-file->diff-file (bytestructure-ref bs 'new-file))))))
+
+(define (pointer->status-entry pointer)
+  (let ((bs (pointer->bytestructure pointer %status-entry)))
+    (%make-status-entry
+     (status-names (bytestructure-ref bs 'status))
+     (pointer->diff-delta
+      (make-pointer (bytestructure-ref bs 'head-to-index)))
+     (pointer->diff-delta
+      (make-pointer (bytestructure-ref bs 'index-to-workdir))))))
