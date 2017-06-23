@@ -3,6 +3,7 @@
 
 (use-modules (ice-9 optargs))
 
+(define %src-dir (or (getenv "srcdir") ""))
 
 (define-public (path-exists? path)
   "Return #true if path is a file or directory.
@@ -77,7 +78,7 @@ extracted."
   (let ((directory (string-append "tmp-" name "-"
                                   (number->string (getpid)))))
     (with-directory directory
-      (let ((path (string-append "tests/data/" name ".tgz")))
+      (let ((path (string-append %src-dir "/tests/data/" name ".tgz")))
         (system* "tar" "xvf" path "-C" directory))
       (let ((directory (string-append directory "/" name)))
         body ...))))

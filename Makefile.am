@@ -36,6 +36,11 @@ SOURCES =                           \
   git/web/config.scm                \
   git/web/repository.scm
 
+TESTS_UTILS =                                   \
+  tests/helpers.scm                             \
+  tests/data/simple-bare.tgz                    \
+  tests/data/simple.tgz
+
 TESTS =                                         \
   tests/branch.scm                              \
   tests/commit.scm                              \
@@ -67,4 +72,6 @@ EXTRA_DIST +=                       \
   build-aux/test-driver.scm		  		\
   static/bg.png                     \
   static/main.css                   \
-  static/normalize.css
+  static/normalize.css              \
+  $(TESTS)                          \
+  $(TESTS_UTILS)
