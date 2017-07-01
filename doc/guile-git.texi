@@ -42,6 +42,16 @@ This manual is for guile-git, version @value{VERSION}.
 @menu
 * Introduction::     About guile-git.
 * Installation::     Installing guile-git.
+
+Tutorial sections
+* Concepts::         Basic concepts for understanding git.
+* Examples::         Simple examples for using guile-git.
+
+Reference sections
+* Bindings::         libgit2 setup.
+* Repository::       Creating and accessing git repositories.
+* Objects::          Git blobs, trees, commits, and tags.
+* References::       Git references.
 * Procedure Index::
 @end menu
 
@@ -75,7 +85,84 @@ Guile-git depends on the following packages:
 @node Building
 @section Building
 
+@node Concepts
+@chapter Concepts
 
+@node Examples
+@chapter Examples
+
+@node Bindings
+@chapter Bindings
+
+@node Repository
+@chapter Repository
+
+@menu
+* Repository: git-repository.   Creating and opening repositories.
+* Clone: git-clone.             Cloning git repositories.
+* Status: git-status.           Git status.
+* Checkout: git-checkout.       Git checkout.
+@end menu
+
+@node git-repository
+@section Repository
+
+@node git-clone
+@section Clone
+
+@node git-status
+@section Status
+
+@node git-checkout
+@section Checkout
+
+@node Objects
+@chapter Objects
+
+@menu
+* OID: git-oid.                Git Object IDs.
+* Object: git-object.          Git objects.
+* Blob: git-blob.              Git blobs.
+* Tree: git-tree.              Git trees.
+* Commit: git-commit.          Git commits.
+* Tag: git-tag.                Git tags.
+@end menu
+
+@node git-oid
+@section OID
+
+@node git-object
+@section Object
+
+@node git-blob
+@section Blob
+
+@node git-tree
+@section Tree
+
+@node git-commit
+@section Commit
+
+@node git-tag
+@section Tag
+
+@node References
+@chapter References
+
+@menu
+* Reference: git-reference.   Git references.
+* Branch: git-branch.         Git branches.
+* Remote: git-remote.         Git remotes.
+@end menu
+
+@node git-reference
+@section Reference
+
+@node git-branch
+@section Branch
+
+@node git-remote
+@section Remote
 
 @node Procedure Index
 @unnumbered Procedure Index
