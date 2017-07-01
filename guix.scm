@@ -5,6 +5,7 @@
              (gnu packages compression)
              (gnu packages guile)
              (gnu packages pkg-config)
+             (gnu packages texinfo)
              (gnu packages tls)
              (gnu packages version-control))
 
@@ -16,7 +17,8 @@
   (native-inputs
    `(("autoconf" ,autoconf)
      ("automake" ,automake)
-     ("pkg-config" ,pkg-config)))
+     ("pkg-config" ,pkg-config)
+     ("texinfo" ,texinfo)))
   (inputs
    `(("guile" ,guile-2.2)
      ("libgit2" ,libgit2)
