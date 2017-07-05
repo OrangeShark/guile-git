@@ -94,6 +94,25 @@ Guile-git depends on the following packages:
 @node Bindings
 @chapter Bindings
 
+The module @code{git bindings} provide several definitions for
+interacting with libgit2.  The main procedure is @code{libgit2-init!}
+which must be called before any other guile-git procedure is called.
+
+@deffn {Scheme Procedure} libgit2-init!
+Return the number of initializations of libgit2 or an error code.
+
+Initializes the global state of libgit2.  The procedure must be called
+before any other procedure is called and may be called multiple times. 
+@end deffn
+
+@deffn {Scheme Procedure} libgit2-shutdown!
+Return the number of remaining initializations of libgit2 or an error
+code.
+
+The procedure cleans up the global state of libgit2 created by
+@code{libgit2-init!}.
+@end deffn
+
 @node Repository
 @chapter Repository
 
