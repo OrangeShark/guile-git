@@ -207,7 +207,7 @@
 (define libgit2-opts
   (libgit2->procedure int "git_libgit2_init" `(,int)))
 
-(define-public libgit2-shutdown
+(define-public libgit2-shutdown!
   (libgit2->procedure int "git_libgit2_shutdown" '()))
 
 (define libgit2-version

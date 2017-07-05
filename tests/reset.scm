@@ -40,6 +40,6 @@
            (path-exists?
             (string-append directory "/directory/message"))))))
 
-(libgit2-shutdown)
+(libgit2-shutdown!)
 
 (test-end)

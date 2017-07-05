@@ -92,6 +92,6 @@
                           (status-list-new repository opts) 0)))
       (status-entry-status status-entry))))
 
-(libgit2-shutdown)
+(libgit2-shutdown!)
 
 (test-end)

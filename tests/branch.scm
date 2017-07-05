@@ -32,6 +32,6 @@
   )
 
 
-(libgit2-shutdown)
+(libgit2-shutdown!)
 
 (test-end)

@@ -17,6 +17,6 @@
            (remote (remote-lookup repository "origin")))
       (remote-name remote))))
 
-(libgit2-shutdown)
+(libgit2-shutdown!)
 
 (test-end)
