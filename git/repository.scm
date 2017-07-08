@@ -20,6 +20,7 @@
 (define-module (git repository)
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
+  #:use-module (ice-9 match)
   #:use-module (git bindings)
   #:use-module (git types)
   #:use-module (git reference)
@@ -38,11 +39,6 @@
             repository-is-empty?
             repository-is-shallow?
             repository-open
-            REPOSITORY-OPEN-NO-SEARCH
-            REPOSITORY-OPEN-CROSS-FS
-            REPOSITORY-OPEN-BARE
-            REPOSITORY-OPEN-NO-DOTGIT
-            REPOSITORY-OPEN-FROM-ENV
             repository-open-ext
             openable-repository?
             repository-path
@@ -192,29 +188,50 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
 
-(define REPOSITORY-OPEN-NO-SEARCH (ash #b1 0))
-(define REPOSITORY-OPEN-CROSS-FS  (ash #b1 1))
-(define REPOSITORY-OPEN-BARE      (ash #b1 2))
-(define REPOSITORY-OPEN-NO-DOTGIT (ash #b1 3))
-(define REPOSITORY-OPEN-FROM-ENV  (ash #b1 4))
+(define REPOSITORY_OPEN_NO_SEARCH (ash #b1 0))
+(define REPOSITORY_OPEN_CROSS_FS  (ash #b1 1))
+(define REPOSITORY_OPEN_BARE      (ash #b1 2))
+(define REPOSITORY_OPEN_NO_DOTGIT (ash #b1 3))
+(define REPOSITORY_OPEN_FROM_ENV  (ash #b1 4))
 
 (define repository-open-ext
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
-    (lambda* (path flags #:optional ceiling-dirs)
+    (lambda* (directory flags #:optional ceiling-path)
+      "Find and open a repository at DIRECTORY with extended controls.
+DIRECTORY may be a subdirectory of the repository and searches parent
+directories for the repository unless 'no-search flag is used.  DIRECTORY
+may also be #f when using 'from-env flag.
+FLAGS is a list of the following symbols:
+* 'no-search - Do not search parent directories.
+* 'cross-fs  - Search across filesystem boundaries.
+* 'bare      - Open repository as a bare repo.
+* 'no-.git   - Do not check by appending .git to directory.
+* 'from-env  - Use git environment variables.
+CEILING-PATH is a string of delimited directory names where the search
+should terminate.  The delimiter is ';' on Windows and ':' on others.
+
+Returns the repository or throws an error if no repository could be found."
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer path) flags (if ceiling-dirs
-                                                   (string->pointer ceiling-dirs)
-                                                   %null-pointer))
-        (if (null-pointer? out)
-            #f
-            (pointer->repository! (dereference-pointer out)))))))
+        (proc out (if directory (string->pointer directory) %null-pointer)
+              (apply logior
+                     (map (match-lambda
+                            ('no-search REPOSITORY_OPEN_NO_SEARCH)
+                            ('cross-fs  REPOSITORY_OPEN_CROSS_FS)
+                            ('bare      REPOSITORY_OPEN_BARE)
+                            ('no-.git   REPOSITORY_OPEN_NO_DOTGIT)
+                            ('from-env  REPOSITORY_OPEN_FROM_ENV))
+                          flags))
+              (if ceiling-path
+                  (string->pointer ceiling-path)
+                  %null-pointer))
+        (pointer->repository! (dereference-pointer out))))))
 
 (define openable-repository?
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
     (lambda (path)
       (catch 'git-error
         (lambda ()
-          (proc %null-pointer (string->pointer path) REPOSITORY-OPEN-NO-SEARCH %null-pointer)
+          (proc %null-pointer (string->pointer path) REPOSITORY_OPEN_NO_SEARCH %null-pointer)
           #t)
         (lambda _ #f)))))
 
