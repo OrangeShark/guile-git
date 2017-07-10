@@ -145,6 +145,13 @@
 (define repository-init
   (let ((proc (libgit2->procedure* "git_repository_init" `(* * ,int))))
     (lambda* (directory #:optional (is-bare #f))
+      "Creates a new repository at DIRECTORY.
+
+If IS-BARE is #t the repository will be created without a working
+directory, #f will create a .git directory and DIRECTORY will be
+the working directory. The default value is #f.
+
+Returns the repository on success or throws an error on failure."
       (let ((out (make-double-pointer)))
         (proc out (string->pointer directory) (if is-bare 1 0))
         (pointer->repository! (dereference-pointer out))))))
@@ -181,7 +188,9 @@
 (define repository-open
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
     (lambda (directory)
-      "Open repository found at DIRECTORY."
+      "Open repository found at DIRECTORY.
+
+Returns a repository or throws an error if no repository could be found."
       (let ((out (make-double-pointer)))
         (proc out (string->pointer directory))
         (pointer->repository! (dereference-pointer out))))))
