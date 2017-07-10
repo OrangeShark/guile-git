@@ -41,7 +41,7 @@
             repository-open
             repository-open-ext
             openable-repository?
-            repository-path
+            repository-directory
             repository-refdb
             repository-set-ident
             repository-state
@@ -71,13 +71,13 @@
 
 (define repository-discover
   (let ((proc (libgit2->procedure* "git_repository_discover" `(* * ,int *))))
-    (lambda* (start-path #:optional (across-fs #t) ceiling-dirs)
+    (lambda* (start-directory #:optional (across-fs #t) ceiling-path)
       (let ((out (make-buffer)))
         (proc out
-              (string->pointer start-path)
+              (string->pointer start-directory)
               (if across-fs 1 0)
-              (if ceiling-dirs
-                  (string->pointer ceiling-dirs)
+              (if ceiling-path
+                  (string->pointer ceiling-path)
                   %null-pointer))
         (let ((out* (buffer-content/string out)))
           (free-buffer out)
@@ -144,9 +144,9 @@
 
 (define repository-init
   (let ((proc (libgit2->procedure* "git_repository_init" `(* * ,int))))
-    (lambda* (path #:optional (is-bare #f))
+    (lambda* (directory #:optional (is-bare #f))
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer path) (if is-bare 1 0))
+        (proc out (string->pointer directory) (if is-bare 1 0))
         (pointer->repository! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_ext
@@ -180,10 +180,10 @@
 
 (define repository-open
   (let ((proc (libgit2->procedure* "git_repository_open" '(* *))))
-    (lambda (file)
-      "Open repository found at FILE"
+    (lambda (directory)
+      "Open repository found at DIRECTORY."
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer file))
+        (proc out (string->pointer directory))
         (pointer->repository! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
@@ -228,14 +228,14 @@ Returns the repository or throws an error if no repository could be found."
 
 (define openable-repository?
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
-    (lambda (path)
+    (lambda (directory)
       (catch 'git-error
         (lambda ()
-          (proc %null-pointer (string->pointer path) REPOSITORY_OPEN_NO_SEARCH %null-pointer)
+          (proc %null-pointer (string->pointer directory) REPOSITORY_OPEN_NO_SEARCH %null-pointer)
           #t)
         (lambda _ #f)))))
 
-(define repository-path
+(define repository-directory
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))
     (lambda (repository)
       (pointer->string (proc (repository->pointer repository))))))

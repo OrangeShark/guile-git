@@ -42,10 +42,10 @@
            (shallow? (repository-is-shallow? repository)))
       shallow?))
 
-  (test-equal "repository-path"
+  (test-equal "repository-directory"
     (canonicalize-path (string-append directory "/.git"))
     (let* ((repository (repository-open directory))
-           (out (repository-path repository)))
+           (out (repository-directory repository)))
       (string-trim-right out #\/)))
 
   (test-equal "repository-discover"
