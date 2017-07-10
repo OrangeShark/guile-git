@@ -196,7 +196,7 @@
 
 (define repository-open-ext
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
-    (lambda* (directory flags #:optional ceiling-path)
+    (lambda* (directory flags #:optional (ceiling-path '()))
       "Find and open a repository at DIRECTORY with extended controls.
 DIRECTORY may be a subdirectory of the repository and searches parent
 directories for the repository unless 'no-search flag is used.  DIRECTORY
@@ -207,8 +207,8 @@ FLAGS is a list of the following symbols:
 * 'bare      - Open repository as a bare repo.
 * 'no-.git   - Do not check by appending .git to directory.
 * 'from-env  - Use git environment variables.
-CEILING-PATH is a string of delimited directory names where the search
-should terminate.  The delimiter is ';' on Windows and ':' on others.
+CEILING-PATH is an optional list of directory names where the search should
+terminate.
 
 Returns the repository or throws an error if no repository could be found."
       (let ((out (make-double-pointer)))
@@ -221,9 +221,7 @@ Returns the repository or throws an error if no repository could be found."
                             ('no-.git   REPOSITORY_OPEN_NO_DOTGIT)
                             ('from-env  REPOSITORY_OPEN_FROM_ENV))
                           flags))
-              (if ceiling-path
-                  (string->pointer ceiling-path)
-                  %null-pointer))
+              (make-path ceiling-path))
         (pointer->repository! (dereference-pointer out))))))
 
 (define openable-repository?

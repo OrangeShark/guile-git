@@ -22,6 +22,7 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (ice-9 match)
+  #:use-module (srfi srfi-1)
   #:use-module (git config)
   #:use-module (git types)
   #:export (libgit2
@@ -30,9 +31,17 @@
             make-buffer
             free-buffer
             buffer-content
-            buffer-content/string))
+            buffer-content/string
+            make-path))
 
 ;; DRAFT!
+
+(define path-separator ":")
+
+(define (make-path dirs)
+  (reduce (lambda (dir path) (string-append path path-separator dir))
+          %null-pointer
+          dirs))
 
 (define libgit2
   (dynamic-link %libgit2))
