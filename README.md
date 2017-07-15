@@ -1,10 +1,10 @@
 # guile-git
 
 This is the repository of guile bindings of git hosted
-@ [gitlab](https://gitlab.com/amirouche/guile-git):
+@ [gitlab](https://gitlab.com/guile-git/guile-git):
 
 ```bash
-git clone https://gitlab.com/amirouche/guile-git.git
+git clone https://gitlab.com/guile-git/guile-git.git
 ```
 
 ## Documentation
