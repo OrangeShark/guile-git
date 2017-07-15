@@ -35,9 +35,9 @@
             repository-ident
             repository-index
             repository-init
-            repository-is-bare?
-            repository-is-empty?
-            repository-is-shallow?
+            repository-bare?
+            repository-empty?
+            repository-shallow?
             repository-open
             repository-open-ext
             openable-repository?
@@ -160,20 +160,26 @@ Returns the repository on success or throws an error on failure."
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_init_init_options
 
-(define repository-is-bare?
+(define repository-bare?
   (let ((proc (libgit2->procedure int "git_repository_is_bare" '(*))))
     (lambda (repository)
-      (eq? (proc (repository->pointer repository)) 1))))
+      "Check if REPOSITORY is a bare repository.  A bare repository is
+a repository without a working directory."
+      (= (proc (repository->pointer repository)) 1))))
 
-(define repository-is-empty?
+(define repository-empty?
   (let ((proc (libgit2->procedure int "git_repository_is_empty" '(*))))
     (lambda (repository)
-      (eq? (proc (repository->pointer repository)) 1))))
+      "Check if REPOSITORY is an empty repository.  A empty repository is
+a repository which was recently initialized."
+      (= (proc (repository->pointer repository)) 1))))
 
-(define repository-is-shallow?
+(define repository-shallow?
   (let ((proc (libgit2->procedure int "git_repository_is_shallow" '(*))))
     (lambda (repository)
-      (eq? (proc (repository->pointer repository)) 1))))
+      "Check if REPOSITORY is a shallow clone.  A shallow clone is a
+repository with a truncated history."
+      (= (proc (repository->pointer repository)) 1))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_mergehead_foreach
 
