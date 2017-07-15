@@ -169,6 +169,28 @@ for the repository should terminate.
 
 @end deffn
 
+@deffn {Scheme Procedure} repository-bare? repository
+Return @code{#t} if @var{repository} is a bare repository and
+@code{#f} otherwise.  A bare repository is a repository which does not
+have a working directory.  Typically created with a guile-git
+procedure like @code{(repository-init "example.git" #t)} or using
+@code{--bare} on any of the repository creation commands in git.
+@end deffn
+
+@deffn {Scheme Procedure} repository-empty? repository
+Return @code{#t} if @var{repository} is an empty repository and
+@code{#f} otherwise.  An empty repository is a repository that has no
+references and was just initialized from a procedure like
+@code{(repository-init "/tmp/example")} or using @code{git init}
+command.
+@end deffn
+
+@deffn {Scheme Procedure} repository-shallow? repository
+Return @code{#t} if @var{repository} is a shallow clone and
+@code{#f} otherwise.  A shallow repository is a repository which has a
+truncated history created from cloning a repository with a depth.
+@end deffn
+
 @node git-clone
 @section Clone
 
