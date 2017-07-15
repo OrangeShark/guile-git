@@ -17,7 +17,8 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with Guile-Git.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (git))
+(define-module (git)
+  #:use-module (git bindings))
 
 (eval-when (eval load compile)
   (begin
@@ -40,3 +41,5 @@
                 (lambda (m)
                   (module-use! i (resolve-interface m))))
               %public-modules)))
+
+(libgit2-init!)
