@@ -22,3 +22,9 @@ config.status
 pre-inst-env
 test-env
 git/config.scm
+
+doc/guile-git.html
+doc/guile-git.info
+doc/version.texi
+doc/.dirstamp
+doc/stamp-vti
