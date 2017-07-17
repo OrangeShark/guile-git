@@ -20,26 +20,26 @@
   (test-equal "repository-init bare"
     #t
     (let* ((repository (repository-init "tmp" #t))
-           (out (repository-is-bare? repository)))
+           (out (repository-bare? repository)))
       out)))
 
 (with-repository "simple" directory
 
-  (test-equal "repository-is-empty?"
+  (test-equal "repository-empty?"
     #f
     (let* ((repository (repository-open directory))
-           (empty? (repository-is-empty? repository)))
+           (empty? (repository-empty? repository)))
       empty?))
 
-  (test-equal "repository-is-bare?"
+  (test-equal "repository-bare?"
     #f
     (let* ((repository (repository-open directory))
-           (bare? (repository-is-bare? repository)))
+           (bare? (repository-bare? repository)))
       bare?))
-  (test-equal "repository-is-shallow?"
+  (test-equal "repository-shallow?"
     #f
     (let* ((repository (repository-open directory))
-           (shallow? (repository-is-shallow? repository)))
+           (shallow? (repository-shallow? repository)))
       shallow?))
 
   (test-equal "repository-directory"
@@ -59,7 +59,7 @@
   (test-equal "repository-is-bare?"
     #t
     (let* ((repository (repository-open directory))
-           (bare? (repository-is-bare? repository)))
+           (bare? (repository-bare? repository)))
       bare?)))
 
 (libgit2-shutdown!)
