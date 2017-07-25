@@ -296,9 +296,13 @@ Returns the repository or throws an error if no repository could be found."
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_state_cleanup
 
-(define repository-workdir
+(define repository-working-directory
   (let ((proc (libgit2->procedure '* "git_repository_workdir" '(*))))
     (lambda (repository)
-      (pointer->string (proc (repository->pointer repository))))))
+      "Returns the working directory for REPOSITORY or #f if REPOSITORY is
+a bare repository."
+      (let ((dir (proc (repository->pointer repository))))
+        (and (not (null-pointer? dir))
+             (pointer->string dir))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_wrap_odb
