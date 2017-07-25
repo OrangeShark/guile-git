@@ -191,6 +191,20 @@ Return @code{#t} if @var{repository} is a shallow clone and
 truncated history created from cloning a repository with a depth.
 @end deffn
 
+@deffn {Scheme Procedure} openable-repository? directory
+Return @code{#t} if @var{directory} is a git repository and may be
+opened by procedures like @code{repository-open}.
+@end deffn
+
+@deffn {Scheme Procedure} repository-directory repository
+Return the @code{.git} directory for @var{repository}.
+@end deffn
+
+@deffn {Scheme Procedure} repository-working-directory repository
+Return the working directory for @var{repository} or @code{#f} if
+@var{repository} is a bare repository.
+@end deffn
+
 @node git-clone
 @section Clone
 
