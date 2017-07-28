@@ -114,7 +114,7 @@
       (case (proc (repository->pointer repository))
         ((0) #f)
         ((1) #t)
-        (else => (lambda (code) (throw 'git-error code)))))))
+        (else => (lambda (code) (raise-git-error code)))))))
 
 (define repository-head-unborn?
   (let ((proc (libgit2->procedure int "git_repository_head_unborn" '(*))))
@@ -122,7 +122,7 @@
       (case (proc (repository->pointer repository))
         ((0) #f)
         ((1) #t)
-        (else => (lambda (code) (throw 'git-error code)))))))
+        (else => (lambda (code) (raise-git-error code)))))))
 
 (define repository-ident
   (let ((proc (libgit2->procedure* "git_repository_ident" '(* * *))))

@@ -1,7 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2016, 2017 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -25,8 +25,10 @@
   #:use-module (srfi srfi-1)
   #:use-module (git config)
   #:use-module (git types)
+  #:use-module (git structs)
   #:export (libgit2
             libgit2->procedure
+            raise-git-error
             libgit2->procedure*
             make-buffer
             free-buffer
@@ -49,12 +51,22 @@
 (define (libgit2->procedure return name params)
   (pointer->procedure return (dynamic-func name libgit2) params))
 
+(define last-git-error
+  (let ((proc (libgit2->procedure '* "giterr_last" '())))
+    (lambda (code)
+      "Return a <git-error> structure representing the last error, or #f."
+      (pointer->git-error (proc) code))))
+
+(define (raise-git-error code)
+  "Raise a 'git-error' exception for the given code."
+  (throw 'git-error (last-git-error code)))
+
 (define-inlinable (libgit2->procedure* name params)
   (let ((proc (libgit2->procedure int name params)))
     (lambda args
       (let ((ret (apply proc args)))
         (unless (zero? ret)
-          (throw 'git-error ret))))))
+          (raise-git-error ret))))))
 
 ;;; git-buf
 

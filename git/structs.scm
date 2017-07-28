@@ -30,7 +30,7 @@
                                            pointer->string))
   #:use-module (bytestructures guile)
   #:use-module (ice-9 match)
-  #:export (git-error? git-error-message git-error-class pointer->git-error
+  #:export (git-error? git-error-code git-error-message git-error-class pointer->git-error
             time->pointer pointer->time time-time time-offset
             signature->pointer pointer->signature signature-name signature-email signature-when
             oid? oid->pointer pointer->oid make-oid-pointer oid=?
@@ -197,8 +197,9 @@
                     (32768 conflicted))))
 
 (define-record-type <git-error>
-  (%make-git-error message class)
+  (%make-git-error code message class)
   git-error?
+  (code    git-error-code)
   (message git-error-message)
   (class   git-error-class))
 
@@ -234,11 +235,12 @@
   status-options?
   (bytestructure status-options-bytestructure))
 
-(define (pointer->git-error pointer)
+(define* (pointer->git-error pointer code)
   (if (null-pointer? pointer)
       #f
       (let ((bs (pointer->bytestructure pointer %error)))
-        (%make-git-error (pointer->string
+        (%make-git-error code
+                         (pointer->string
                           (make-pointer (bytestructure-ref bs 'message)))
                          (bytestructure-ref bs 'class)))))
 

@@ -38,8 +38,7 @@
         (clear-git-error!)
         (repository-open "/does/not/exist"))
       (lambda (key err)
-        (let ((last (last-git-error)))
-          (list err (git-error-class last))))))
+        (list (git-error-code err) (git-error-class err)))))
 
   (test-equal "repository-bare?"
     #f

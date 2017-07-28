@@ -82,8 +82,8 @@
             GITERR_FILESYSTEM
             GITERR_PATCH
 
-            last-git-error
-            clear-git-error!))
+            clear-git-error!)
+  #:re-export (raise-git-error))
 
 ;; Error codes, classes, and functions defined in <git2/errors.h>.
 
@@ -155,12 +155,6 @@
 (define GITERR_FILESYSTEM 30)
 (define GITERR_PATCH 31)
 
-
-(define last-git-error
-  (let ((proc (libgit2->procedure '* "giterr_last" '())))
-    (lambda ()
-      "Return a <git-error> structure representing the last error, or #f."
-      (pointer->git-error (proc)))))
 
 (define clear-git-error!
   (let ((proc (libgit2->procedure void "giterr_clear" '())))

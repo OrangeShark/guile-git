@@ -79,7 +79,7 @@
       (case (proc (reference->pointer branch))
         ((0) #f)
         ((1) #t)
-        (else => (lambda (code) (throw 'git-error code)))))))
+        (else => (lambda (code) (raise-git-error code)))))))
 
 (define %branch-iterator-free (dynamic-func "git_branch_iterator_free" libgit2))
 

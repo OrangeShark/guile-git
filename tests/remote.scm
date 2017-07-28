@@ -25,8 +25,7 @@
           (clear-git-error!)
           (remote-lookup repository "does-not-exist")))
       (lambda (key err)
-        (let ((last (last-git-error)))
-          (list err (git-error-class last)))))))
+        (list (git-error-code err) (git-error-class err))))))
 
 (libgit2-shutdown!)
 
