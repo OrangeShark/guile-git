@@ -3,7 +3,10 @@ AC_INIT([Guile-Git], [0.1], [], [], [https://gitlab.com/guile-git/guile-git/])
 AC_CONFIG_SRCDIR(git)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign color-tests])
+
+dnl Enable silent rules by default.
+AM_SILENT_RULES([yes])
 
 GUILE_PKG([2.2 2.0])
 GUILE_PROGS
