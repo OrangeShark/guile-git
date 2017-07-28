@@ -30,7 +30,8 @@
                                            pointer->string))
   #:use-module (bytestructures guile)
   #:use-module (ice-9 match)
-  #:export (time->pointer pointer->time time-time time-offset
+  #:export (git-error? git-error-message git-error-class pointer->git-error
+            time->pointer pointer->time time-time time-offset
             signature->pointer pointer->signature signature-name signature-email signature-when
             oid? oid->pointer pointer->oid make-oid-pointer oid=?
 
@@ -133,6 +134,10 @@
 
 ;;; git status options
 
+(define %error
+  (bs:struct `((message ,(bs:pointer uint8))
+               (class   ,int))))
+
 (define %strarray
   (bs:struct `((strings ,(bs:pointer
                           (bs:pointer uint8)))
@@ -191,6 +196,12 @@
                     (16384 ignored)
                     (32768 conflicted))))
 
+(define-record-type <git-error>
+  (%make-git-error message class)
+  git-error?
+  (message git-error-message)
+  (class   git-error-class))
+
 (define-record-type <diff-file>
   (%make-diff-file oid path size flags mode id-abbrev)
   diff-file?
@@ -222,6 +233,14 @@
   (%make-status-options bytestructure)
   status-options?
   (bytestructure status-options-bytestructure))
+
+(define (pointer->git-error pointer)
+  (if (null-pointer? pointer)
+      #f
+      (let ((bs (pointer->bytestructure pointer %error)))
+        (%make-git-error (pointer->string
+                          (make-pointer (bytestructure-ref bs 'message)))
+                         (bytestructure-ref bs 'class)))))
 
 (define (make-status-options)
   (%make-status-options (bytestructure %status-options)))

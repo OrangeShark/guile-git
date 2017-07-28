@@ -31,6 +31,16 @@
            (empty? (repository-empty? repository)))
       empty?))
 
+  (test-equal "repository-open, non-existent file"
+    (list GIT_ENOTFOUND GITERR_OS)
+    (catch 'git-error
+      (lambda ()
+        (clear-git-error!)
+        (repository-open "/does/not/exist"))
+      (lambda (key err)
+        (let ((last (last-git-error)))
+          (list err (git-error-class last))))))
+
   (test-equal "repository-bare?"
     #f
     (let* ((repository (repository-open directory))

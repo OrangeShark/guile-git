@@ -15,7 +15,18 @@
     "origin"
     (let* ((repository (repository-open directory))
            (remote (remote-lookup repository "origin")))
-      (remote-name remote))))
+      (remote-name remote)))
+
+  (test-equal "remote lookup, not found"
+    (list GIT_ENOTFOUND GITERR_CONFIG)
+    (catch 'git-error
+      (lambda ()
+        (let ((repository (repository-open directory)))
+          (clear-git-error!)
+          (remote-lookup repository "does-not-exist")))
+      (lambda (key err)
+        (let ((last (last-git-error)))
+          (list err (git-error-class last)))))))
 
 (libgit2-shutdown!)
 

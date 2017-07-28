@@ -27,6 +27,7 @@
         (git branch)
         (git clone)
         (git commit)
+        (git errors)
         (git oid)
         (git reference)
         (git repository)
