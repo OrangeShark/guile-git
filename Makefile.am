@@ -22,6 +22,7 @@ SOURCES =                           \
   git/repository.scm                \
   git/reset.scm	                    \
   git/remote.scm                    \
+  git/settings.scm                  \
   git/status.scm                    \
   git/structs.scm                   \
   git/tag.scm                       \

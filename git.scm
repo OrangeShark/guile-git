@@ -32,6 +32,7 @@
         (git repository)
         (git reset)
         (git remote)
+        (git settings)
         (git status)
         (git structs)
         (git tag)
