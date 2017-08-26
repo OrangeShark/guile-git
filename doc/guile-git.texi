@@ -118,7 +118,7 @@ The procedure cleans up the global state of libgit2 created by
 
 @menu
 * Repository: git repository.   Creating and opening repositories.
-* Clone: git-clone.             Cloning git repositories.
+* Clone: git clone.             Cloning git repositories.
 * Status: git-status.           Git status.
 * Checkout: git-checkout.       Git checkout.
 @end menu
@@ -205,8 +205,13 @@ Return the working directory for @var{repository} or @code{#f} if
 @var{repository} is a bare repository.
 @end deffn
 
-@node git-clone
+@node git clone
 @section Clone
+
+@deffn {Scheme Procedure} clone url directory
+Return a repository by cloning a remote git repository found at
+@var{url} into @var{directory} or throws an error.
+@end deffn
 
 @node git-status
 @section Status

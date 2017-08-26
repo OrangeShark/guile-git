@@ -29,9 +29,12 @@
 
 (define clone
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
-    (lambda (url local-path)
+    (lambda (url directory)
+      "Clones a remote repository found at URL into DIRECTORY.
+
+Returns the repository on success or throws an error on failure."
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer url) (string->pointer local-path) %null-pointer)
+        (proc out (string->pointer url) (string->pointer directory) %null-pointer)
         (pointer->repository! (dereference-pointer out))))))
 
 ;;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/clone/git_clone_init_options
