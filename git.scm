@@ -33,6 +33,7 @@
         (git repository)
         (git reset)
         (git remote)
+        (git rev-parse)
         (git settings)
         (git status)
         (git structs)

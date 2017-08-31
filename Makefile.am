@@ -23,6 +23,7 @@ SOURCES =                           \
   git/repository.scm                \
   git/reset.scm	                    \
   git/remote.scm                    \
+  git/rev-parse.scm                 \
   git/settings.scm                  \
   git/status.scm                    \
   git/structs.scm                   \
@@ -51,6 +52,7 @@ TESTS =                                         \
   tests/repository.scm                          \
   tests/reset.scm                               \
   tests/remote.scm                              \
+  tests/rev-parse.scm                           \
   tests/status.scm                              \
   tests/tree.scm
 
