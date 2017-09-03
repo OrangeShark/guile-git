@@ -48,11 +48,13 @@
 
 (define remote-fetch
   (let ((proc (libgit2->procedure* "git_remote_fetch" '(* * * *))))
-    (lambda* (remote #:key (reflog-message "") (fetch-options %null-pointer))
+    (lambda* (remote #:key (reflog-message "") (fetch-options #f))
       (proc (remote->pointer remote)
             ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_strarray
             %null-pointer
-            (fetch-options->pointer fetch-options)
+            (if fetch-options
+                (fetch-options->pointer fetch-options)
+                %null-pointer)
             (string->pointer reflog-message)))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/reset/git_reset_default
