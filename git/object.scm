@@ -92,13 +92,13 @@
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_peel
 
 (define object-short-id
-  (let ((proc (libgit2->procedure* "git_object_short_id" '(*))))
+  (let ((proc (libgit2->procedure* "git_object_short_id" '(* *))))
     (lambda (object)
       (let ((out (make-buffer)))
         (proc out (object->pointer object))
         (let ((out* (buffer-content/string out)))
           (free-buffer out)
-          out)))))
+          out*)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_string2type
 
