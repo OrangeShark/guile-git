@@ -16,6 +16,7 @@ SOURCES =                           \
   git/clone.scm                     \
   git/commit.scm                    \
   git/config.scm                    \
+  git/cred.scm                      \
   git/errors.scm                    \
   git/oid.scm                       \
   git/object.scm                    \
