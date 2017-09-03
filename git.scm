@@ -28,6 +28,7 @@
         (git clone)
         (git commit)
         (git errors)
+        (git fetch)
         (git oid)
         (git reference)
         (git repository)
