@@ -41,7 +41,10 @@
 
             status-entry? status-entry-status status-entry-head-to-index status-entry-index-to-workdir pointer->status-entry
 
-            make-status-options status-options->pointer set-status-options-show! set-status-options-flags!))
+            make-status-options status-options->pointer set-status-options-show! set-status-options-flags!
+
+            make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
+            set-fetch-options-callbacks! set-remote-callbacks-credentials!))
 
 
 ;;; bytestructures helper
@@ -289,3 +292,58 @@
       (make-pointer (bytestructure-ref bs 'head-to-index)))
      (pointer->diff-delta
       (make-pointer (bytestructure-ref bs 'index-to-workdir))))))
+
+;; git fetch options
+
+(define %remote-callbacks
+  (bs:struct `((version ,unsigned-int)
+               (sideband-progress ,(bs:pointer uint8))
+               (completion ,(bs:pointer uint8))
+               (credentials ,(bs:pointer uint8))
+               (certificate-check ,(bs:pointer uint8))
+               (transfer-progress ,(bs:pointer uint8))
+               (update-tips ,(bs:pointer uint8))
+               (pack-progress ,(bs:pointer uint8))
+               (push-transfer-progress ,(bs:pointer uint8))
+               (push-update-reference ,(bs:pointer uint8))
+               (push-negotiation ,(bs:pointer uint8))
+               (transport ,(bs:pointer uint8))
+               (payload ,(bs:pointer uint8)))))
+
+(define %proxy-options
+  (bs:struct `((version ,int)
+               (type ,int)
+               (url ,(bs:pointer uint8))
+               (credentials ,(bs:pointer uint8))
+               (certificate-check ,(bs:pointer uint8))
+               (payload ,(bs:pointer uint8)))))
+
+(define %fetch-options
+  (bs:struct `((version ,int)
+               (callbacks ,%remote-callbacks)
+               (prune ,int)
+               (update-fetchhead ,int)
+               (download-tags ,int)
+               (proxy-opts ,%proxy-options)
+               (custom-headers ,%strarray))))
+
+(define-record-type <fetch-options>
+  (%make-fetch-options bytestructure)
+  fetch-options?
+  (bytestructure fetch-options-bytestructure))
+
+(define (make-fetch-options)
+  (%make-fetch-options (bytestructure %fetch-options)))
+
+(define (fetch-options->pointer fetch-options)
+  (bytestructure->pointer (fetch-options-bytestructure fetch-options)))
+
+(define (fetch-options-callbacks fetch-options)
+  (bytestructure-ref (fetch-options-bytestructure fetch-options) 'callbacks))
+
+(define (set-fetch-options-callbacks! fetch-options callbacks)
+  (bytestructure-set! (fetch-options-bytestructure fetch-options)
+                      'callbacks callbacks))
+
+(define (set-remote-callbacks-credentials! callbacks credentials)
+  (bytestructure-set! callbacks 'credentials credentials))

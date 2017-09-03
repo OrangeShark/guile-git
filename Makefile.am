@@ -18,6 +18,7 @@ SOURCES =                           \
   git/config.scm                    \
   git/cred.scm                      \
   git/errors.scm                    \
+  git/fetch.scm                     \
   git/oid.scm                       \
   git/object.scm                    \
   git/reference.scm                 \
