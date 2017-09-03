@@ -20,6 +20,7 @@
   #:use-module (srfi srfi-9 gnu)
   #:use-module (system foreign)
   #:use-module (git bindings)
+  #:use-module (git structs)
   #:use-module (git types)
   #:export (remote-name
             remote-lookup
@@ -47,12 +48,11 @@
 
 (define remote-fetch
   (let ((proc (libgit2->procedure* "git_remote_fetch" '(* * * *))))
-    (lambda* (remote #:optional (reflog-message ""))
+    (lambda* (remote #:key (reflog-message "") (fetch-options %null-pointer))
       (proc (remote->pointer remote)
             ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_strarray
             %null-pointer
-            ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_fetch_options
-            %null-pointer
+            (fetch-options->pointer fetch-options)
             (string->pointer reflog-message)))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/reset/git_reset_default
