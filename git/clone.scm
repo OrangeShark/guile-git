@@ -21,21 +21,32 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
+  #:use-module (git structs)
   #:use-module (git types)
   #:use-module (git repository)
-  #:export (clone))
+  #:export (clone
+            clone-init-options))
 
 ;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
 
+(define CLONE-OPTIONS-VERSION 1)
+
 (define clone
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
-    (lambda (url directory)
+    (lambda* (url directory #:optional (clone-options %null-pointer))
       "Clones a remote repository found at URL into DIRECTORY.
 
 Returns the repository on success or throws an error on failure."
       (let ((out (make-double-pointer)))
-        (proc out (string->pointer url) (string->pointer directory) %null-pointer)
+        (proc out
+              (string->pointer url)
+              (string->pointer directory)
+              (clone-options->pointer clone-options))
         (pointer->repository! (dereference-pointer out))))))
 
-;;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/clone/git_clone_init_options
-
+(define clone-init-options
+  (let ((proc (libgit2->procedure* "git_clone_init_options" `(* ,unsigned-int))))
+    (lambda ()
+      (let ((clone-options (make-clone-options)))
+        (proc (clone-options->pointer clone-options) CLONE-OPTIONS-VERSION)
+        clone-options))))

@@ -44,7 +44,9 @@
             make-status-options status-options->pointer set-status-options-show! set-status-options-flags!
 
             make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
-            set-fetch-options-callbacks! set-remote-callbacks-credentials!))
+            set-fetch-options-callbacks! set-remote-callbacks-credentials!
+
+            make-clone-options clone-options->pointer clone-options-fetch-options))
 
 
 ;;; bytestructures helper
@@ -347,3 +349,54 @@
 
 (define (set-remote-callbacks-credentials! callbacks credentials)
   (bytestructure-set! callbacks 'credentials credentials))
+
+;; git clone options
+
+(define %checkout-options
+  (bs:struct `((version ,unsigned-int)
+               (checkout-strategy ,unsigned-int)
+               (disable-filters ,int)
+               (dir-mode ,unsigned-int)
+               (file-mode ,unsigned-int)
+               (file-open-flags ,int)
+               (notify-flags ,unsigned-int)
+               (notify-cb ,(bs:pointer uint8))
+               (notify-payload ,(bs:pointer uint8))
+               (progress-cb ,(bs:pointer uint8))
+               (progress-payload ,(bs:pointer uint8))
+               (paths ,%strarray)
+               (baseline ,(bs:pointer uint8))
+               (baseline-index ,(bs:pointer uint8))
+               (target-directory ,(bs:pointer uint8))
+               (ancestor-label ,(bs:pointer uint8))
+               (our-label ,(bs:pointer uint8))
+               (their-label ,(bs:pointer uint8))
+               (perfdata-cb ,(bs:pointer uint8))
+               (perfdata-payload ,(bs:pointer uint8)))))
+
+(define %clone-options
+  (bs:struct `((version ,int)
+               (checkout-opts ,%checkout-options)
+               (fetch-opts ,%fetch-options)
+               (bare ,int)
+               (local ,int)
+               (checkout-branch ,(bs:pointer uint8))
+               (repository-cb ,(bs:pointer uint8))
+               (repository-cb-payload ,(bs:pointer uint8))
+               (remote-cb ,(bs:pointer uint8))
+               (remote-cb-payload ,(bs:pointer uint8)))))
+
+(define-record-type <clone-options>
+  (%make-clone-options bytestructure)
+  clone-options?
+  (bytestructure clone-options-bytestructure))
+
+(define (make-clone-options)
+  (%make-clone-options (bytestructure %clone-options)))
+
+(define (clone-options->pointer clone-options)
+  (bytestructure->pointer (clone-options-bytestructure clone-options)))
+
+(define (clone-options-fetch-options clone-options)
+  (%make-fetch-options
+   (bytestructure-ref (clone-options-bytestructure clone-options) 'fetch-opts)))
