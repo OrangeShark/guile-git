@@ -46,7 +46,7 @@
     (lambda* (directory #:optional file)
       "Search for TLS certificates under FILE (a certificate bundle) or under
 DIRECTORY (a directory containing one file per certificate, with \"hash
-symlinks\" as created by OpenSSL's 'c_rehash').  Either or both can be #f.
+symlinks\" as created by OpenSSL's 'c_rehash').  Either can be #f but not both.
 This is used when transferring from a repository over HTTPS."
       (proc GIT_OPT_SET_SSL_CERT_LOCATIONS
             (if file (string->pointer file) %null-pointer)
