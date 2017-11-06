@@ -72,7 +72,7 @@
     (lambda (reference obj-type)
       (let ((out (make-double-pointer)))
         (proc out (reference->pointer reference) obj-type)
-        (pointer->object (dereference-pointer out))))))
+        (pointer->object! (dereference-pointer out))))))
 
 (define %reference-free (dynamic-func "git_reference_free" libgit2))
 

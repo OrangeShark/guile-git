@@ -201,7 +201,7 @@ Returns a repository or throws an error if no repository could be found."
         (proc out (string->pointer directory))
         (pointer->repository! (dereference-pointer out))))))
 
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_baer
+;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_open_bare
 
 (define REPOSITORY_OPEN_NO_SEARCH (ash #b1 0))
 (define REPOSITORY_OPEN_CROSS_FS  (ash #b1 1))

@@ -31,4 +31,4 @@
     (lambda (repository spec)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (string->pointer spec))
-        (pointer->object (dereference-pointer out))))))
+        (pointer->object! (dereference-pointer out))))))

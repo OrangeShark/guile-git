@@ -34,7 +34,8 @@
             free-buffer
             buffer-content
             buffer-content/string
-            make-path))
+            make-path
+            pointer->object!))
 
 ;; DRAFT!
 
@@ -149,6 +150,12 @@
       (rev (make-double-pointer)))
         (proc major minor rev)
         (map (compose pointer-address dereference-pointer) (list major minor rev))))))
+
+(define %object-free (dynamic-func "git_object_free" libgit2))
+
+(define (pointer->object! pointer)
+  (set-pointer-finalizer! pointer %object-free)
+  (pointer->object pointer))
 
 ;;; FIXME: mempack https://libgit2.github.com/libgit2/#HEAD/group/mempack
 

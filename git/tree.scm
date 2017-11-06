@@ -121,7 +121,7 @@
     (lambda (repository entry)
       (let ((out (make-double-pointer)))
         (proc out (repository->pointer repository) (tree-entry->pointer entry))
-        (pointer->object (dereference-pointer out))))))
+        (pointer->object! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_type
 

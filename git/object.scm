@@ -1,7 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2016, 2017 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -60,12 +60,7 @@
     (lambda (object)
       (let ((out (make-double-pointer)))
         (proc out (object->pointer object))
-        (pointer->object (dereference-pointer out))))))
-
-(define object-free
-  (let ((proc (libgit2->procedure void "git_object_free" '(*))))
-    (lambda (object)
-      (proc (object->pointer object)))))
+        (pointer->object! (dereference-pointer out))))))
 
 (define object-id
   (let ((proc (libgit2->procedure '* "git_object_id" '(*))))
@@ -78,7 +73,7 @@
       (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
         (proc out (repository->pointer repository) (oid->pointer oid)
               type)
-        (pointer->object (dereference-pointer out))))))
+        (pointer->object! (dereference-pointer out))))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
 
