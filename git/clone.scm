@@ -33,7 +33,7 @@
 
 (define clone
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
-    (lambda* (url directory #:optional (clone-options %null-pointer))
+    (lambda* (url directory #:optional (clone-options (clone-init-options)))
       "Clones a remote repository found at URL into DIRECTORY.
 
 Returns the repository on success or throws an error on failure."
