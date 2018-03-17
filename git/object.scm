@@ -1,7 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2016, 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -37,6 +37,7 @@
             OBJ-REF-DELTA
             object-id
             object-lookup
+            object-lookup-prefix
             object-owner
             object-short-id
             object-type))
@@ -75,9 +76,16 @@
               type)
         (pointer->object! (dereference-pointer out))))))
 
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
+(define object-lookup-prefix
+  (let ((proc (libgit2->procedure* "git_object_lookup_prefix"
+                                   `(* * * ,size_t ,int))))
+    (lambda* (repository oid length #:optional (type OBJ-ANY))
+      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
+        (proc out (repository->pointer repository) (oid->pointer oid)
+              length type)
+        (pointer->object! (dereference-pointer out))))))
 
-;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_prefix
+;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
 
 (define object-owner
   (let ((proc (libgit2->procedure '* "git_object_owner" '(*))))
