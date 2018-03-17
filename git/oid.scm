@@ -52,13 +52,11 @@
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromraw
 
 (define string->oid
-  (let ((proc (libgit2->procedure* "git_oid_fromstr" '(* *))))
+  (let ((proc (libgit2->procedure* "git_oid_fromstrn" `(* * ,size_t))))
     (lambda (str)
       (let ((out (make-oid-pointer)))
-        (proc out (string->pointer str))
+        (proc out (string->pointer str "US-ASCII") (string-length str))
         (pointer->oid out)))))
-
-;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrn
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrp
 
