@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2018 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -41,6 +42,7 @@
             repository-open
             repository-open-ext
             openable-repository?
+            repository-close!
             repository-directory
             repository-refdb
             repository-set-ident
@@ -247,6 +249,14 @@ Returns the repository or throws an error if no repository could be found."
           (proc %null-pointer (string->pointer directory) REPOSITORY_OPEN_NO_SEARCH %null-pointer)
           #t)
         (lambda _ #f)))))
+
+(define repository-close!
+  (let ((proc (libgit2->procedure void "git_repository__cleanup" '(*))))
+    (lambda (repository)
+      "Explicitly free resources associated with REPOSITORY---file
+descriptors, mmap'd memory, etc.---without freeing REPOSITORY itself.  The
+return value is unspecified."
+      (proc (repository->pointer repository)))))
 
 (define repository-directory
   (let ((proc (libgit2->procedure '* "git_repository_path" '(*))))

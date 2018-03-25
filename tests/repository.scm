@@ -1,9 +1,15 @@
 (define-module (tests repository)
+  #:use-module (git)
+  #:use-module (tests helpers)
+  #:use-module ((ice-9 ftw) #:select (scandir))
   #:use-module (srfi srfi-64))
 
-(use-modules (tests helpers))
-(use-modules (git))
 
+(define %top-srcdir
+  (canonicalize-path (dirname (search-path %load-path "git.scm"))))
+
+(define %top-git-directory
+  (string-append %top-srcdir "/.git"))
 
 (test-begin "repository")
 
@@ -61,7 +67,26 @@
     (canonicalize-path (string-append directory "/.git"))
     (let ((path (repository-discover
                  (string-append directory "/directory"))))
-      (string-trim-right path #\/))))
+      (string-trim-right path #\/)))
+
+  (unless (and (string-suffix? "-linux-gnu" %host-type)
+               (file-exists? %top-git-directory))
+    (test-skip 1))
+  (test-assert "repository-close!"
+    ;; Make sure 'repository-close!' closes file descriptors associated with
+    ;; the repo.  For this test, we need a big enough repo, where libgit2
+    ;; typically keeps open file descriptors for the 'pack' files.
+    (let* ((fd-before  (length (scandir "/proc/self/fd")))
+           (repository (repository-open %top-srcdir))
+           (commits    (fold-commits (lambda (commit count)
+                                       (+ 1 count))
+                                     0
+                                     repository))
+           (fd-after   (length (scandir "/proc/self/fd"))))
+      (pk 'file-descriptors fd-before fd-after)
+      (repository-close! repository)
+      (<= (pk 'after-close (length (scandir "/proc/self/fd")))
+          fd-before))))
 
 (with-repository "simple-bare" directory
 
