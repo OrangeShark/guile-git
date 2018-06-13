@@ -3,6 +3,7 @@
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -43,6 +44,7 @@
 
             make-status-options status-options->pointer set-status-options-show! set-status-options-flags!
 
+            make-remote-callbacks remote-callbacks->pointer set-remote-callbacks-version!
             make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
@@ -311,6 +313,20 @@
                (push-negotiation ,(bs:pointer uint8))
                (transport ,(bs:pointer uint8))
                (payload ,(bs:pointer uint8)))))
+
+(define-record-type <remote-callbacks>
+  (%make-remote-callbacks bytestructure)
+  remote-callbacks?
+  (bytestructure remote-callbacks-bytestructure))
+
+(define (make-remote-callbacks)
+  (%make-remote-callbacks (bytestructure %remote-callbacks)))
+
+(define (remote-callbacks->pointer remote-callbacks)
+  (bytestructure->pointer (remote-callbacks-bytestructure remote-callbacks)))
+
+(define (set-remote-callbacks-version! remote-callbacks version)
+  (bytestructure-set! (remote-callbacks-bytestructure remote-callbacks) 'version version))
 
 (define %proxy-options
   (bs:struct `((version ,int)
