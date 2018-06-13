@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -44,6 +45,8 @@
             tag? pointer->tag tag->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
+            pointer->size_t
+            make-size_t-pointer
             make-double-pointer))
 
 
@@ -97,3 +100,12 @@
 
 (define (make-double-pointer)
   (bytevector->pointer (make-bytevector (sizeof '*))))
+
+(define (make-size_t-pointer)
+  (bytevector->pointer (make-bytevector (sizeof size_t))))
+
+(define (pointer->size_t ptr)
+  (bytevector-uint-ref (pointer->bytevector ptr (sizeof size_t))
+                       0
+                       (endianness little)
+                       (sizeof size_t)))
