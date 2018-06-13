@@ -28,7 +28,9 @@
                                            bytevector->pointer
                                            make-pointer
                                            pointer->bytevector
-                                           pointer->string))
+                                           pointer->string
+                                           sizeof
+                                           dereference-pointer))
   #:use-module (bytestructures guile)
   #:use-module (ice-9 match)
   #:export (git-error? git-error-code git-error-message git-error-class pointer->git-error
@@ -48,7 +50,8 @@
             make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
-            make-clone-options clone-options->pointer clone-options-fetch-options))
+            make-clone-options clone-options->pointer clone-options-fetch-options
+            remote-head? remote-head-local remote-head-oid remote-head-loid remote-head-name pointer->remote-head pointer->remote-head-list))
 
 
 ;;; bytestructures helper
@@ -416,3 +419,49 @@
 (define (clone-options-fetch-options clone-options)
   (%make-fetch-options
    (bytestructure-ref (clone-options-bytestructure clone-options) 'fetch-opts)))
+
+;; git remote head
+
+(define %remote-head
+  (bs:struct `((local ,int)
+               (oid ,(bs:vector GIT-OID-RAWSZ uint8))
+               (loid ,(bs:vector GIT-OID-RAWSZ uint8))
+               (name ,(bs:pointer uint8))
+               (symref-target ,(bs:pointer uint8)))))
+
+(define-record-type <remote-head>
+  (%make-remote-head local oid loid name symref-target)
+  remote-head?
+  (local remote-head-local)
+  (oid remote-head-oid)
+  (loid remote-head-loid)
+  (name remote-head-name)
+  (symref-target remote-head-symref-target))
+
+(define (pointer->remote-head pointer)
+  (if (null-pointer? pointer)
+      #f
+      (let ((bs (pointer->bytestructure pointer %remote-head)))
+        (%make-remote-head
+         (bytestructure-ref bs 'local)
+         (%make-oid (bytestructure-bytevector (bytestructure-ref bs 'oid)))
+         (%make-oid (bytestructure-bytevector (bytestructure-ref bs 'loid)))
+         (pointer->string (make-pointer (bytestructure-ref bs 'name)))
+         (bytestructure-ref bs 'symref-target)))))
+
+(define (pointer->pointer-list ptr length)
+  (let ((size (sizeof '*)))
+    (let ((main (pointer->bytevector ptr (* size length))))
+        (let loop ((count 0)
+                   (acc '()))
+          (if (= count length)
+              (reverse acc)
+              (let* ((offset (* count size))
+                     (next-ptr (bytevector->pointer main offset)))
+                (loop (+ count 1)
+                      (cons (dereference-pointer next-ptr) acc))))))))
+
+(define (pointer->remote-head-list ptr length)
+   (map pointer->remote-head
+        (pointer->pointer-list ptr length)))
+
