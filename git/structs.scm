@@ -3,6 +3,7 @@
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -27,7 +28,9 @@
                                            bytevector->pointer
                                            make-pointer
                                            pointer->bytevector
-                                           pointer->string))
+                                           pointer->string
+                                           sizeof
+                                           dereference-pointer))
   #:use-module (bytestructures guile)
   #:use-module (ice-9 match)
   #:export (git-error? git-error-code git-error-message git-error-class pointer->git-error
@@ -43,10 +46,12 @@
 
             make-status-options status-options->pointer set-status-options-show! set-status-options-flags!
 
+            make-remote-callbacks remote-callbacks->pointer set-remote-callbacks-version!
             make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
-            make-clone-options clone-options->pointer clone-options-fetch-options))
+            make-clone-options clone-options->pointer clone-options-fetch-options
+            remote-head? remote-head-local remote-head-oid remote-head-loid remote-head-name pointer->remote-head pointer->remote-head-list))
 
 
 ;;; bytestructures helper
@@ -312,6 +317,20 @@
                (transport ,(bs:pointer uint8))
                (payload ,(bs:pointer uint8)))))
 
+(define-record-type <remote-callbacks>
+  (%make-remote-callbacks bytestructure)
+  remote-callbacks?
+  (bytestructure remote-callbacks-bytestructure))
+
+(define (make-remote-callbacks)
+  (%make-remote-callbacks (bytestructure %remote-callbacks)))
+
+(define (remote-callbacks->pointer remote-callbacks)
+  (bytestructure->pointer (remote-callbacks-bytestructure remote-callbacks)))
+
+(define (set-remote-callbacks-version! remote-callbacks version)
+  (bytestructure-set! (remote-callbacks-bytestructure remote-callbacks) 'version version))
+
 (define %proxy-options
   (bs:struct `((version ,int)
                (type ,int)
@@ -400,3 +419,49 @@
 (define (clone-options-fetch-options clone-options)
   (%make-fetch-options
    (bytestructure-ref (clone-options-bytestructure clone-options) 'fetch-opts)))
+
+;; git remote head
+
+(define %remote-head
+  (bs:struct `((local ,int)
+               (oid ,(bs:vector GIT-OID-RAWSZ uint8))
+               (loid ,(bs:vector GIT-OID-RAWSZ uint8))
+               (name ,(bs:pointer uint8))
+               (symref-target ,(bs:pointer uint8)))))
+
+(define-record-type <remote-head>
+  (%make-remote-head local oid loid name symref-target)
+  remote-head?
+  (local remote-head-local)
+  (oid remote-head-oid)
+  (loid remote-head-loid)
+  (name remote-head-name)
+  (symref-target remote-head-symref-target))
+
+(define (pointer->remote-head pointer)
+  (if (null-pointer? pointer)
+      #f
+      (let ((bs (pointer->bytestructure pointer %remote-head)))
+        (%make-remote-head
+         (bytestructure-ref bs 'local)
+         (%make-oid (bytestructure-bytevector (bytestructure-ref bs 'oid)))
+         (%make-oid (bytestructure-bytevector (bytestructure-ref bs 'loid)))
+         (pointer->string (make-pointer (bytestructure-ref bs 'name)))
+         (bytestructure-ref bs 'symref-target)))))
+
+(define (pointer->pointer-list ptr length)
+  (let ((size (sizeof '*)))
+    (let ((main (pointer->bytevector ptr (* size length))))
+        (let loop ((count 0)
+                   (acc '()))
+          (if (= count length)
+              (reverse acc)
+              (let* ((offset (* count size))
+                     (next-ptr (bytevector->pointer main offset)))
+                (loop (+ count 1)
+                      (cons (dereference-pointer next-ptr) acc))))))))
+
+(define (pointer->remote-head-list ptr length)
+   (map pointer->remote-head
+        (pointer->pointer-list ptr length)))
+
