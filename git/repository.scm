@@ -47,7 +47,7 @@
             repository-refdb
             repository-set-ident
             repository-state
-            repository-workdir
+            repository-working-directory
             pointer->repository!))
 
 ;;; repository
