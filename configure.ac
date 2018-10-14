@@ -1,5 +1,5 @@
 
-AC_INIT([Guile-Git], [0.1.0], [], [], [https://gitlab.com/guile-git/guile-git/])
+AC_INIT([Guile-Git], [0.1.1], [], [], [https://gitlab.com/guile-git/guile-git/])
 AC_CONFIG_SRCDIR(git)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
