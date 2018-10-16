@@ -3,6 +3,13 @@
 Guile-Git is a GNU Guile library providing bindings to
 [libgit2](https://libgit2.org/).
 
+Copyright © 2016, 2017 Amirouche Boubekki
+Copyright © 2018 Erik Edrosa
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
 ## Documentation
 
 The documentation is currently a work in progress, so please read the
