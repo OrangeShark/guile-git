@@ -102,5 +102,6 @@ EXTRA_DIST +=                       \
   static/bg.png                     \
   static/main.css                   \
   static/normalize.css              \
+  static/README                     \
   $(TESTS)                          \
   $(TESTS_UTILS)
