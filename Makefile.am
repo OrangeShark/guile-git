@@ -1,5 +1,5 @@
 # Guile-Git --- GNU Guile bindings of libgit2
-# Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>#
+# Copyright © 2016-2018 Erik Edrosa <erik.edrosa@gmail.com>
 # Copyright © 2016, 2017 Amirouche Boubekki <amirouche@hypermove.net>
 # Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
@@ -65,7 +65,8 @@ SOURCES =                           \
 TESTS_UTILS =                                   \
   tests/helpers.scm                             \
   tests/data/simple-bare.tgz                    \
-  tests/data/simple.tgz
+  tests/data/simple.tgz                         \
+  tests/data/README
 
 TESTS =                                         \
   tests/branch.scm                              \

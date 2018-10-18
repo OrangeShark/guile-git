@@ -1,0 +1,15 @@
+These files contain git repositories to be used by Guile-Git's tests.
+
+simple.tgz
+Copyright © 2016 Amirouche Boubekki
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+simple-bare.tgz
+Copyright © 2017 Erik Edrosa
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
