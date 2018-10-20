@@ -98,11 +98,9 @@ include $(top_srcdir)/doc/local.mk
 EXTRA_DIST +=                       \
   README.md                         \
   pre-inst-env.in                   \
-  guix.scm                          \
   build-aux/test-driver.scm		  		\
   static/bg.png                     \
   static/main.css                   \
-  static/normalize.css              \
   static/README                     \
   $(TESTS)                          \
   $(TESTS_UTILS)

@@ -31,7 +31,6 @@
      (head
       (meta (@ (charset "utf-8")))
       (title ,title)
-      (link (@ (rel "stylesheet") (href "/static/normalize.css")))
       (link (@ (rel "stylesheet") (href "/static/main.css"))))
      (body (@ (class ,body-class))
            (div (h1 ,title))
