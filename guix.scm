@@ -1,4 +1,6 @@
-(use-modules ((guix licenses) #:select (lgpl3+))
+
+
+(use-modules ((guix licenses) #:select (gpl3+))
              (guix packages)
              (guix build-system gnu)
              (gnu packages autotools)
@@ -28,4 +30,4 @@
   (synopsis "Guile bindings for libgit2")
   (description "")
   (home-page "")
-  (license lgpl3+))
+  (license gpl3+))
