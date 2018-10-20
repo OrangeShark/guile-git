@@ -36,7 +36,6 @@ SOURCES =                           \
   git/cherrypick.scm                \
   git/clone.scm                     \
   git/commit.scm                    \
-  git/config.scm                    \
   git/cred.scm                      \
   git/errors.scm                    \
   git/fetch.scm                     \

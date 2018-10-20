@@ -44,6 +44,5 @@ AC_SUBST([LIBGIT2_LIBDIR])
 
 AC_CONFIG_FILES([Makefile git/config.scm])
 AC_CONFIG_FILES([pre-inst-env], [chmod +x pre-inst-env])
-AC_CONFIG_FILES([test-env], [chmod +x test-env])
 
 AC_OUTPUT
