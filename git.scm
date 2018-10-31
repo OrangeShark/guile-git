@@ -41,9 +41,13 @@
         (git tag)
         (git tree)))
 
-    (for-each (let ((i (module-public-interface (current-module))))
-                (lambda (m)
-                  (module-use! i (resolve-interface m))))
-              %public-modules)))
+    (let* ((current-module (current-module))
+          (current-module-interface (resolve-interface (module-name current-module))))
+      (for-each
+       (lambda (git-submodule)
+         (let ((git-submodule-interface (resolve-interface git-submodule)))
+           (module-use! current-module git-submodule-interface)
+           (module-use! current-module-interface git-submodule-interface)))
+       %public-modules))))
 
 (libgit2-init!)
