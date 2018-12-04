@@ -61,6 +61,9 @@ SOURCES =                           \
   git/web/config.scm                \
   git/web/repository.scm
 
+NODIST_SOURCES =                    \
+  git/config.scm
+
 TESTS_UTILS =                                   \
   tests/helpers.scm                             \
   tests/data/simple-bare.tgz                    \
