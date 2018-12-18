@@ -29,6 +29,7 @@
         (git commit)
         (git errors)
         (git fetch)
+        (git object)
         (git oid)
         (git reference)
         (git repository)
