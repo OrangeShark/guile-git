@@ -45,6 +45,7 @@
             tag? pointer->tag tag->pointer
             tree? pointer->tree tree->pointer
             tree-entry? pointer->tree-entry tree-entry->pointer
+            submodule? pointer->submodule submodule->pointer
             pointer->size_t
             make-size_t-pointer
             make-double-pointer))
@@ -95,6 +96,7 @@
 (define-libgit2-type tag)
 (define-libgit2-type tree)
 (define-libgit2-type tree-entry)
+(define-libgit2-type submodule)
 
 ;;; helpers
 

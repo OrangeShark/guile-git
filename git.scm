@@ -39,6 +39,7 @@
         (git settings)
         (git status)
         (git structs)
+        (git submodule)
         (git tag)
         (git tree)))
 
