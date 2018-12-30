@@ -41,9 +41,19 @@
 
 (define %submodule-free (dynamic-func "git_submodule_free" libgit2))
 
-(define (pointer->submodule! pointer)
+(define %submodule-owners
+  ;; This table maps <submodule> records to their "owner", usually a
+  ;; <repository> record.  This is used to ensure that the lifetime of the
+  ;; submodule is shorter than that of its owner so that 'submodule-owner'
+  ;; always returns a valid object.
+  (make-weak-key-hash-table))
+
+(define* (pointer->submodule! pointer #:optional owner)
   (set-pointer-finalizer! pointer %submodule-free)
-  (pointer->submodule pointer))
+  (let ((submodule (pointer->submodule pointer)))
+    (when owner
+      (hashq-set! %submodule-owners submodule owner))
+    submodule))
 
 (define submodule-map
   (let ((proc (libgit2->procedure* "git_submodule_foreach" '(* * *))))
@@ -106,7 +116,7 @@ on success and #f if NAME could not be found."
             (proc submodule
                   (repository->pointer repository)
                   (string->pointer name))
-            (pointer->submodule! (dereference-pointer submodule)))
+            (pointer->submodule! (dereference-pointer submodule) repository))
           (lambda (key error . rest)
             ;; For convenience return #f in the common case.
             (if (= GIT_ENOTFOUND (git-error-code error))
@@ -144,7 +154,7 @@ directory to the new repo."
               (string->pointer url)
               (string->pointer path)
               (if use-gitlink? 1 0))
-        (pointer->submodule! (dereference-pointer submodule))))))
+        (pointer->submodule! (dereference-pointer submodule) repository)))))
 
 (define submodule-add-finalize
   (let ((proc (libgit2->procedure* "git_submodule_add_finalize" '(*))))
