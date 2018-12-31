@@ -1,0 +1,36 @@
+                             -*- org -*-
+#+TITLE: Guile-Git NEWS - history of user-visible changes
+
+
+Copyright © 2018 Erik Edrosa
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.  This file is offered as-is,
+  without any warranty.
+
+* Changes in 0.2.0 (since 0.1.0)
+
+** New Functionality
+
+*** Add (git submodule) module
+
+Add some initial bindings to libgit2's submodule functions. These
+include ~git_submodule_name~, ~git_submodule_path~,
+~git_submodule_owner~, ~git_submodule_head_id~,
+~git_submodule_lookup~, ~git_submodule_init~, ~git_submodule_reload~,
+~git_submodule_add_setup~, ~git_submodule_add_finalize~,
+~git_submodule_add_to_index~, ~git_submodule_set_branch~, and
+~git_submodule_update~.
+
+** Bug fixes
+
+*** Fix experience in REPL
+
+When in the ~(git)~ module, you can use ~,use~ and ~,apropos~ in the
+Guile REPL to get module and bindings in the module.
+
+*** Correctly export ~repository-working-directory~
+
+~(git repository)~ was exporting the incorrectly named
+~repository-workdir~.
