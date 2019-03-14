@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -56,59 +57,52 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object__size
 
-(define object-dup
-  (let ((proc (libgit2->procedure* "git_object_dup" '(* *))))
-    (lambda (object)
-      (let ((out (make-double-pointer)))
-        (proc out (object->pointer object))
-        (pointer->object! (dereference-pointer out))))))
+(define (object-dup object)
+  (let ((proc (libgit2->procedure* "git_object_dup" '(* *)))
+        (out (make-double-pointer)))
+    (proc out (object->pointer object))
+    (pointer->object! (dereference-pointer out))))
 
-(define object-id
+(define (object-id object)
   (let ((proc (libgit2->procedure '* "git_object_id" '(*))))
-    (lambda (object)
-      (pointer->oid (proc (object->pointer object))))))
+    (pointer->oid (proc (object->pointer object)))))
 
-(define object-lookup
-  (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int))))
-    (lambda* (repository oid #:optional (type OBJ-ANY))
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-        (proc out (repository->pointer repository) (oid->pointer oid)
-              type)
-        (pointer->object! (dereference-pointer out))))))
+(define* (object-lookup repository oid #:optional (type OBJ-ANY))
+  (let ((proc (libgit2->procedure* "git_object_lookup" `(* * * ,int)))
+        (out (bytevector->pointer (make-bytevector (sizeof '*)))))
+    (proc out (repository->pointer repository) (oid->pointer oid)
+          type)
+    (pointer->object! (dereference-pointer out))))
 
-(define object-lookup-prefix
+(define* (object-lookup-prefix repository oid length #:optional (type OBJ-ANY))
   (let ((proc (libgit2->procedure* "git_object_lookup_prefix"
-                                   `(* * * ,size_t ,int))))
-    (lambda* (repository oid length #:optional (type OBJ-ANY))
-      (let ((out (bytevector->pointer (make-bytevector (sizeof '*)))))
-        (proc out (repository->pointer repository) (oid->pointer oid)
-              length type)
-        (pointer->object! (dereference-pointer out))))))
+                                   `(* * * ,size_t ,int)))
+        (out (bytevector->pointer (make-bytevector (sizeof '*)))))
+    (proc out (repository->pointer repository) (oid->pointer oid)
+          length type)
+    (pointer->object! (dereference-pointer out))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_lookup_bypath
 
-(define object-owner
+(define (object-owner object)
   (let ((proc (libgit2->procedure '* "git_object_owner" '(*))))
-    (lambda (object)
-      (pointer->repository (proc (object->pointer object))))))
+    (pointer->repository (proc (object->pointer object)))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_peel
 
-(define object-short-id
-  (let ((proc (libgit2->procedure* "git_object_short_id" '(* *))))
-    (lambda (object)
-      (let ((out (make-buffer)))
-        (proc out (object->pointer object))
-        (let ((out* (buffer-content/string out)))
-          (free-buffer out)
-          out*)))))
+(define (object-short-id object)
+  (let ((proc (libgit2->procedure* "git_object_short_id" '(* *)))
+        (out (make-buffer)))
+    (proc out (object->pointer object))
+    (let ((out* (buffer-content/string out)))
+      (free-buffer out)
+      out*)))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_string2type
 
-(define object-type
+(define (object-type object)
   (let ((proc (libgit2->procedure int "git_object_type" '(*))))
-    (lambda (object)
-      (proc (object->pointer object)))))
+    (proc (object->pointer object))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/object/git_object_type2string
 

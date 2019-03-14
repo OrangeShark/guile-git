@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2016, 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -46,17 +47,16 @@
           %null-pointer
           dirs))
 
-(define libgit2
+(define (libgit2)
   (dynamic-link %libgit2))
 
 (define (libgit2->procedure return name params)
-  (pointer->procedure return (dynamic-func name libgit2) params))
+  (pointer->procedure return (dynamic-func name (libgit2)) params))
 
-(define last-git-error
+(define (last-git-error code)
+  "Return a <git-error> structure representing the last error, or #f."
   (let ((proc (libgit2->procedure '* "giterr_last" '())))
-    (lambda (code)
-      "Return a <git-error> structure representing the last error, or #f."
-      (pointer->git-error (proc) code))))
+    (pointer->git-error (proc) code)))
 
 (define (raise-git-error code)
   "Raise a 'git-error' exception for the given code."
@@ -77,8 +77,9 @@
 (define (make-buffer)
   (make-c-struct %buffer-struct `(,%null-pointer 0 0)))
 
-(define free-buffer
-  (libgit2->procedure void "git_buf_free" '(*)))
+(define (free-buffer buffer)
+  (let ((proc (libgit2->procedure void "git_buf_free" '(*))))
+    (proc buffer)))
 
 (define (buffer-content buf)
   (match (parse-c-struct buf %buffer-struct)
@@ -97,20 +98,17 @@
 
 ;;; FIXME: diff https://libgit2.github.com/libgit2/#HEAD/group/diff
 
-(define diff-free
+(define (diff-free diff)
   (let ((proc (libgit2->procedure void "git_diff_free" '(*))))
-    (lambda (diff)
-      (proc (diff->pointer diff)))))
+    (proc (diff->pointer diff))))
 
-(define diff-get-delta
+(define (diff-get-delta diff)
   (let ((proc (libgit2->procedure '* "git_diff_get_delta" '(*))))
-    (lambda (diff)
-      (pointer->diff-delta (proc (diff->pointer diff))))))
+    (pointer->diff-delta (proc (diff->pointer diff)))))
 
-(define diff-num-deltas
+(define (diff-num-deltas diff)
   (let ((proc (libgit2->procedure size_t "git_diff_num_deltas" '(*))))
-    (lambda (diff)
-      (proc (diff->pointer diff)))))
+    (proc (diff->pointer diff))))
 
 ;;; FIXME: fetch https://libgit2.github.com/libgit2/#HEAD/group/fetch
 
@@ -130,31 +128,35 @@
 
 ;;; libgit2
 
-(define libgit2-features
-  (libgit2->procedure int "git_libgit2_features" '()))
+(define (libgit2-features)
+  (let ((proc (libgit2->procedure int "git_libgit2_features" '())))
+    (proc)))
 
-(define-public libgit2-init!
-  (libgit2->procedure int "git_libgit2_init" '()))
+(define-public (libgit2-init!)
+  (let ((proc (libgit2->procedure int "git_libgit2_init" '())))
+    (proc)))
 
-(define libgit2-opts
-  (libgit2->procedure int "git_libgit2_init" `(,int)))
+(define (libgit2-opts)
+  (let ((proc (libgit2->procedure int "git_libgit2_init" `(,int))))
+    (proc)))
 
-(define-public libgit2-shutdown!
-  (libgit2->procedure int "git_libgit2_shutdown" '()))
+(define-public (libgit2-shutdown!)
+  (let ((proc (libgit2->procedure int "git_libgit2_shutdown" '())))
+    (proc)))
 
-(define libgit2-version
-  (let ((proc (libgit2->procedure void "git_libgit2_version" '(* * *))))
-    (lambda ()
-      (let ((major (make-double-pointer))
-      (minor (make-double-pointer))
-      (rev (make-double-pointer)))
-        (proc major minor rev)
-        (map (compose pointer-address dereference-pointer) (list major minor rev))))))
+(define (libgit2-version)
+  (let ((proc (libgit2->procedure void "git_libgit2_version" '(* * *)))
+        (major (make-double-pointer))
+        (minor (make-double-pointer))
+        (rev (make-double-pointer)))
+    (proc major minor rev)
+    (map (compose pointer-address dereference-pointer) (list major minor rev))))
 
-(define %object-free (dynamic-func "git_object_free" libgit2))
+(define (%object-free)
+  (dynamic-func "git_object_free" (libgit2)))
 
 (define (pointer->object! pointer)
-  (set-pointer-finalizer! pointer %object-free)
+  (set-pointer-finalizer! pointer (%object-free))
   (pointer->object pointer))
 
 ;;; FIXME: mempack https://libgit2.github.com/libgit2/#HEAD/group/mempack
@@ -175,19 +177,17 @@
 
 ;;; FIXME: patch https://libgit2.github.com/libgit2/#HEAD/group/patch
 
-(define patch-free
+(define (patch-free patch)
   (let ((proc (libgit2->procedure void "git_patch_free" '(*))))
-    (lambda (patch)
-      (proc (patch->pointer patch)))))
+    (proc (patch->pointer patch))))
 
-(define patch->string
-  (let ((proc (libgit2->procedure* "git_patch_to_buf" '(*))))
-    (lambda (patch)
-      (let ((out (make-buffer)))
-        (proc out (patch->pointer patch))
-        (let ((out* (buffer-content/string out)))
-          (free-buffer out)
-          out*)))))
+(define (patch->string patch)
+  (let ((proc (libgit2->procedure* "git_patch_to_buf" '(*)))
+        (out (make-buffer)))
+    (proc out (patch->pointer patch))
+    (let ((out* (buffer-content/string out)))
+      (free-buffer out)
+      out*)))
 
 ;;; FIXME: pathspec https://libgit2.github.com/libgit2/#HEAD/group/pathspec
 

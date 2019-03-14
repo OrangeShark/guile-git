@@ -1,5 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -155,9 +156,7 @@
 (define GITERR_FILESYSTEM 30)
 (define GITERR_PATCH 31)
 
-
-(define clear-git-error!
+(define (clear-git-error!)
+  "Clear the last Git error."
   (let ((proc (libgit2->procedure void "giterr_clear" '())))
-    (lambda ()
-      "Clear the last Git error."
-      (proc))))
+    (proc)))

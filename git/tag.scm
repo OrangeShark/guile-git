@@ -1,5 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -30,42 +31,37 @@
             tag-name))
 
 
-(define %tag-free (dynamic-func "git_tag_free" libgit2))
+(define (%tag-free)
+  (dynamic-func "git_tag_free" (libgit2)))
 
 (define (pointer->tag! pointer)
-  (set-pointer-finalizer! pointer %tag-free)
+  (set-pointer-finalizer! pointer (%tag-free))
   (pointer->tag pointer))
 
-(define tag-lookup
-  (let ((proc (libgit2->procedure* "git_tag_lookup" '(* * *))))
-    (lambda (repository oid)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (oid->pointer oid))
-        (pointer->tag! (dereference-pointer out))))))
+(define (tag-lookup repository oid)
+  (let ((proc (libgit2->procedure* "git_tag_lookup" '(* * *)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (oid->pointer oid))
+    (pointer->tag! (dereference-pointer out))))
 
-(define tag-lookup-prefix
-  (let ((proc (libgit2->procedure* "git_tag_lookup_prefix" `(* * * ,size_t))))
-    (lambda (repository oid length)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (oid->pointer oid) length)
-        (pointer->tag! (dereference-pointer out))))))
+(define (tag-lookup-prefix repository oid length)
+  (let ((proc (libgit2->procedure* "git_tag_lookup_prefix" `(* * * ,size_t)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (oid->pointer oid) length)
+    (pointer->tag! (dereference-pointer out))))
 
-(define tag-id
+(define (tag-id tag)
   (let ((proc (libgit2->procedure '* "git_tag_id" '(*))))
-    (lambda (tag)
-      (pointer->oid (proc (tag->pointer tag))))))
+    (pointer->oid (proc (tag->pointer tag)))))
 
-(define tag-target-id
+(define (tag-target-id tag)
   (let ((proc (libgit2->procedure '* "git_tag_target_id" '(*))))
-    (lambda (tag)
-      (pointer->oid (proc (tag->pointer tag))))))
+    (pointer->oid (proc (tag->pointer tag)))))
 
-(define tag-message
+(define (tag-message tag)
   (let ((proc (libgit2->procedure '* "git_tag_message" '(*))))
-    (lambda (tag)
-      (pointer->string (proc (tag->pointer tag))))))
+    (pointer->string (proc (tag->pointer tag)))))
 
-(define tag-name
+(define (tag-name tag)
   (let ((proc (libgit2->procedure '* "git_tag_name" '(*))))
-    (lambda (tag)
-      (pointer->string (proc (tag->pointer tag))))))
+    (pointer->string (proc (tag->pointer tag)))))

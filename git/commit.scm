@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -75,35 +76,32 @@
   (and (= (object-type object) OBJ-COMMIT)
        (pointer->commit (object->pointer object))))
 
-(define commit-amend
+(define (commit-amend id commit update-ref author
+                      commiter message-encoding message tree)
   (let ((proc (libgit2->procedure* "git_commit_amend" '(* * * * * * * *))))
-    (lambda (id commit update-ref author commiter message-encoding message tree)
-      (proc (oid->pointer id)
-            (commit->pointer commit)
-            (string->pointer update-ref)
-            (signature->pointer author)
-            (signature->pointer commiter)
-            (string->pointer message-encoding)
-            (string->pointer message)
-            (tree->pointer tree)))))
+    (proc (oid->pointer id)
+          (commit->pointer commit)
+          (string->pointer update-ref)
+          (signature->pointer author)
+          (signature->pointer commiter)
+          (string->pointer message-encoding)
+          (string->pointer message)
+          (tree->pointer tree))))
 
-(define commit-author
+(define (commit-author commit)
   (let ((proc (libgit2->procedure '* "git_commit_author" '(*))))
-    (lambda (commit)
-      (pointer->signature (proc (commit->pointer commit))))))
+    (pointer->signature (proc (commit->pointer commit)))))
 
-(define commit-body
-  (let ((proc (libgit2->procedure '* "git_commit_body" '(*))))
-    (lambda (commit)
-      (let ((out (proc (commit->pointer commit))))
-        (if (eq? out %null-pointer)
-            ""
-            (pointer->string out))))))
+(define (commit-body commit)
+  (let* ((proc (libgit2->procedure '* "git_commit_body" '(*)))
+         (out (proc (commit->pointer commit))))
+    (if (eq? out %null-pointer)
+        ""
+        (pointer->string out))))
 
-(define commit-committer
+(define (commit-committer commit)
   (let ((proc (libgit2->procedure '* "git_commit_committer" '(*))))
-    (lambda (commit)
-      (pointer->signature (proc (commit->pointer commit))))))
+    (pointer->signature (proc (commit->pointer commit)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_create
 
@@ -117,97 +115,86 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_dup
 
-(define commit-extract-signature
-  (let ((proc (libgit2->procedure* "git_commit_extract_signature" '(* * * * *))))
-    (lambda* (repository oid #:optional (field "gpgsig"))
-      (let ((signature (make-buffer))
-            (data (make-buffer)))
-        (proc signature
-              data
-              (repository->pointer repository)
-              (oid->pointer oid)
-              (string->pointer field))
-        (let ((signature* (buffer-content/string signature))
-              (data*      (buffer-content/string data)))
-          (free-buffer signature)
-          (free-buffer data)
-          (values signature* data*))))))
+(define* (commit-extract-signature repository oid #:optional (field "gpgsig"))
+  (let ((proc (libgit2->procedure* "git_commit_extract_signature" '(* * * * *)))
+        (signature (make-buffer))
+        (data (make-buffer)))
+    (proc signature
+          data
+          (repository->pointer repository)
+          (oid->pointer oid)
+          (string->pointer field))
+    (let ((signature* (buffer-content/string signature))
+          (data*      (buffer-content/string data)))
+      (free-buffer signature)
+      (free-buffer data)
+      (values signature* data*))))
 
-(define %commit-free (dynamic-func "git_commit_free" libgit2))
+(define (%commit-free)
+  (dynamic-func "git_commit_free" (libgit2)))
 
 (define (pointer->commit! pointer)
-  (set-pointer-finalizer! pointer %commit-free)
+  (set-pointer-finalizer! pointer (%commit-free))
   (pointer->commit pointer))
 
-(define commit-header-field
-  (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *))))
-    (lambda (commit field)
-      (let ((out (make-buffer)))
-        (proc out (commit->pointer commit) (string->pointer field))
-        (let ((out* (buffer-content/string out)))
-          (free-buffer out)
-          out*)))))
+(define (commit-header-field commit field)
+  (let ((proc (libgit2->procedure* "git_commit_header_field" '(* * *)))
+        (out (make-buffer)))
+    (proc out (commit->pointer commit) (string->pointer field))
+    (let ((out* (buffer-content/string out)))
+      (free-buffer out)
+      out*)))
 
-(define commit-id
+(define (commit-id commit)
   (let ((proc (libgit2->procedure '* "git_commit_id" '(*))))
-    (lambda (commit)
-      (pointer->oid (proc (commit->pointer commit))))))
+    (pointer->oid (proc (commit->pointer commit)))))
 
-(define commit-lookup
-  (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *))))
-    (lambda (repository oid)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (oid->pointer oid))
-        (pointer->commit! (dereference-pointer out))))))
+(define (commit-lookup repository oid)
+  (let ((proc (libgit2->procedure* "git_commit_lookup" `(* * *)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (oid->pointer oid))
+    (pointer->commit! (dereference-pointer out))))
 
-(define commit-lookup-prefix
-  (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t))))
-    (lambda (repository id len)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (oid->pointer id) len)
-        (pointer->commit! (dereference-pointer out))))))
+(define (commit-lookup-prefix repository id len)
+  (let ((proc (libgit2->procedure* "git_commit_lookup_prefix" `(* * * ,size_t)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (oid->pointer id) len)
+    (pointer->commit! (dereference-pointer out))))
 
-(define commit-message
+(define (commit-message commit)
   (let ((proc (libgit2->procedure '* "git_commit_message" '(*))))
-    (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+    (pointer->string (proc (commit->pointer commit)))))
 
-(define commit-message-encoding
-  (let ((proc (libgit2->procedure '* "git_commit_message_encoding" '(*))))
-    (lambda (commit)
-      (let ((out (proc (commit->pointer commit))))
-        (if (eq? out %null-pointer)
-            #f
-            (pointer->string out))))))
+(define (commit-message-encoding commit)
+  (let* ((proc (libgit2->procedure '* "git_commit_message_encoding" '(*)))
+         (out (proc (commit->pointer commit))))
+    (if (eq? out %null-pointer)
+        #f
+        (pointer->string out))))
 
-(define commit-message-raw
+(define (commit-message-raw commit)
   (let ((proc (libgit2->procedure '* "git_commit_message_raw" '(*))))
-    (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+    (pointer->string (proc (commit->pointer commit)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/commit/git_commit_nth_gen_ancestor
 
-(define commit-owner
+(define (commit-owner commit)
   (let ((proc (libgit2->procedure '* "git_commit_owner" '(*))))
-    (lambda (commit)
-      (pointer->repository (proc (commit->pointer commit))))))
+    (pointer->repository (proc (commit->pointer commit)))))
 
-(define commit-parent
-  (let ((proc (libgit2->procedure* "git_commit_parent" `(* * ,unsigned-int))))
-    (lambda* (commit #:optional (n 0))
-      (let ((out (make-double-pointer)))
-        (proc out (commit->pointer commit) n)
-        (pointer->commit! (dereference-pointer out))))))
+(define* (commit-parent commit #:optional (n 0))
+  (let ((proc (libgit2->procedure* "git_commit_parent" `(* * ,unsigned-int)))
+        (out (make-double-pointer)))
+    (proc out (commit->pointer commit) n)
+    (pointer->commit! (dereference-pointer out))))
 
-(define commit-parent-id
+(define* (commit-parent-id commit #:optional (n 0))
   (let ((proc (libgit2->procedure '* "git_commit_parent_id" `(* ,unsigned-int))))
-    (lambda* (commit #:optional (n 0))
-      (pointer->oid (proc (commit->pointer commit) n)))))
+    (pointer->oid (proc (commit->pointer commit) n))))
 
-(define commit-parentcount
+(define (commit-parentcount commit)
   (let ((proc (libgit2->procedure unsigned-int "git_commit_parentcount" '(*))))
-    (lambda (commit)
-      (proc (commit->pointer commit)))))
+    (proc (commit->pointer commit))))
 
 (define (commit-parents commit)
   "Return the list of all the parent commits of COMMIT."
@@ -244,34 +231,28 @@ This procedure performs a breadth-first traversal of the commit graph."
       (()
        result))))
 
-(define commit-raw-header
+(define (commit-raw-header commit)
   (let ((proc (libgit2->procedure '* "git_commit_raw_header" '(*))))
-    (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+    (pointer->string (proc (commit->pointer commit)))))
 
-(define commit-summary
+(define (commit-summary commit)
   (let ((proc (libgit2->procedure '* "git_commit_summary" '(*))))
-    (lambda (commit)
-      (pointer->string (proc (commit->pointer commit))))))
+    (pointer->string (proc (commit->pointer commit)))))
 
-(define commit-time
+(define (commit-time commit)
   (let ((proc (libgit2->procedure int64 "git_commit_time" '(*))))
-    (lambda (commit)
-      (proc (commit->pointer commit)))))
+    (proc (commit->pointer commit))))
 
-(define commit-time-offset
+(define (commit-time-offset commit)
   (let ((proc (libgit2->procedure int "git_commit_time_offset" '(*))))
-    (lambda (commit)
-      (proc (commit->pointer commit)))))
+    (proc (commit->pointer commit))))
 
-(define commit-tree
-  (let ((proc (libgit2->procedure* "git_commit_tree" '(* *))))
-    (lambda (commit)
-      (let ((out (make-double-pointer)))
-        (proc out (commit->pointer commit))
-        (pointer->tree! (dereference-pointer out))))))
+(define (commit-tree commit)
+  (let ((proc (libgit2->procedure* "git_commit_tree" '(* *)))
+        (out (make-double-pointer)))
+    (proc out (commit->pointer commit))
+    (pointer->tree! (dereference-pointer out))))
 
-(define commit-tree-id
+(define (commit-tree-id commit)
   (let ((proc (libgit2->procedure '* "git_commit_tree_id" '(*))))
-    (lambda (commit)
-      (pointer->oid (proc (commit->pointer commit))))))
+    (pointer->oid (proc (commit->pointer commit)))))

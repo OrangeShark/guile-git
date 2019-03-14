@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -43,77 +44,70 @@
 
 ;;; FIXME: reference https://libgit2.github.com/libgit2/#HEAD/group/reference
 
-(define reference-name
+(define (reference-name reference)
   (let ((proc (libgit2->procedure '* "git_reference_name" '(*))))
-    (lambda (reference)
-      (pointer->string (proc (reference->pointer reference))))))
+    (pointer->string (proc (reference->pointer reference)))))
 
-(define reference-target
+(define (reference-target reference)
   (let ((proc (libgit2->procedure '* "git_reference_target" '(*))))
-    (lambda (reference)
-      (pointer->oid (proc (reference->pointer reference))))))
+    (pointer->oid (proc (reference->pointer reference)))))
 
-(define reference-name->oid
-  (let ((proc (libgit2->procedure* "git_reference_name_to_id" '(* * *))))
-    (lambda (repository name)
-      (let ((out (make-oid-pointer)))
-        (proc out
-              (repository->pointer repository)
-              (string->pointer name))
-        (pointer->oid out)))))
+(define (reference-name->oid repository name)
+  (let ((proc (libgit2->procedure* "git_reference_name_to_id" '(* * *)))
+        (out (make-oid-pointer)))
+    (proc out
+          (repository->pointer repository)
+          (string->pointer name))
+    (pointer->oid out)))
 
-(define reference-shorthand
+(define (reference-shorthand reference)
   (let ((proc (libgit2->procedure '* "git_reference_shorthand" '(*))))
-    (lambda (reference)
-      (pointer->string (proc (reference->pointer reference))))))
+    (pointer->string (proc (reference->pointer reference)))))
 
-(define reference-peel
-  (let ((proc (libgit2->procedure* "git_reference_peel" `(* * ,int))))
-    (lambda (reference obj-type)
-      (let ((out (make-double-pointer)))
-        (proc out (reference->pointer reference) obj-type)
-        (pointer->object! (dereference-pointer out))))))
+(define (reference-peel reference obj-type)
+  (let ((proc (libgit2->procedure* "git_reference_peel" `(* * ,int)))
+        (out (make-double-pointer)))
+    (proc out (reference->pointer reference) obj-type)
+    (pointer->object! (dereference-pointer out))))
 
-(define %reference-free (dynamic-func "git_reference_free" libgit2))
+(define (%reference-free)
+  (dynamic-func "git_reference_free" (libgit2)))
 
 (define (pointer->reference! pointer)
-  (set-pointer-finalizer! pointer %reference-free)
+  (set-pointer-finalizer! pointer (%reference-free))
   (pointer->reference pointer))
 
-(define reference-lookup
-  (let ((proc (libgit2->procedure* "git_reference_lookup" '(* * *))))
-    (lambda (repository name)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (string->pointer name))
-        (pointer->reference! (dereference-pointer out))))))
+(define (reference-lookup repository name)
+  (let ((proc (libgit2->procedure* "git_reference_lookup" '(* * *)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (string->pointer name))
+    (pointer->reference! (dereference-pointer out))))
 
 
-(define %reference-iterator-free (dynamic-func "git_reference_iterator_free" libgit2))
+(define (%reference-iterator-free)
+  (dynamic-func "git_reference_iterator_free" (libgit2)))
 
 (define (pointer->reference-iterator! pointer)
-  (set-pointer-finalizer! pointer %reference-iterator-free)
+  (set-pointer-finalizer! pointer (%reference-iterator-free))
   (pointer->reference-iterator pointer))
 
-(define reference-iterator-new
-  (let ((proc (libgit2->procedure* "git_reference_iterator_new" '(* *))))
-    (lambda (repository)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository))
-        (pointer->reference-iterator! (dereference-pointer out))))))
+(define (reference-iterator-new repository)
+  (let ((proc (libgit2->procedure* "git_reference_iterator_new" '(* *)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository))
+    (pointer->reference-iterator! (dereference-pointer out))))
 
-(define reference-iterator-glob-new
-  (let ((proc (libgit2->procedure* "git_reference_iterator_glob_new" '(* * *))))
-    (lambda (repository glob)
-      (let ((out (make-double-pointer)))
-        (proc out (repository->pointer repository) (string->pointer glob))
-        (pointer->reference-iterator! (dereference-pointer out))))))
+(define (reference-iterator-glob-new repository glob)
+  (let ((proc (libgit2->procedure* "git_reference_iterator_glob_new" '(* * *)))
+        (out (make-double-pointer)))
+    (proc out (repository->pointer repository) (string->pointer glob))
+    (pointer->reference-iterator! (dereference-pointer out))))
 
-(define reference-next
-  (let ((proc (libgit2->procedure* "git_reference_next" '(* *))))
-    (lambda (iterator)
-      (let ((out (make-double-pointer)))
-        (proc out (reference-iterator->pointer iterator))
-        (pointer->reference (dereference-pointer out))))))
+(define (reference-next iterator)
+  (let ((proc (libgit2->procedure* "git_reference_next" '(* *)))
+        (out (make-double-pointer)))
+    (proc out (reference-iterator->pointer iterator))
+    (pointer->reference (dereference-pointer out))))
 
 (define* (reference-fold proc init repository #:key (glob #f))
   (let ((iterator (if glob
@@ -125,37 +119,32 @@
             (loop (proc reference acc))
             acc)))))
 
-(define reference-branch?
+(define (reference-branch? reference)
   (let ((proc (libgit2->procedure int "git_reference_is_branch" '(*))))
-    (lambda (reference)
-      (case (proc (reference->pointer reference))
-        ((1) #t)
-        (else #f)))))
+    (case (proc (reference->pointer reference))
+      ((1) #t)
+      (else #f))))
 
-(define reference-note?
+(define (reference-note? reference)
   (let ((proc (libgit2->procedure int "git_reference_is_note" '(*))))
-    (lambda (reference)
-      (case (proc (reference->pointer reference))
-        ((1) #t)
-        (else #f)))))
+    (case (proc (reference->pointer reference))
+      ((1) #t)
+      (else #f))))
 
-(define reference-remote?
+(define (reference-remote? reference)
   (let ((proc (libgit2->procedure int "git_reference_is_remote" '(*))))
-    (lambda (reference)
-      (case (proc (reference->pointer reference))
-        ((1) #t)
-        (else #f)))))
+    (case (proc (reference->pointer reference))
+      ((1) #t)
+      (else #f))))
 
-(define reference-tag?
+(define (reference-tag? reference)
   (let ((proc (libgit2->procedure int "git_reference_is_tag" '(*))))
-    (lambda (reference)
-      (case (proc (reference->pointer reference))
-        ((1) #t)
-        (else #f)))))
+    (case (proc (reference->pointer reference))
+      ((1) #t)
+      (else #f))))
 
-(define reference-eq?
+(define (reference-eq? ref1 ref2)
   (let ((proc (libgit2->procedure int "git_reference_cmp" '(* *))))
-    (lambda (ref1 ref2)
-      (case (proc (reference->pointer ref1) (reference->pointer ref2))
-        ((0) #t)
-        (else #f)))))
+    (case (proc (reference->pointer ref1) (reference->pointer ref2))
+      ((0) #t)
+      (else #f))))
