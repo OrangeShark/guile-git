@@ -4,6 +4,7 @@
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
+;;; Copyright © 2019 Marius Bakke <marius@devup.no>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -30,7 +31,8 @@
                                            pointer->bytevector
                                            pointer->string
                                            sizeof
-                                           dereference-pointer))
+                                           dereference-pointer
+                                           pointer-address))
   #:use-module (bytestructures guile)
   #:use-module (ice-9 match)
   #:export (git-error? git-error-code git-error-message git-error-class pointer->git-error
@@ -51,6 +53,17 @@
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
             make-clone-options clone-options->pointer clone-options-fetch-options
+
+            make-describe-options describe-options->pointer describe-options->bytestructure
+            set-describe-options-max-candidates! set-describe-options-strategy!
+            set-describe-options-pattern! set-describe-options-only-follow-first-parent!
+            set-describe-options-show-commit-oid-as-fallback!
+
+            make-describe-format-options describe-format-options->pointer describe-format-options->bytestructure
+            set-describe-format-options-abbreviated-size!
+            set-describe-format-options-always-use-long-format!
+            set-describe-format-options-dirty-suffix!
+
             remote-head? remote-head-local remote-head-oid remote-head-loid remote-head-name pointer->remote-head pointer->remote-head-list))
 
 
@@ -465,3 +478,76 @@
    (map pointer->remote-head
         (pointer->pointer-list ptr length)))
 
+;;; git describe options
+
+(define %describe-options
+  (bs:struct `((version ,unsigned-int)
+               (max-candidates-tag ,unsigned-int)
+               (describe-strategy ,unsigned-int)
+               (pattern ,(bs:pointer uint8)) ;char *
+               (only-follow-first-parent ,int)
+               (show-commit-oid-as-fallback ,int))))
+
+(define-record-type <describe-options>
+  (%make-describe-options bytestructure)
+  describe-options?
+  (bytestructure describe-options-bytestructure))
+
+(define (make-describe-options)
+  (%make-describe-options (bytestructure %describe-options)))
+
+(define (describe-options->pointer options)
+  (bytestructure->pointer (describe-options-bytestructure options)))
+
+(define (set-describe-options-max-candidates! options max-candidates)
+  (bytestructure-set! (describe-options-bytestructure options)
+                      'max-candidates-tag max-candidates))
+
+(define (set-describe-options-strategy! options strategy)
+  (bytestructure-set! (describe-options-bytestructure options)
+                      'describe-strategy strategy))
+
+(define (set-describe-options-pattern! options pattern)
+  (bytestructure-set! (describe-options-bytestructure options)
+                      'pattern (pointer-address pattern)))
+
+(define (set-describe-options-only-follow-first-parent! options only-follow-first-parent?)
+  (bytestructure-set! (describe-options-bytestructure options)
+                      'only-follow-first-parent only-follow-first-parent?))
+
+(define (set-describe-options-show-commit-oid-as-fallback! options fallback-to-oid?)
+  (bytestructure-set! (describe-options-bytestructure options)
+                      'show-commit-oid-as-fallback fallback-to-oid?))
+
+;;; git describe format options
+
+(define %describe-format-options
+  (bs:struct `((version ,unsigned-int)
+               (abbreviated-size ,unsigned-int)
+               (always-use-long-format ,int)
+               (dirty-suffix ,(bs:pointer uint8))))) ;char *
+
+(define-record-type <describe-format-options>
+  (%make-describe-format-options bytestructure)
+  describe-format-options?
+  (bytestructure describe-format-options-bytestructure))
+
+(define (describe-format-options->pointer format-options)
+  (bytestructure->pointer (describe-format-options-bytestructure
+                           format-options)))
+
+(define (make-describe-format-options)
+  (%make-describe-format-options (bytestructure %describe-format-options)))
+
+(define (set-describe-format-options-abbreviated-size! format-options abbreviated-size)
+  (bytestructure-set! (describe-format-options-bytestructure format-options)
+                      'abbreviated-size abbreviated-size))
+
+(define (set-describe-format-options-always-use-long-format! format-options
+                                                             always-use-long-format?)
+  (bytestructure-set! (describe-format-options-bytestructure format-options)
+                      'always-use-long-format always-use-long-format?))
+
+(define (set-describe-format-options-dirty-suffix! format-options dirty-suffix)
+  (bytestructure-set! (describe-format-options-bytestructure format-options)
+                      'dirty-suffix (pointer-address dirty-suffix)))

@@ -27,6 +27,7 @@
         (git branch)
         (git clone)
         (git commit)
+        (git describe)
         (git errors)
         (git fetch)
         (git object)

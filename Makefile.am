@@ -37,6 +37,7 @@ SOURCES =                           \
   git/clone.scm                     \
   git/commit.scm                    \
   git/cred.scm                      \
+  git/describe.scm                  \
   git/errors.scm                    \
   git/fetch.scm                     \
   git/oid.scm                       \
@@ -75,6 +76,7 @@ TESTS_UTILS =                                   \
 TESTS =                                         \
   tests/branch.scm                              \
   tests/commit.scm                              \
+  tests/describe.scm                            \
   tests/oid.scm                                 \
   tests/reference.scm                           \
   tests/repository.scm                          \
