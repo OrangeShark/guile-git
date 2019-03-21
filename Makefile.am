@@ -47,6 +47,7 @@ SOURCES =                           \
   git/remote.scm                    \
   git/rev-parse.scm                 \
   git/settings.scm                  \
+  git/signature.scm                 \
   git/status.scm                    \
   git/structs.scm                   \
   git/submodule.scm									\

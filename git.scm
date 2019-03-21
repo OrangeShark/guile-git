@@ -37,6 +37,7 @@
         (git remote)
         (git rev-parse)
         (git settings)
+        (git signature)
         (git status)
         (git structs)
         (git submodule)
