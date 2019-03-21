@@ -83,6 +83,7 @@ TESTS =                                         \
   tests/rev-parse.scm                           \
   tests/status.scm                              \
   tests/submodule.scm														\
+  tests/tag.scm                                 \
   tests/tree.scm
 
 TEST_EXTENSIONS = .scm
