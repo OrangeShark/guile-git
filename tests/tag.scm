@@ -75,7 +75,7 @@
     (let* ((repository (repository-open directory))
            (name "1.0")
            (target (revparse-single repository "HEAD"))
-           (tagger (signature-default repository))
+           (tagger (signature-new "Test Tag" "test@localhost" 0 0))
            (message "This tag is annotated!"))
       (tag-create repository name target tagger message)))
 
