@@ -1,6 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2019 Marius Bakke <marius@devup.no>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -28,8 +29,12 @@
             tag-id
             tag-target-id
             tag-message
-            tag-name))
+            tag-name
 
+            tag-create
+            tag-create!
+            tag-create-lightweight
+            tag-create-lightweight!))
 
 (define (%tag-free)
   (dynamic-func "git_tag_free" (libgit2)))
@@ -64,4 +69,34 @@
 
 (define (tag-name tag)
   (let ((proc (libgit2->procedure '* "git_tag_name" '(*))))
-    (pointer->string (proc (tag->pointer tag)))))
+      (pointer->string (proc (tag->pointer tag)))))
+
+(define* (tag-create repository name target tagger message
+                    #:optional (force? #f))
+  (let ((proc (libgit2->procedure* "git_tag_create" `(* * * * * * ,int)))
+        (oid (make-oid-pointer)))
+    (proc oid
+          (repository->pointer repository)
+          (string->pointer name)
+          (object->pointer target)
+          (signature->pointer tagger)
+          (string->pointer message)
+          (if force? 1 0))
+    (pointer->oid oid)))
+
+(define (tag-create! repository name target tagger message)
+  (tag-create repository name target tagger message #t))
+
+(define* (tag-create-lightweight repository name target
+                                 #:optional (force? #f))
+  (let ((proc (libgit2->procedure* "git_tag_create_lightweight" `(* * * * ,int)))
+        (oid (make-oid-pointer)))
+    (proc oid
+          (repository->pointer repository)
+          (string->pointer name)
+          (object->pointer target)
+          (if force? 1 0))
+    (pointer->oid oid)))
+
+(define (tag-create-lightweight! repository name target)
+  (tag-create-lightweight repository name target #t))

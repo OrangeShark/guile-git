@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
+;;; Copyright © 2019 Marius Bakke <marius@devup.no>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -30,6 +31,7 @@
             commit? pointer->commit commit->pointer
             config? pointer->config config->pointer
             cred? pointer->cred cred->pointer
+            describe-result? pointer->describe-result describe-result->pointer
             diff? pointer->diff diff->pointer
             diff-delta? pointer->diff-delta diff-delta->pointer
             diff-options? pointer->diff-options diff-options->pointer
@@ -81,6 +83,7 @@
 (define-libgit2-type commit)
 (define-libgit2-type config)
 (define-libgit2-type cred)
+(define-libgit2-type describe-result)
 (define-libgit2-type diff)
 (define-libgit2-type diff-delta)
 (define-libgit2-type diff-options)

@@ -37,6 +37,7 @@ SOURCES =                           \
   git/clone.scm                     \
   git/commit.scm                    \
   git/cred.scm                      \
+  git/describe.scm                  \
   git/errors.scm                    \
   git/fetch.scm                     \
   git/oid.scm                       \
@@ -47,6 +48,7 @@ SOURCES =                           \
   git/remote.scm                    \
   git/rev-parse.scm                 \
   git/settings.scm                  \
+  git/signature.scm                 \
   git/status.scm                    \
   git/structs.scm                   \
   git/submodule.scm									\
@@ -74,6 +76,7 @@ TESTS_UTILS =                                   \
 TESTS =                                         \
   tests/branch.scm                              \
   tests/commit.scm                              \
+  tests/describe.scm                            \
   tests/oid.scm                                 \
   tests/reference.scm                           \
   tests/repository.scm                          \
@@ -82,6 +85,7 @@ TESTS =                                         \
   tests/rev-parse.scm                           \
   tests/status.scm                              \
   tests/submodule.scm														\
+  tests/tag.scm                                 \
   tests/tree.scm
 
 TEST_EXTENSIONS = .scm
