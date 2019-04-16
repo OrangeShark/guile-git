@@ -117,14 +117,17 @@ The procedure cleans up the global state of libgit2 created by
 @chapter Repository
 
 @menu
-* Repository: git repository.   Creating and opening repositories.
+* Repository: git-repository.   Creating and opening repositories.
 * Clone: git clone.             Cloning git repositories.
 * Status: git-status.           Git status.
 * Checkout: git-checkout.       Git checkout.
 @end menu
 
-@node git repository
+@node git-repository
 @section Repository
+
+The @code{(git repository)} module provides procedures for creating,
+opening, and interacting with git repositories.
 
 @deffn {Scheme Procedure} repository-init directory [is-bare]
 Return a repository created at @var{directory} or throws an error if
@@ -203,6 +206,54 @@ Return the @code{.git} directory for @var{repository}.
 @deffn {Scheme Procedure} repository-working-directory repository
 Return the working directory for @var{repository} or @code{#f} if
 @var{repository} is a bare repository.
+@end deffn
+
+@deffn {Scheme Procedure} repository-config repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-config-snapshot repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-detach-head repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-get-namespace repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-head repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-head-detached? repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-head-unborn? repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-ident repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-index repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-refdb repository
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-set-ident repository name email
+
+@end deffn
+
+@deffn {Scheme Procedure} repository-state repository
+
 @end deffn
 
 @node git clone
