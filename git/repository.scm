@@ -283,9 +283,26 @@ return value is unspecified."
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_set_workdir
 
+(define (int->repository-state n)
+  (case n
+    ((0)  'repository-state/none)
+    ((1)  'repository-state/merge)
+    ((2)  'repository-state/revert)
+    ((3)  'repository-state/revert-sequence)
+    ((4)  'repository-state/cherrypick)
+    ((5)  'repository-state/cherrypick-sequence)
+    ((6)  'repository-state/bisect)
+    ((7)  'repository-state/rebase)
+    ((8)  'repository-state/rebase-interactive)
+    ((9)  'repository-state/rebase-merge)
+    ((10) 'repository-state/apply-mailbox)
+    ((11) 'repository-state/apply-mailbox-or-rebase)))
+
 (define (repository-state repository)
+  "Returns the state of REPOSITORY. The state is a symbol representing
+an operation in progress like merge, revert, rebase, etc."
   (let ((proc (libgit2->procedure int "git_repository_state" '(*))))
-    (proc (repository->pointer repository))))
+    (int->repository-state (proc (repository->pointer repository)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_state_cleanup
 
