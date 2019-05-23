@@ -52,6 +52,6 @@ You can then:
 
 - Create a pull request on gitlab
 - Send a patch to one of the maintainers
-- Come and ping `amz3` or `OrangeShark` about it at `#guile@irc.freenode.net`.
+- Come and ping `OrangeShark` about it at `#guile@irc.freenode.net`.
 
 And don't forget to add a unit test!
