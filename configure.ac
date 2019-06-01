@@ -1,6 +1,6 @@
 dnl Guile-Git --- GNU Guile bindings of libgit2
 dnl Copyright © 2016-2018 Erik Edrosa <erik.edrosa@gmail.com>
-dnl Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
+dnl Copyright © 2017, 2019 Ludovic Courtès <ludo@gnu.org>
 dnl
 dnl This file is part of Guile-Git.
 dnl
@@ -26,7 +26,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign color-tests])
 dnl Enable silent rules by default.
 AM_SILENT_RULES([yes])
 
-GUILE_PKG([2.2 2.0])
+GUILE_PKG([3.0 2.2 2.0])
 GUILE_PROGS
 
 dnl (srfi srfi-64) appeared in Guile 2.0.11.
