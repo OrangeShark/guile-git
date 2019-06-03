@@ -60,53 +60,63 @@
     ((all) DESCRIBE-STRATEGY-ALL)
     (else (raise-git-error GIT_EINVALID))))
 
-(define* (make-describe-options #:key
-                                (max-candidates DESCRIBE-MAX-CANDIDATES)
-                                (strategy DESCRIBE-STRATEGY)
-                                (pattern DESCRIBE-PATTERN)
-                                (only-follow-first-parent? DESCRIBE-ONLY-FOLLOW-FIRST-PARENT?)
-                                (fallback-to-oid? DESCRIBE-FALLBACK-TO-OID?))
-  "Return a <describe-options> structure for use with DESCRIBE-COMMIT or
-DESCRIBE-WORKDIR.  MAX-CANDIDATES specifies how many tags will be considered
-when finding the descriptive name; use 0 to not consider any tags at all.
-STRATEGY can be either 'default to only consider annotated tags, 'tags to consider
-all tags, or 'all to also consider branch names.  If PATTERN is a non-empty string, only
-refs matching the given glob(7) pattern are considered.  ONLY-FOLLOW-FIRST-PARENT? will
-ignore tags that are not direct ancestors of the commit.  When FALLBACK-TO-OID? is true,
-the commit ID will be returned if no matching tags were found."
-  (let ((proc (libgit2->procedure* "git_describe_init_options" `(* ,unsigned-int)))
-        (describe-options (make-describe-options-bytestructure))
-        (strategy (symbol->describe-strategy strategy)))
-    (proc (describe-options->pointer describe-options) DESCRIBE-OPTIONS-VERSION)
-    (set-describe-options-max-candidates-tag! describe-options max-candidates)
-    (when (> strategy 0)
-      (set-describe-options-strategy! describe-options strategy))
-    (when (> (string-length pattern) 0)
-      (set-describe-options-pattern! describe-options (string->pointer pattern)))
-    (when only-follow-first-parent?
-      (set-describe-options-only-follow-first-parent! describe-options 1))
-    (when fallback-to-oid?
-      (set-describe-options-show-commit-oid-as-fallback! describe-options 1))
+(define make-describe-options
+  ;; Return a <describe-options> structure for use with DESCRIBE-COMMIT
+  ;; or DESCRIBE-WORKDIR.  MAX-CANDIDATES specifies how many tags will
+  ;; be considered when finding the descriptive name; use 0 to not
+  ;; consider any tags at all.  STRATEGY can be either 'default to only
+  ;; consider annotated tags, 'tags to consider all tags, or 'all to
+  ;; also consider branch names.  If PATTERN is a non-empty string, only
+  ;; refs matching the given glob(7) pattern are considered.
+  ;; ONLY-FOLLOW-FIRST-PARENT? will ignore tags that are not direct
+  ;; ancestors of the commit.  When FALLBACK-TO-OID? is true, the commit
+  ;; ID will be returned if no matching tags were found.
+  (let ((proc (libgit2->procedure* "git_describe_init_options"
+                                   `(* ,unsigned-int))))
+    (lambda* (#:key
+              (max-candidates DESCRIBE-MAX-CANDIDATES)
+              (strategy DESCRIBE-STRATEGY)
+              (pattern DESCRIBE-PATTERN)
+              (only-follow-first-parent? DESCRIBE-ONLY-FOLLOW-FIRST-PARENT?)
+              (fallback-to-oid? DESCRIBE-FALLBACK-TO-OID?))
+      (let ((describe-options (make-describe-options-bytestructure))
+            (strategy (symbol->describe-strategy strategy)))
+        (proc (describe-options->pointer describe-options) DESCRIBE-OPTIONS-VERSION)
+        (set-describe-options-max-candidates-tag! describe-options max-candidates)
+        (when (> strategy 0)
+          (set-describe-options-strategy! describe-options strategy))
+        (when (> (string-length pattern) 0)
+          (set-describe-options-pattern! describe-options (string->pointer pattern)))
+        (when only-follow-first-parent?
+          (set-describe-options-only-follow-first-parent! describe-options 1))
+        (when fallback-to-oid?
+          (set-describe-options-show-commit-oid-as-fallback! describe-options 1))
 
-    describe-options))
+        describe-options))))
 
-(define (%describe-result-free) (dynamic-func "git_describe_result_free" (libgit2)))
+(define %describe-result-free (dynamic-func "git_describe_result_free" libgit2))
 
 (define (pointer->describe-result! pointer)
-  (set-pointer-finalizer! pointer (%describe-result-free))
+  (set-pointer-finalizer! pointer %describe-result-free)
   (pointer->describe-result pointer))
 
-(define* (describe-commit commit #:optional (options (make-describe-options)))
-  (let ((proc (libgit2->procedure* "git_describe_commit" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (commit->pointer commit) (describe-options->pointer options))
-    (pointer->describe-result! (dereference-pointer out))))
+(define* describe-commit
+  (let ((proc (libgit2->procedure* "git_describe_commit" '(* * *))))
+    (lambda* (commit #:optional (options (make-describe-options)))
+      (let ((out (make-double-pointer)))
+        (proc out
+              (commit->pointer commit)
+              (describe-options->pointer options))
+        (pointer->describe-result! (dereference-pointer out))))))
 
-(define* (describe-workdir repository #:optional (options (make-describe-options)))
-  (let ((proc (libgit2->procedure* "git_describe_workdir" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (describe-options->pointer options))
-    (pointer->describe-result! (dereference-pointer out))))
+(define* describe-workdir
+  (let ((proc (libgit2->procedure* "git_describe_workdir" '(* * *))))
+    (lambda* (repository #:optional (options (make-describe-options)))
+      (let ((out (make-double-pointer)))
+        (proc out
+              (repository->pointer repository)
+              (describe-options->pointer options))
+        (pointer->describe-result! (dereference-pointer out))))))
 
 
 
@@ -116,35 +126,41 @@ the commit ID will be returned if no matching tags were found."
 (define DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT? #f)
 (define DESCRIBE-FORMAT-DIRTY-SUFFIX "")
 
-(define* (make-describe-format-options
-          #:key
-          (abbreviated-size DESCRIBE-FORMAT-ABBREVIATED-SIZE)
-          (always-use-long-format? DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT?)
-          (dirty-suffix DESCRIBE-FORMAT-DIRTY-SUFFIX))
-  "Return a <describe-format-options> structure for formatting the output of
-DESCRIBE-FORMAT.  ABBREVIATED-SIZE specifies how many characters of the commit ID
-to use.  When ALWAYS-USE-LONG-FORMAT? is true, the returned string will be formatted
-with tag, number of commits and abbreviated commit ID even when it exactly matches a
-tag.  DIRTY-SUFFIX is an optional string that will be appended to the output when the
-worktree is considered 'dirty', i.e. modified."
-  (let ((proc (libgit2->procedure* "git_describe_init_format_options" `(* ,unsigned-int)))
-        (describe-format-options (make-describe-format-options-bytestructure)))
-    (proc (describe-format-options->pointer describe-format-options)
-          DESCRIBE-FORMAT-OPTIONS-VERSION)
-    (set-describe-format-options-abbreviated-size! describe-format-options abbreviated-size)
-    (when always-use-long-format?
-      (set-describe-format-options-always-use-long-format! describe-format-options 1))
-    (when (> (string-length dirty-suffix) 0)
-      (set-describe-format-options-dirty-suffix! describe-format-options
-                                                 (string->pointer dirty-suffix)))
+;; Return a <describe-format-options> structure for formatting the
+;; output of DESCRIBE-FORMAT.  ABBREVIATED-SIZE specifies how many
+;; characters of the commit ID to use.  When ALWAYS-USE-LONG-FORMAT? is
+;; true, the returned string will be formatted with tag, number of
+;; commits and abbreviated commit ID even when it exactly matches a tag.
+;; DIRTY-SUFFIX is an optional string that will be appended to the output
+;; when the worktree is considered 'dirty', i.e. modified.
+(define make-describe-format-options
+  (let ((proc (libgit2->procedure* "git_describe_init_format_options"
+                                   `(* ,unsigned-int))))
+    (lambda* (#:key
+              (abbreviated-size DESCRIBE-FORMAT-ABBREVIATED-SIZE)
+              (always-use-long-format? DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT?)
+              (dirty-suffix DESCRIBE-FORMAT-DIRTY-SUFFIX))
+      (let ((describe-format-options
+             (make-describe-format-options-bytestructure)))
+        (proc (describe-format-options->pointer describe-format-options)
+              DESCRIBE-FORMAT-OPTIONS-VERSION)
+        (set-describe-format-options-abbreviated-size! describe-format-options
+                                                       abbreviated-size)
+        (when always-use-long-format?
+          (set-describe-format-options-always-use-long-format!
+           describe-format-options 1))
+        (when (> (string-length dirty-suffix) 0)
+          (set-describe-format-options-dirty-suffix!
+           describe-format-options (string->pointer dirty-suffix)))
 
-    describe-format-options))
+        describe-format-options))))
 
-(define* (describe-format result #:optional (options (make-describe-format-options)))
-  (let ((proc (libgit2->procedure* "git_describe_format" '(* * *)))
-        (out (make-buffer)))
-    (proc out (describe-result->pointer result)
-          (describe-format-options->pointer options))
-    (let ((out* (buffer-content/string out)))
-      (free-buffer out)
-      out*)))
+(define describe-format
+  (let ((proc (libgit2->procedure* "git_describe_format" '(* * *))))
+    (lambda* (result #:optional (options (make-describe-format-options)))
+      (let ((out (make-buffer)))
+        (proc out (describe-result->pointer result)
+              (describe-format-options->pointer options))
+        (let ((out* (buffer-content/string out)))
+          (free-buffer out)
+          out*)))))

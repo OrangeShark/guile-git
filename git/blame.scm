@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -29,20 +28,20 @@
 
 ;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_buffer
 
-(define (blame-file repository path options)
-  (let ((proc (libgit2->procedure* "git_blame_file" '(* * * *)))
-        (out (make-double-pointer)))
-    (proc out
-          (repository->pointer repository)
-          (string->pointer path)
-          (blame-options->pointer options))
-    (pointer->blame! (dereference-pointer out))))
+(define blame-file
+  (let ((proc (libgit2->procedure* "git_blame_file" '(* * * *))))
+    (lambda (repository path options)
+      (let ((out (make-double-pointer)))
+        (proc out
+              (repository->pointer repository)
+              (string->pointer path)
+              (blame-options->pointer options))
+        (pointer->blame! (dereference-pointer out))))))
 
-(define (%blame-free)
-  (dynamic-func "git_blame_free" (libgit2)))
+(define %blame-free (dynamic-func "git_blame_free" libgit2))
 
 (define (pointer->blame! pointer)
-  (set-pointer-finalizer! pointer (%blame-free))
+  (set-pointer-finalizer! pointer %blame-free)
   (pointer->blame pointer))
 
 ;; https://libgit2.github.com/libgit2/#HEAD/group/blame/git_blame_get_hunk_byindex

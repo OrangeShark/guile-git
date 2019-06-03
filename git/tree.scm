@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -52,109 +51,118 @@
 ;;               (tree->pointer source))
 ;;         (pointer->tree (dereference-pointer out))))))
 
-(define (tree-entry-byid tree id)
-  (let* ((proc (libgit2->procedure '* "git_tree_entry_byid" '(* *)))
-         (ret (proc (tree->pointer tree) (oid->pointer id))))
-    (if (null-pointer? ret)
-        #f
-        (pointer->tree-entry ret))))
+(define tree-entry-byid
+  (let ((proc (libgit2->procedure '* "git_tree_entry_byid" '(* *))))
+    (lambda (tree id)
+      (let ((ret (proc (tree->pointer tree) (oid->pointer id))))
+        (if (null-pointer? ret)
+            #f
+            (pointer->tree-entry ret))))))
 
-(define (tree-entry-byindex tree idx)
-  (let* ((proc (libgit2->procedure '* "git_tree_entry_byindex" `(* ,size_t)))
-         (ret (proc (tree->pointer tree) idx)))
-    (if (null-pointer? ret)
-        #f
-        (pointer->tree-entry ret))))
+(define tree-entry-byindex
+  (let ((proc (libgit2->procedure '* "git_tree_entry_byindex" `(* ,size_t))))
+    (lambda (tree idx)
+      (let ((ret (proc (tree->pointer tree) idx)))
+        (if (null-pointer? ret)
+            #f
+            (pointer->tree-entry ret))))))
 
-(define (tree-entry-byname tree filename)
-  (let* ((proc (libgit2->procedure '* "git_tree_entry_byname" '(* *)))
-         (ret (proc (tree->pointer tree) (string->pointer filename))))
-    (if (null-pointer? ret)
-        #f
-        (pointer->tree-entry ret))))
+(define tree-entry-byname
+  (let ((proc (libgit2->procedure '* "git_tree_entry_byname" '(* *))))
+    (lambda (tree filename)
+      (let ((ret (proc (tree->pointer tree) (string->pointer filename))))
+        (if (null-pointer? ret)
+            #f
+            (pointer->tree-entry ret))))))
 
-(define (tree-entry-bypath tree path)
-  (let ((proc (libgit2->procedure* "git_tree_entry_bypath" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (tree->pointer tree) (string->pointer path))
-    (pointer->tree-entry! (dereference-pointer out))))
+(define tree-entry-bypath
+  (let ((proc (libgit2->procedure* "git_tree_entry_bypath" '(* * *))))
+    (lambda (tree path)
+      (let ((out (make-double-pointer)))
+        (proc out (tree->pointer tree) (string->pointer path))
+        (pointer->tree-entry! (dereference-pointer out))))))
 
-(define (tree-entry-cmp e1 e2)
+(define tree-entry-cmp
   (let ((proc (libgit2->procedure int "git_tree_entry_cmp" '(* *))))
-    (proc (tree-entry->pointer e1) (tree-entry->pointer e2))))
+    (lambda (e1 e2)
+      (proc (tree-entry->pointer e1) (tree-entry->pointer e2)))))
 
-(define (tree-entry-dup source)
-  (let ((proc (libgit2->procedure* "git_tree_entry_dup" '(* *)))
-        (dest (make-double-pointer)))
-    (proc dest (tree-entry->pointer source))
-    (pointer->tree-entry! (dereference-pointer dest))))
+(define tree-entry-dup
+  (let ((proc (libgit2->procedure* "git_tree_entry_dup" '(* *))))
+    (lambda (source)
+      (let ((dest (make-double-pointer)))
+        (proc dest (tree-entry->pointer source))
+        (pointer->tree-entry! (dereference-pointer dest))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode_raw
 
-(define (%tree-entry-free)
-  (dynamic-func "git_tree_entry_free" (libgit2)))
+(define %tree-entry-free (dynamic-func "git_tree_entry_free" libgit2))
 
 (define (pointer->tree-entry! pointer)
-  (set-pointer-finalizer! pointer (%tree-entry-free))
+  (set-pointer-finalizer! pointer %tree-entry-free)
   (pointer->tree-entry pointer))
 
-(define (tree-entry-id entry)
-  (let* ((proc (libgit2->procedure '* "git_tree_entry_id" '(*)))
-         (ret (proc (tree-entry->pointer entry))))
-    (pointer->oid ret)))
+(define tree-entry-id
+  (let ((proc (libgit2->procedure '* "git_tree_entry_id" '(*))))
+    (lambda (entry)
+      (let ((ret (proc (tree-entry->pointer entry))))
+        (pointer->oid ret)))))
 
-(define (tree-entry-name entry)
-  (let* ((proc (libgit2->procedure '* "git_tree_entry_name" '(*)))
-         (ret (proc (tree-entry->pointer entry))))
-    (pointer->string ret)))
+(define tree-entry-name
+  (let ((proc (libgit2->procedure '* "git_tree_entry_name" '(*))))
+    (lambda (entry)
+      (let ((ret (proc (tree-entry->pointer entry))))
+        (pointer->string ret)))))
 
-(define (tree-entry->object repository entry)
-  (let ((proc (libgit2->procedure* "git_tree_entry_to_object" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (tree-entry->pointer entry))
-    (pointer->object! (dereference-pointer out))))
+(define tree-entry->object
+  (let ((proc (libgit2->procedure* "git_tree_entry_to_object" '(* * *))))
+    (lambda (repository entry)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (tree-entry->pointer entry))
+        (pointer->object! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_type
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entrycount
 
-(define (%tree-free)
-  (dynamic-func "git_tree_free" (libgit2)))
+(define %tree-free (dynamic-func "git_tree_free" libgit2))
 
 (define (pointer->tree! pointer)
-  (set-pointer-finalizer! pointer (%tree-free))
+  (set-pointer-finalizer! pointer %tree-free)
   (pointer->tree pointer))
 
-(define (tree-id tree)
+(define tree-id
   (let ((proc (libgit2->procedure '* "git_tree_id" '(*))))
-    (pointer->oid (proc (tree->pointer tree)))))
+    (lambda (tree)
+      (pointer->oid (proc (tree->pointer tree))))))
 
-(define (tree-lookup repository id)
-  (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out
-          (repository->pointer repository)
-          (oid->pointer id))
-    (pointer->tree! (dereference-pointer out))))
+(define tree-lookup
+  (let ((proc (libgit2->procedure* "git_tree_lookup" '(* * *))))
+    (lambda (repository id)
+      (let ((out (make-double-pointer)))
+        (proc out
+              (repository->pointer repository)
+              (oid->pointer id))
+        (pointer->tree! (dereference-pointer out))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_lookup_prefix
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_owner
 
-(define (tree-walk tree mode callback)
-  (let ((proc (libgit2->procedure* "git_tree_walk" `(* ,int * *)))
-        ;; If the callback returns a positive value, the passed entry will
-        ;; be skipped on the traversal (in pre mode). A negative value stops
-        ;; the walk.
-        (callback*
-         (procedure->pointer int
-                             (lambda (root entry _)
-                               (callback (pointer->string root)
-                                         (pointer->tree-entry entry)))
-                             (list '* '* '*))))
-    (proc (tree->pointer tree) mode callback* %null-pointer)))
+(define tree-walk
+  (let ((proc (libgit2->procedure* "git_tree_walk" `(* ,int * *))))
+    (lambda (tree mode callback)
+      ;; If the callback returns a positive value, the passed entry will
+      ;; be skipped on the traversal (in pre mode). A negative value stops
+      ;; the walk.
+      (let ((callback* (procedure->pointer int
+                                           (lambda (root entry _)
+                                             (callback (pointer->string root)
+                                                       (pointer->tree-entry entry)))
+                                           (list '* '* '*))))
+        (proc (tree->pointer tree) mode callback* %null-pointer)))))
 
 (define (tree-fold proc knil tree)
   (let ((out knil))

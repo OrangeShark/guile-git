@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -33,76 +33,83 @@
             cred-userpass-paintext-new
             cred-acquire-cb))
 
-(define (cred-default-new cred-double-pointer)
+(define cred-default-new
   (let ((proc (libgit2->procedure* "git_cred_default_new" '(*))))
-    (proc cred-double-pointer)))
+    (lambda (cred-double-pointer)
+      (proc cred-double-pointer))))
 
-(define (cred-free cred-double-pointer)
+(define cred-free
   (let ((proc (libgit2->procedure void "git_cred_free" '(*))))
-    (proc cred-double-pointer)))
+    (lambda (cred-double-pointer)
+      (proc cred-double-pointer))))
 
-(define (cred-has-username? cred-double-pointer)
+(define cred-has-username?
   (let ((proc (libgit2->procedure int "git_cred_has_username" '(*))))
-    (eq? (proc cred-double-pointer) 1)))
+    (lambda (cred-double-pointer)
+      (eq? (proc cred-double-pointer) 1))))
 
-(define (cred-ssh-custom-new cred-double-pointer username
-                             publickey sign-callback)
-  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new"
-                                   `(* * * ,size_t * *))))
-    (proc cred-double-pointer
-          (string->pointer username)
-          (string->pointer publickey)
-          (string-length publickey)
-          (procedure->pointer int
-                              (lambda (session sig sig-len data data-len abstract)
-                                (sign-callback session sig data abstract))
-                              '(* * * * * *)))))
+(define cred-ssh-custom-new
+  (let ((proc (libgit2->procedure* "git_cred_ssh_custom_new" `(* * * ,size_t * *))))
+    (lambda (cred-double-pointer username publickey sign-callback)
+      (proc cred-double-pointer
+            (string->pointer username)
+            (string->pointer publickey)
+            (string-length publickey)
+            (procedure->pointer int
+                                (lambda (session sig sig-len data data-len abstract)
+                                  (sign-callback session sig data abstract))
+                                '(* * * * * *))))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/cred/git_cred_ssh_interactive_new
 
-(define (cred-ssh-key-from-agent cred-double-pointer username)
+(define cred-ssh-key-from-agent
   (let ((proc (libgit2->procedure int "git_cred_ssh_key_from_agent" '(* *))))
-    (proc cred-double-pointer (string->pointer username))))
+    (lambda (cred-double-pointer username)
+      (proc cred-double-pointer (string->pointer username)))))
 
-(define (cred-ssh-key-from-memory-new cred-double-pointer username
-                                      publickey privatekey passphrase)
+(define cred-ssh-key-from-memory-new
   (let ((proc (libgit2->procedure* "git_cred_ssh_key_memory_new" '(* * * * *))))
-    (proc cred-double-pointer
-          (string->pointer username)
-          (string->pointer publickey)
-          (string->pointer privatekey)
-          (string->pointer passphrase))))
+    (lambda (cred-double-pointer username publickey privatekey passphrase)
+      (proc cred-double-pointer
+            (string->pointer username)
+            (string->pointer publickey)
+            (string->pointer privatekey)
+            (string->pointer passphrase)))))
 
-(define (cred-ssh-key-new cred-double-pointer username
-                          publickey privatekey passphrase)
+(define cred-ssh-key-new
   (let ((proc (libgit2->procedure int "git_cred_ssh_key_new" '(* * * * *))))
-    (proc cred-double-pointer
-          (string->pointer username)
-          (string->pointer publickey)
-          (string->pointer privatekey)
-          (string->pointer passphrase))))
+    (lambda (cred-double-pointer username publickey privatekey passphrase)
+      (proc cred-double-pointer
+            (string->pointer username)
+            (string->pointer publickey)
+            (string->pointer privatekey)
+            (string->pointer passphrase)))))
 
-(define (cred-username-new cred-double-pointer username)
+(define cred-username-new
   (let ((proc (libgit2->procedure* "git_cred_username_new" '(* *))))
-    (proc cred-double-pointer (string->pointer username))))
+    (lambda (cred-double-pointer username)
+      (proc cred-double-pointer (string->pointer username)))))
 
-(define (cred-userpass cred-double-pointer url user-from-url allowed-types)
+(define cred-userpass
   (let ((proc (libgit2->procedure* "git_cred_userpass" `(* * * ,unsigned-int *))))
-    (proc cred-double-pointer
-          (string->pointer url)
-          (string->pointer user-from-url)
-          allowed-types
-          %null-pointer)))
+    (lambda (cred-double-pointer url user-from-url allowed-types)
+      (proc cred-double-pointer
+            (string->pointer url)
+            (string->pointer user-from-url)
+            allowed-types
+            %null-pointer))))
 
-(define (cred-userpass-paintext-new cred-double-pointer username password)
+(define cred-userpass-paintext-new
   (let ((proc (libgit2->procedure* "git_cred_userpass_plaintext_new" '(* * *))))
-    (proc cred-double-pointer
-          (string->pointer username)
-          (string->pointer password))))
+    (lambda (cred-double-pointer username password)
+      (proc cred-double-pointer
+            (string->pointer username)
+            (string->pointer password)))))
 
-(define (cred-acquire-cb callback)
-  (procedure->pointer
-   int
-   (lambda (cred url username allowed payload)
-     (callback cred url username allowed payload))
-   `(* * * ,unsigned-int *)))
+(define cred-acquire-cb
+  (lambda (callback)
+    (procedure->pointer
+     int
+     (lambda (cred url username allowed payload)
+       (callback cred url username allowed payload))
+    `(* * * ,unsigned-int *))))

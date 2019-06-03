@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -74,41 +74,43 @@
 (define STATUS-FLAG-INCLUDE-UNREADABLE               16384)
 (define STATUS-FLAG-INCLUDE-UNREADABLE-AS-UNTRACKED  32768)
 
-(define (%status-list-free)
-  (dynamic-func "git_status_list_free" (libgit2)))
+(define %status-list-free (dynamic-func "git_status_list_free" libgit2))
 
 (define (pointer->status-list! pointer)
-  (set-pointer-finalizer! pointer (%status-list-free))
+  (set-pointer-finalizer! pointer %status-list-free)
   (pointer->status-list pointer))
 
-(define* (make-status-options
-          #:optional
-          (show STATUS-SHOW-INDEX-AND-WORKDIR)
-          (flags STATUS-FLAG-INCLUDE-UNTRACKED))
-  (let ((proc (libgit2->procedure* "git_status_init_options" `(* ,unsigned-int)))
-        (status-options (make-status-options-bytestructure)))
-    (proc (status-options->pointer status-options) STATUS-OPTIONS-VERSION)
-    (set-status-options-show! status-options show)
-    (set-status-options-flags! status-options flags)
-    status-options))
+(define make-status-options
+  (let ((proc (libgit2->procedure* "git_status_init_options" `(* ,unsigned-int))))
+    (lambda* (#:optional
+              (show STATUS-SHOW-INDEX-AND-WORKDIR)
+              (flags STATUS-FLAG-INCLUDE-UNTRACKED))
+      (let ((status-options (make-status-options-bytestructure)))
+        (proc (status-options->pointer status-options) STATUS-OPTIONS-VERSION)
+        (set-status-options-show! status-options show)
+        (set-status-options-flags! status-options flags)
+        status-options))))
 
 (define status-init-options
   ;; Deprecated alias for compatibility with 0.2.
   make-status-options)
 
-(define (status-list-new repository status-options)
-  (let ((proc (libgit2->procedure* "git_status_list_new" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (status-options->pointer status-options))
-    (pointer->status-list! (dereference-pointer out))))
+(define status-list-new
+  (let ((proc (libgit2->procedure* "git_status_list_new" '(* * *))))
+    (lambda (repository status-options)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (status-options->pointer status-options))
+        (pointer->status-list! (dereference-pointer out))))))
 
-(define (status-list-entry-count status-list)
+(define status-list-entry-count
   (let ((proc (libgit2->procedure size_t "git_status_list_entrycount" '(*))))
-    (proc (status-list->pointer status-list))))
+    (lambda (status-list)
+      (proc (status-list->pointer status-list)))))
 
-(define (status-byindex status-list index)
+(define status-byindex
   (let ((proc (libgit2->procedure '* "git_status_byindex" `(* ,size_t))))
-    (pointer->status-entry (proc (status-list->pointer status-list) index))))
+    (lambda (status-list index)
+      (pointer->status-entry (proc (status-list->pointer status-list) index)))))
 
 (define (status-list->status-entries status-list)
   (map (cut status-byindex status-list <>)

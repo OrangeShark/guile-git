@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -31,11 +31,12 @@
 
 (define FETCH-OPTIONS-VERSION 1)
 
-(define (make-fetch-options)
-  (let ((proc (libgit2->procedure* "git_fetch_init_options" `(* ,unsigned-int)))
-        (fetch-options (make-fetch-options-bytestructure)))
-    (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
-    fetch-options))
+(define make-fetch-options
+  (let ((proc (libgit2->procedure* "git_fetch_init_options" `(* ,unsigned-int))))
+    (lambda ()
+      (let ((fetch-options (make-fetch-options-bytestructure)))
+        (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
+        fetch-options))))
 
 (define fetch-init-options
   ;; Deprecated alias for compatibility with 0.2.

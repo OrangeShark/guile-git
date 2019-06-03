@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -26,20 +25,23 @@
 
 ;;; checkout https://libgit2.github.com/libgit2/#HEAD/group/checkout
 
-(define (checkout-head repository options)
+(define checkout-head
   (let ((proc (libgit2->procedure* "git_checkout_head" '(* *))))
-    (proc (repository->pointer repository) %null-pointer)))
+    (lambda (repository options)
+      (proc (repository->pointer repository) %null-pointer))))
 
-(define (checkout-index repository index options)
+(define checkout-index
   (let ((proc (libgit2->procedure* "git_checkout_index" '(* * *))))
-    (proc (repository->pointer repository)
-          (index->pointer index)
-          %null-pointer)))
+    (lambda (repository index options)
+      (proc (repository->pointer repository)
+	    (index->pointer index)
+	    %null-pointer))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/checkout/git_checkout_init_options
 
-(define (checkout-tree repository treeish)
+(define checkout-tree
   (let ((proc (libgit2->procedure* "git_checkout_tree" `(* * *))))
-    (proc (repository->pointer repository)
-          (object->pointer treeish)
-          %null-pointer)))
+    (lambda (repository treeish)
+      (proc (repository->pointer repository)
+	    (object->pointer treeish)
+	    %null-pointer))))

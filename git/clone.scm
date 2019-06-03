@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -33,17 +32,18 @@
 
 (define CLONE-OPTIONS-VERSION 1)
 
-(define* (clone url directory #:optional (clone-options (make-clone-options)))
-  "Clones a remote repository found at URL into DIRECTORY.
+(define clone
+  (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
+    (lambda* (url directory #:optional (clone-options (make-clone-options)))
+      "Clones a remote repository found at URL into DIRECTORY.
 
 Returns the repository on success or throws an error on failure."
-  (let ((proc (libgit2->procedure* "git_clone" '(* * * *)))
-        (out (make-double-pointer)))
-    (proc out
-          (string->pointer url)
-          (string->pointer directory)
-          (clone-options->pointer clone-options))
-    (pointer->repository! (dereference-pointer out))))
+      (let ((out (make-double-pointer)))
+        (proc out
+              (string->pointer url)
+              (string->pointer directory)
+              (clone-options->pointer clone-options))
+        (pointer->repository! (dereference-pointer out))))))
 
 (define (make-clone-options)
   (let ((proc (libgit2->procedure* "git_clone_init_options" `(* ,unsigned-int)))

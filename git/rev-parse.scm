@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -26,8 +26,9 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/revparse/git_revparse_ext
 
-(define (revparse-single repository spec)
-  (let ((proc (libgit2->procedure* "git_revparse_single" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (string->pointer spec))
-    (pointer->object! (dereference-pointer out))))
+(define revparse-single
+  (let ((proc (libgit2->procedure* "git_revparse_single" '(* * *))))
+    (lambda (repository spec)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (string->pointer spec))
+        (pointer->object! (dereference-pointer out))))))

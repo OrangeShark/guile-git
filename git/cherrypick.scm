@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -26,12 +25,14 @@
 
 ;;; cherrypick https://libgit2.github.com/libgit2/#HEAD/group/cherrypick
 
-(define (cherrypick repository commit)
+(define cherrypick
   (let ((proc (libgit2->procedure* "git_cherrypick" '(* * *))))
-    (proc (repository->pointer repository)
-          (commit->pointer commit)
-          %null-pointer)))
+    (lambda (repository commit)
+      (proc (repository->pointer repository)
+            (commit->pointer commit)
+            %null-pointer))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_commit
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/cherrypick/git_cherrypick_init_options
+

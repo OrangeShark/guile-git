@@ -1,6 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -42,17 +41,19 @@
 (define GIT_OPT_SET_SSL_CIPHERS 15)
 (define GIT_OPT_GET_USER_AGENT 16)
 
-(define* (set-tls-certificate-locations! directory #:optional file)
-  "Search for TLS certificates under FILE (a certificate bundle) or under
+(define set-tls-certificate-locations!
+  (let ((proc (libgit2->procedure* "git_libgit2_opts" (list int '* '*))))
+    (lambda* (directory #:optional file)
+      "Search for TLS certificates under FILE (a certificate bundle) or under
 DIRECTORY (a directory containing one file per certificate, with \"hash
 symlinks\" as created by OpenSSL's 'c_rehash').  Either can be #f but not both.
 This is used when transferring from a repository over HTTPS."
-  (let ((proc (libgit2->procedure* "git_libgit2_opts" (list int '* '*))))
-    (proc GIT_OPT_SET_SSL_CERT_LOCATIONS
-          (if file (string->pointer file) %null-pointer)
-          (if directory (string->pointer directory) %null-pointer))))
+      (proc GIT_OPT_SET_SSL_CERT_LOCATIONS
+            (if file (string->pointer file) %null-pointer)
+            (if directory (string->pointer directory) %null-pointer)))))
 
-(define (set-user-agent! user-agent)
-  "Append USER-AGENT to the 'User-Agent' HTTP header."
+(define set-user-agent!
   (let ((proc (libgit2->procedure* "git_libgit2_opts" (list int '*))))
-    (proc GIT_OPT_SET_USER_AGENT (string->pointer user-agent))))
+    (lambda (user-agent)
+      "Append USER-AGENT to the 'User-Agent' HTTP header."
+      (proc GIT_OPT_SET_USER_AGENT (string->pointer user-agent)))))

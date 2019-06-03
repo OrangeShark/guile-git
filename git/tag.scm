@@ -36,67 +36,75 @@
             tag-create-lightweight
             tag-create-lightweight!))
 
-(define (%tag-free)
-  (dynamic-func "git_tag_free" (libgit2)))
+(define %tag-free (dynamic-func "git_tag_free" libgit2))
 
 (define (pointer->tag! pointer)
-  (set-pointer-finalizer! pointer (%tag-free))
+  (set-pointer-finalizer! pointer %tag-free)
   (pointer->tag pointer))
 
-(define (tag-lookup repository oid)
-  (let ((proc (libgit2->procedure* "git_tag_lookup" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (oid->pointer oid))
-    (pointer->tag! (dereference-pointer out))))
+(define tag-lookup
+  (let ((proc (libgit2->procedure* "git_tag_lookup" '(* * *))))
+    (lambda (repository oid)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (oid->pointer oid))
+        (pointer->tag! (dereference-pointer out))))))
 
-(define (tag-lookup-prefix repository oid length)
-  (let ((proc (libgit2->procedure* "git_tag_lookup_prefix" `(* * * ,size_t)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (oid->pointer oid) length)
-    (pointer->tag! (dereference-pointer out))))
+(define tag-lookup-prefix
+  (let ((proc (libgit2->procedure* "git_tag_lookup_prefix" `(* * * ,size_t))))
+    (lambda (repository oid length)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (oid->pointer oid) length)
+        (pointer->tag! (dereference-pointer out))))))
 
-(define (tag-id tag)
+(define tag-id
   (let ((proc (libgit2->procedure '* "git_tag_id" '(*))))
-    (pointer->oid (proc (tag->pointer tag)))))
+    (lambda (tag)
+      (pointer->oid (proc (tag->pointer tag))))))
 
-(define (tag-target-id tag)
+(define tag-target-id
   (let ((proc (libgit2->procedure '* "git_tag_target_id" '(*))))
-    (pointer->oid (proc (tag->pointer tag)))))
+    (lambda (tag)
+      (pointer->oid (proc (tag->pointer tag))))))
 
-(define (tag-message tag)
+(define tag-message
   (let ((proc (libgit2->procedure '* "git_tag_message" '(*))))
-    (pointer->string (proc (tag->pointer tag)))))
+    (lambda (tag)
+      (pointer->string (proc (tag->pointer tag))))))
 
-(define (tag-name tag)
+(define tag-name
   (let ((proc (libgit2->procedure '* "git_tag_name" '(*))))
-      (pointer->string (proc (tag->pointer tag)))))
+    (lambda (tag)
+      (pointer->string (proc (tag->pointer tag))))))
 
-(define* (tag-create repository name target tagger message
-                    #:optional (force? #f))
-  (let ((proc (libgit2->procedure* "git_tag_create" `(* * * * * * ,int)))
-        (oid (make-oid-pointer)))
-    (proc oid
-          (repository->pointer repository)
-          (string->pointer name)
-          (object->pointer target)
-          (signature->pointer tagger)
-          (string->pointer message)
-          (if force? 1 0))
-    (pointer->oid oid)))
+(define tag-create
+  (let ((proc (libgit2->procedure* "git_tag_create" `(* * * * * * ,int))))
+    (lambda* (repository name target tagger message #:optional (force? #f))
+      (let ((oid (make-oid-pointer)))
+        (proc oid
+              (repository->pointer repository)
+              (string->pointer name)
+              (object->pointer target)
+              (signature->pointer tagger)
+              (string->pointer message)
+              (if force? 1 0))
+        (pointer->oid oid)))))
 
-(define (tag-create! repository name target tagger message)
-  (tag-create repository name target tagger message #t))
+(define tag-create!
+  (lambda (repository name target tagger message)
+    (tag-create repository name target tagger message #t)))
 
-(define* (tag-create-lightweight repository name target
-                                 #:optional (force? #f))
-  (let ((proc (libgit2->procedure* "git_tag_create_lightweight" `(* * * * ,int)))
-        (oid (make-oid-pointer)))
-    (proc oid
-          (repository->pointer repository)
-          (string->pointer name)
-          (object->pointer target)
-          (if force? 1 0))
-    (pointer->oid oid)))
+(define tag-create-lightweight
+  (let ((proc (libgit2->procedure* "git_tag_create_lightweight"
+                                   `(* * * * ,int))))
+    (lambda* (repository name target #:optional (force? #f))
+      (let ((oid (make-oid-pointer)))
+        (proc oid
+              (repository->pointer repository)
+              (string->pointer name)
+              (object->pointer target)
+              (if force? 1 0))
+        (pointer->oid oid)))))
 
-(define (tag-create-lightweight! repository name target)
-  (tag-create-lightweight repository name target #t))
+(define tag-create-lightweight!
+  (lambda (repository name target)
+    (tag-create-lightweight repository name target #t)))

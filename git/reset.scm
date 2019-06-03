@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -29,13 +29,14 @@
 (define RESET_MIXED 2)
 (define RESET_HARD  3)
 
-(define (reset repository target type)
+(define reset
   (let ((proc (libgit2->procedure* "git_reset" `(* * ,unsigned-int *))))
-    (proc (repository->pointer repository)
-          (object->pointer target)
-          type
-          ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_checkout_options
-          %null-pointer)))
+    (lambda (repository target type)
+      (proc (repository->pointer repository)
+            (object->pointer target)
+            type
+            ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_checkout_options
+            %null-pointer))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/reset/git_reset_default
 

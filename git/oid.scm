@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -36,35 +35,40 @@
 
 ;;; oid https://libgit2.github.com/libgit2/#HEAD/group/oid
 
-(define (oid-cmp a b)
+(define oid-cmp
   (let ((proc (libgit2->procedure int "git_oid_cmp" '(* *))))
-    (proc (oid->pointer a) (oid->pointer b))))
+    (lambda (a b)
+      (proc (oid->pointer a) (oid->pointer b)))))
 
-(define (oid-copy src)
-  (let ((proc (libgit2->procedure void "git_oid_cpy" '(* *)))
-        (out (make-oid-pointer)))
-    (proc out (oid->pointer src))
-    (pointer->oid out)))
+(define oid-copy
+  (let ((proc (libgit2->procedure void "git_oid_cpy" '(* *))))
+    (lambda (src)
+      (let ((out (make-oid-pointer)))
+        (proc out (oid->pointer src))
+        (pointer->oid out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fmt
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromraw
 
-(define (string->oid str)
-  (let ((proc (libgit2->procedure* "git_oid_fromstrn" `(* * ,size_t)))
-        (out (make-oid-pointer)))
-    (proc out (string->pointer str "US-ASCII") (string-length str))
-    (pointer->oid out)))
+(define string->oid
+  (let ((proc (libgit2->procedure* "git_oid_fromstrn" `(* * ,size_t))))
+    (lambda (str)
+      (let ((out (make-oid-pointer)))
+        (proc out (string->pointer str "US-ASCII") (string-length str))
+        (pointer->oid out)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_fromstrp
 
-(define (oid-zero? id)
+(define oid-zero?
   (let ((proc (libgit2->procedure int "git_oid_iszero" '(*))))
-    (eq? (proc (oid->pointer id)) 1)))
+    (lambda (id)
+      (eq? (proc (oid->pointer id)) 1))))
 
-(define (oid-ncmp? a b len)
+(define oid-ncmp?
   (let ((proc (libgit2->procedure int "git_oid_ncmp" `(* * ,size_t))))
-    (eq? (proc (oid->pointer a) (oid->pointer b) len) 0)))
+    (lambda (a b len)
+      (eq? (proc (oid->pointer a) (oid->pointer b) len) 0))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_nfmt
 
@@ -76,19 +80,22 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_shorten_new
 
-(define (oid-strcmp id string)
+(define oid-strcmp
   (let ((proc (libgit2->procedure int "git_oid_strcmp" '(* *))))
-    (proc (oid->pointer id) (string->pointer string))))
+    (lambda (id string)
+      (proc (oid->pointer id) (string->pointer string)))))
 
-(define (oid-str=? id string)
+(define oid-str=?
   (let ((proc (libgit2->procedure int "git_oid_streq" '(* *))))
-    (proc (oid->pointer id) (string->pointer string))))
+    (lambda (id string)
+      (proc (oid->pointer id) (string->pointer string)))))
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/oid/git_oid_tostr
 
-(define (oid->string id)
+(define oid->string
   (let ((proc (libgit2->procedure '* "git_oid_tostr_s" '(*))))
-    (pointer->string (proc (oid->pointer id)))))
+    (lambda (id)
+      (pointer->string (proc (oid->pointer id))))))
 
 (define (print-oid oid port)
   (format port "#<oid ~a>" (oid->string oid)))

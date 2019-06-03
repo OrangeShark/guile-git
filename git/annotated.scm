@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -32,41 +31,45 @@
 
 ;;; annotated
 
-(define (%annotated-commit-free)
-  (dynamic-func "git_annotated_commit_free" (libgit2)))
+(define %annotated-commit-free (dynamic-func "git_annotated_commit_free" libgit2))
 
 (define (pointer->annotated-commit! pointer)
-  (set-pointer-finalizer! pointer (%annotated-commit-free))
+  (set-pointer-finalizer! pointer %annotated-commit-free)
   (pointer->annotated-commit pointer))
 
-(define (annotated-commit-from-fetchhead repository branch-name remote-url id)
-  (let ((proc (libgit2->procedure* "git_annotated_commit_from_fetchhead" '(* * * * *)))
-        (out (make-double-pointer)))
-    (proc out
-          (repository->pointer repository)
-          (string->pointer branch-name)
-          (string->pointer remote-url)
-          (oid->pointer id))
-    (pointer->annotated-commit! (dereference-pointer out))))
+(define annotated-commit-from-fetchhead
+  (let ((proc (libgit2->procedure* "git_annotated_commit_from_fetchhead" '(* * * * *))))
+    (lambda (repository branch-name remote-url id)
+      (let ((out (make-double-pointer)))
+        (proc out
+              (repository->pointer repository)
+              (string->pointer branch-name)
+              (string->pointer remote-url)
+              (oid->pointer id))
+        (pointer->annotated-commit! (dereference-pointer out))))))
 
-(define (annotated-commit-from-ref repository reference)
-  (let ((proc (libgit2->procedure* "git_annotated_commit_from_ref" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (reference->pointer reference))
-    (pointer->annotated-commit! (dereference-pointer out))))
+(define annotated-commit-from-ref
+  (let ((proc (libgit2->procedure* "git_annotated_commit_from_ref" '(* * *))))
+    (lambda (repository reference)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (reference->pointer reference))
+        (pointer->annotated-commit! (dereference-pointer out))))))
 
-(define (annotated-commit-from-revspec repository revspec)
-  (let ((proc (libgit2->procedure* "git_annotated_commit_from_revspec" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (string->pointer revspec))
-    (pointer->annotated-commit (dereference-pointer out))))
+(define annotated-commit-from-revspec
+  (let ((proc (libgit2->procedure* "git_annotated_commit_from_revspec" '(* * *))))
+    (lambda (repository revspec)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (string->pointer revspec))
+        (pointer->annotated-commit (dereference-pointer out))))))
 
-(define (annotated-commit-id commit)
+(define annotated-commit-id
   (let ((proc (libgit2->procedure '* "git_annotated_commit_id" '(*))))
-    (pointer->oid (proc (annotated-commit->pointer commit)))))
+    (lambda (commit)
+      (pointer->oid (proc (annotated-commit->pointer commit))))))
 
-(define (annotated-commit-lookup repository id)
-  (let ((proc (libgit2->procedure* "git_annotated_commit_lookup" '(* * *)))
-        (out (make-double-pointer)))
-    (proc out (repository->pointer repository) (oid->pointer id))
-    (pointer->annotated-commit! (dereference-pointer out))))
+(define annotated-commit-lookup
+  (let ((proc (libgit2->procedure* "git_annotated_commit_lookup" '(* * *))))
+    (lambda (repository id)
+      (let ((out (make-double-pointer)))
+        (proc out (repository->pointer repository) (oid->pointer id))
+        (pointer->annotated-commit! (dereference-pointer out))))))

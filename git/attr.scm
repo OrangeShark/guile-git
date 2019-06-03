@@ -1,7 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -27,15 +26,17 @@
 
 ;;; attr
 
-(define (attr-add-macro repository name values)
+(define attr-add-macro
   (let ((proc (libgit2->procedure* "git_attr_add_macro" '(* * *))))
-    (proc (repository->pointer repository)
-          (string->pointer name)
-          (string->pointer values))))
+    (lambda (repository name values)
+      (proc (repository->pointer repository)
+	    (string->pointer name)
+	    (string->pointer values)))))
 
-(define (attr-cache-flush repository)
+(define attr-cache-flush
   (let ((proc (libgit2->procedure void "git_attr_cache_flush" '(*))))
-    (proc (repository->pointer repository))))
+    (lambda (repository)
+      (proc (repository->pointer repository)))))
 
 ;; https://libgit2.github.com/libgit2/#HEAD/group/attr/git_attr_foreach
 
