@@ -30,14 +30,14 @@
             DESCRIBE-PATTERN
             DESCRIBE-ONLY-FOLLOW-FIRST-PARENT?
             DESCRIBE-FALLBACK-TO-OID?
-            describe-init-options
+            make-describe-options
             describe-commit
             describe-workdir
 
             DESCRIBE-FORMAT-ABBREVIATED-SIZE
             DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT?
             DESCRIBE-FORMAT-DIRTY-SUFFIX
-            describe-format-init-options
+            make-describe-format-options
             describe-format))
 
 ;;; https://libgit2.org/libgit2/#HEAD/group/describe
@@ -60,7 +60,7 @@
     ((all) DESCRIBE-STRATEGY-ALL)
     (else (raise-git-error GIT_EINVALID))))
 
-(define* (describe-init-options #:key
+(define* (make-describe-options #:key
                                 (max-candidates DESCRIBE-MAX-CANDIDATES-TAGS)
                                 (strategy DESCRIBE-STRATEGY)
                                 (pattern DESCRIBE-PATTERN)
@@ -75,7 +75,7 @@ refs matching the given glob(7) pattern are considered.  ONLY-FOLLOW-FIRST-PAREN
 ignore tags that are not direct ancestors of the commit.  When FALLBACK-TO-OID? is true,
 the commit ID will be returned if no matching tags were found."
   (let ((proc (libgit2->procedure* "git_describe_init_options" `(* ,unsigned-int)))
-        (describe-options (make-describe-options))
+        (describe-options (make-describe-options-bytestructure))
         (strategy (symbol->describe-strategy strategy)))
     (proc (describe-options->pointer describe-options) DESCRIBE-OPTIONS-VERSION)
     (set-describe-options-max-candidates! describe-options max-candidates)
@@ -96,13 +96,13 @@ the commit ID will be returned if no matching tags were found."
   (set-pointer-finalizer! pointer (%describe-result-free))
   (pointer->describe-result pointer))
 
-(define* (describe-commit commit #:optional (options (describe-init-options)))
+(define* (describe-commit commit #:optional (options (make-describe-options)))
   (let ((proc (libgit2->procedure* "git_describe_commit" '(* * *)))
         (out (make-double-pointer)))
     (proc out (commit->pointer commit) (describe-options->pointer options))
     (pointer->describe-result! (dereference-pointer out))))
 
-(define* (describe-workdir repository #:optional (options (describe-init-options)))
+(define* (describe-workdir repository #:optional (options (make-describe-options)))
   (let ((proc (libgit2->procedure* "git_describe_workdir" '(* * *)))
         (out (make-double-pointer)))
     (proc out (repository->pointer repository) (describe-options->pointer options))
@@ -116,7 +116,7 @@ the commit ID will be returned if no matching tags were found."
 (define DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT? #f)
 (define DESCRIBE-FORMAT-DIRTY-SUFFIX "")
 
-(define* (describe-format-init-options
+(define* (make-describe-format-options
           #:key
           (abbreviated-size DESCRIBE-FORMAT-ABBREVIATED-SIZE)
           (always-use-long-format? DESCRIBE-FORMAT-ALWAYS-USE-LONG-FORMAT?)
@@ -128,7 +128,7 @@ with tag, number of commits and abbreviated commit ID even when it exactly match
 tag.  DIRTY-SUFFIX is an optional string that will be appended to the output when the
 worktree is considered 'dirty', i.e. modified."
   (let ((proc (libgit2->procedure* "git_describe_init_format_options" `(* ,unsigned-int)))
-        (describe-format-options (make-describe-format-options)))
+        (describe-format-options (make-describe-format-options-bytestructure)))
     (proc (describe-format-options->pointer describe-format-options)
           DESCRIBE-FORMAT-OPTIONS-VERSION)
     (set-describe-format-options-abbreviated-size! describe-format-options abbreviated-size)
@@ -140,7 +140,7 @@ worktree is considered 'dirty', i.e. modified."
 
     describe-format-options))
 
-(define* (describe-format result #:optional (options (describe-format-init-options)))
+(define* (describe-format result #:optional (options (make-describe-format-options)))
   (let ((proc (libgit2->procedure* "git_describe_format" '(* * *)))
         (out (make-buffer)))
     (proc out (describe-result->pointer result)

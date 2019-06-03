@@ -24,17 +24,22 @@
   #:use-module (git types)
   #:use-module (srfi srfi-26)
 
-  #:export (fetch-init-options
+  #:export (make-fetch-options
+            fetch-init-options   ;deprecated!
             set-fetch-auth-with-ssh-agent!
             set-fetch-auth-with-default-ssh-key!))
 
 (define FETCH-OPTIONS-VERSION 1)
 
-(define (fetch-init-options)
+(define (make-fetch-options)
   (let ((proc (libgit2->procedure* "git_fetch_init_options" `(* ,unsigned-int)))
-        (fetch-options (make-fetch-options)))
+        (fetch-options (make-fetch-options-bytestructure)))
     (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
     fetch-options))
+
+(define fetch-init-options
+  ;; Deprecated alias for compatibility with 0.2.
+  make-fetch-options)
 
 (define (set-fetch-auth-callback fetch-options callback)
   (let ((callbacks (fetch-options-callbacks fetch-options)))

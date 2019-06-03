@@ -63,13 +63,13 @@
     (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
-           (options (describe-init-options #:strategy 'tags)))
+           (options (make-describe-options #:strategy 'tags)))
       (describe-format (describe-commit commit options))))
 
   (test-equal "describe workdir, strategy and pattern"
     "0.1-1-g3f848a1"
     (let ((repository (repository-open directory))
-          (options (describe-init-options #:strategy 'all
+          (options (make-describe-options #:strategy 'all
                                           #:pattern "0.1")))
     (describe-format (describe-workdir repository options))))
 
@@ -78,7 +78,7 @@
     (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
-           (options (describe-init-options
+           (options (make-describe-options
                      #:strategy 'foo)))
       (describe-format (describe-commit commit options))))
 
@@ -96,7 +96,7 @@
            (oid (reference-target (repository-head repository)))
            (head (commit-lookup repository oid))
            (head^ (commit-parent head))
-           (format-options (describe-format-init-options
+           (format-options (make-describe-format-options
                             #:always-use-long-format? #t)))
       (describe-format (describe-commit head^) format-options)))
 
@@ -105,7 +105,7 @@
     (let* ((repository (repository-open directory))
            (oid (reference-target (repository-head repository)))
            (commit (commit-lookup repository oid))
-           (options (describe-init-options
+           (options (make-describe-options
                      #:max-candidates 0)))
       (catch 'git-error
         (lambda ()
@@ -121,8 +121,8 @@
            (head (commit-lookup repository oid))
            (head^ (commit-parent head))
            (root (commit-parent head^))
-           (options (describe-init-options #:fallback-to-oid? #t))
-           (format-options (describe-format-init-options
+           (options (make-describe-options #:fallback-to-oid? #t))
+           (format-options (make-describe-format-options
                             #:abbreviated-size 5)))
       (describe-format (describe-commit root options) format-options)))
 
@@ -134,7 +134,7 @@
   (test-equal "describe workdir, dirty suffix"
     "0.1-1-g3f848a1-dirty"
     (let* ((repository (repository-open directory))
-           (format-options (describe-format-init-options
+           (format-options (make-describe-format-options
                             #:dirty-suffix "-dirty")))
       (describe-format (describe-workdir repository) format-options))))
 

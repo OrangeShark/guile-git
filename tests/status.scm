@@ -33,7 +33,7 @@
   (test-equal "empty status list"
     0
     (let ((repository (repository-open directory))
-          (opts (status-init-options)))
+          (opts (make-status-options)))
       (status-list-entry-count (status-list-new repository opts))))
 
   ;; Create a new, untracked, file test.txt in simple directory.
@@ -45,13 +45,13 @@
     1
     (begin
       (let* ((repository (repository-open directory))
-             (opts (status-init-options)))
+             (opts (make-status-options)))
         (status-list-entry-count (status-list-new repository opts)))))
 
   (test-equal "untracked file name"
     "test.txt"
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-entry (status-byindex
                           (status-list-new repository opts) 0)))
       (diff-file-path
@@ -61,14 +61,14 @@
   (test-equal "status-entries length"
     1
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-list (status-list-new repository opts)))
       (length (status-list->status-entries status-list))))
 
   (test-equal "status-entries type"
     #t
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-list (status-list-new repository opts)))
       (match (status-list->status-entries status-list)
         ((e) (status-entry? e))
@@ -77,7 +77,7 @@
   (test-equal "untracked file status"
     '(wt-new)
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-entry (status-byindex
                           (status-list-new repository opts) 0)))
       (status-entry-status status-entry)))
@@ -88,7 +88,7 @@
   (test-equal "empty status list"
     0
     (let ((repository (repository-open directory))
-          (opts (status-init-options)))
+          (opts (make-status-options)))
       (status-list-entry-count (status-list-new repository opts))))
 
   ;; Modify a tracked file.
@@ -99,14 +99,14 @@
   (test-equal "status-entries length"
     1
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-list (status-list-new repository opts)))
       (length (status-list->status-entries status-list))))
 
   (test-equal "unstaged file status"
     '(wt-modified)
     (let* ((repository (repository-open directory))
-           (opts (status-init-options))
+           (opts (make-status-options))
            (status-entry (status-byindex
                           (status-list-new repository opts) 0)))
       (status-entry-status status-entry))))
