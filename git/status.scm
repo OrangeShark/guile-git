@@ -44,7 +44,8 @@
             STATUS-FLAG-INCLUDE-UNREADABLE
             STATUS-FLAG-INCLUDE-UNREADABLE-AS-UNTRACKED
 
-            status-init-options
+            make-status-options
+            status-init-options  ;deprecated!
             status-list-new
             status-list-entry-count
             status-byindex
@@ -80,16 +81,20 @@
   (set-pointer-finalizer! pointer (%status-list-free))
   (pointer->status-list pointer))
 
-(define* (status-init-options
+(define* (make-status-options
           #:optional
           (show STATUS-SHOW-INDEX-AND-WORKDIR)
           (flags STATUS-FLAG-INCLUDE-UNTRACKED))
   (let ((proc (libgit2->procedure* "git_status_init_options" `(* ,unsigned-int)))
-        (status-options (make-status-options)))
+        (status-options (make-status-options-bytestructure)))
     (proc (status-options->pointer status-options) STATUS-OPTIONS-VERSION)
     (set-status-options-show! status-options show)
     (set-status-options-flags! status-options flags)
     status-options))
+
+(define status-init-options
+  ;; Deprecated alias for compatibility with 0.2.
+  make-status-options)
 
 (define (status-list-new repository status-options)
   (let ((proc (libgit2->procedure* "git_status_list_new" '(* * *)))

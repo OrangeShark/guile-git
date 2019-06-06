@@ -46,20 +46,20 @@
 
             status-entry? status-entry-status status-entry-head-to-index status-entry-index-to-workdir pointer->status-entry
 
-            make-status-options status-options->pointer set-status-options-show! set-status-options-flags!
+            make-status-options-bytestructure status-options->pointer set-status-options-show! set-status-options-flags!
 
             make-remote-callbacks remote-callbacks->pointer set-remote-callbacks-version!
-            make-fetch-options fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
+            make-fetch-options-bytestructure fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
-            make-clone-options clone-options->pointer clone-options-fetch-options
+            make-clone-options-bytestructure clone-options->pointer clone-options-fetch-options
 
-            make-describe-options describe-options->pointer describe-options->bytestructure
+            make-describe-options-bytestructure describe-options->pointer describe-options->bytestructure
             set-describe-options-max-candidates! set-describe-options-strategy!
             set-describe-options-pattern! set-describe-options-only-follow-first-parent!
             set-describe-options-show-commit-oid-as-fallback!
 
-            make-describe-format-options describe-format-options->pointer describe-format-options->bytestructure
+            make-describe-format-options-bytestructure describe-format-options->pointer describe-format-options->bytestructure
             set-describe-format-options-abbreviated-size!
             set-describe-format-options-always-use-long-format!
             set-describe-format-options-dirty-suffix!
@@ -267,7 +267,7 @@
                           (make-pointer (bytestructure-ref bs 'message)))
                          (bytestructure-ref bs 'class)))))
 
-(define (make-status-options)
+(define (make-status-options-bytestructure)
   (%make-status-options (bytestructure %status-options)))
 
 (define (status-options->pointer status-options)
@@ -366,7 +366,7 @@
   fetch-options?
   (bytestructure fetch-options-bytestructure))
 
-(define (make-fetch-options)
+(define (make-fetch-options-bytestructure)
   (%make-fetch-options (bytestructure %fetch-options)))
 
 (define (fetch-options->pointer fetch-options)
@@ -423,7 +423,7 @@
   clone-options?
   (bytestructure clone-options-bytestructure))
 
-(define (make-clone-options)
+(define (make-clone-options-bytestructure)
   (%make-clone-options (bytestructure %clone-options)))
 
 (define (clone-options->pointer clone-options)
@@ -493,7 +493,7 @@
   describe-options?
   (bytestructure describe-options-bytestructure))
 
-(define (make-describe-options)
+(define (make-describe-options-bytestructure)
   (%make-describe-options (bytestructure %describe-options)))
 
 (define (describe-options->pointer options)
@@ -536,7 +536,7 @@
   (bytestructure->pointer (describe-format-options-bytestructure
                            format-options)))
 
-(define (make-describe-format-options)
+(define (make-describe-format-options-bytestructure)
   (%make-describe-format-options (bytestructure %describe-format-options)))
 
 (define (set-describe-format-options-abbreviated-size! format-options abbreviated-size)

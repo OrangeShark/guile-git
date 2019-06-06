@@ -26,13 +26,14 @@
   #:use-module (git types)
   #:use-module (git repository)
   #:export (clone
-            clone-init-options))
+            clone-init-options ;deprecated!
+            make-clone-options))
 
 ;;; clone https://libgit2.github.com/libgit2/#HEAD/group/clone
 
 (define CLONE-OPTIONS-VERSION 1)
 
-(define* (clone url directory #:optional (clone-options (clone-init-options)))
+(define* (clone url directory #:optional (clone-options (make-clone-options)))
   "Clones a remote repository found at URL into DIRECTORY.
 
 Returns the repository on success or throws an error on failure."
@@ -44,8 +45,12 @@ Returns the repository on success or throws an error on failure."
           (clone-options->pointer clone-options))
     (pointer->repository! (dereference-pointer out))))
 
-(define (clone-init-options)
+(define (make-clone-options)
   (let ((proc (libgit2->procedure* "git_clone_init_options" `(* ,unsigned-int)))
-        (clone-options (make-clone-options)))
+        (clone-options (make-clone-options-bytestructure)))
     (proc (clone-options->pointer clone-options) CLONE-OPTIONS-VERSION)
     clone-options))
+
+(define clone-init-options
+  ;; Deprecated alias for compatibility with 0.2.
+  make-clone-options)
