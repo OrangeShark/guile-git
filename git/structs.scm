@@ -55,7 +55,7 @@
             make-clone-options-bytestructure clone-options->pointer clone-options-fetch-options
 
             make-describe-options-bytestructure describe-options->pointer describe-options->bytestructure
-            set-describe-options-max-candidates! set-describe-options-strategy!
+            set-describe-options-max-candidates-tag! set-describe-options-strategy!
             set-describe-options-pattern! set-describe-options-only-follow-first-parent!
             set-describe-options-show-commit-oid-as-fallback!
 
@@ -499,7 +499,7 @@
 (define (describe-options->pointer options)
   (bytestructure->pointer (describe-options-bytestructure options)))
 
-(define (set-describe-options-max-candidates! options max-candidates)
+(define (set-describe-options-max-candidates-tag! options max-candidates)
   (bytestructure-set! (describe-options-bytestructure options)
                       'max-candidates-tag max-candidates))
 
