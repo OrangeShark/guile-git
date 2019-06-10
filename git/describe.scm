@@ -22,7 +22,7 @@
   #:use-module (git bindings)
   #:use-module (git types)
   #:use-module (git structs)
-  #:export (DESCRIBE-MAX-CANDIDATES-TAGS
+  #:export (DESCRIBE-MAX-CANDIDATES
             DESCRIBE-STRATEGY-DEFAULT
             DESCRIBE-STRATEGY-TAGS
             DESCRIBE-STRATEGY-ALL
@@ -44,7 +44,7 @@
 
 (define DESCRIBE-OPTIONS-VERSION 1)
 
-(define DESCRIBE-MAX-CANDIDATES-TAGS 10)
+(define DESCRIBE-MAX-CANDIDATES 10)
 (define DESCRIBE-STRATEGY-DEFAULT 0)
 (define DESCRIBE-STRATEGY-TAGS 1)
 (define DESCRIBE-STRATEGY-ALL 2)
@@ -61,7 +61,7 @@
     (else (raise-git-error GIT_EINVALID))))
 
 (define* (make-describe-options #:key
-                                (max-candidates DESCRIBE-MAX-CANDIDATES-TAGS)
+                                (max-candidates DESCRIBE-MAX-CANDIDATES)
                                 (strategy DESCRIBE-STRATEGY)
                                 (pattern DESCRIBE-PATTERN)
                                 (only-follow-first-parent? DESCRIBE-ONLY-FOLLOW-FIRST-PARENT?)
@@ -78,7 +78,7 @@ the commit ID will be returned if no matching tags were found."
         (describe-options (make-describe-options-bytestructure))
         (strategy (symbol->describe-strategy strategy)))
     (proc (describe-options->pointer describe-options) DESCRIBE-OPTIONS-VERSION)
-    (set-describe-options-max-candidates! describe-options max-candidates)
+    (set-describe-options-max-candidates-tag! describe-options max-candidates)
     (when (> strategy 0)
       (set-describe-options-strategy! describe-options strategy))
     (when (> (string-length pattern) 0)
