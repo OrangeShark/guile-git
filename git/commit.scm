@@ -77,13 +77,13 @@
        (pointer->commit (object->pointer object))))
 
 (define (commit-amend id commit update-ref author
-                      commiter message-encoding message tree)
+                      committer message-encoding message tree)
   (let ((proc (libgit2->procedure* "git_commit_amend" '(* * * * * * * *))))
     (proc (oid->pointer id)
           (commit->pointer commit)
           (string->pointer update-ref)
           (signature->pointer author)
-          (signature->pointer commiter)
+          (signature->pointer committer)
           (string->pointer message-encoding)
           (string->pointer message)
           (tree->pointer tree))))
