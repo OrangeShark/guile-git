@@ -21,6 +21,11 @@ A copy of the license is included in the section entitled "GNU
 Free Documentation License".
 @end copying
 
+@dircategory The Algorithmic Language Scheme
+@direntry
+* Guile-Git: (guile-git). Git library for Guile.
+@end direntry
+
 @titlepage
 @title guile-git Reference Manual
 
