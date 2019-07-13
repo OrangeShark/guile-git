@@ -82,9 +82,9 @@ Guile-git depends on the following packages:
 @item
 @url{https://www.gnu.org/software/guile/, GNU Guile}
 @item
-@url{https://libgit2.github.com/, libgit2}
+@url{https://libgit2.org/, libgit2}
 @item
-@url{https://github.com/TaylanUB/scheme-bytestructures, guile-bytestructures}
+@url{https://github.com/TaylanUB/scheme-bytestructures, scheme-bytestructures}
 @end itemize
 
 @node Building
