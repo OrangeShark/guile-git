@@ -233,8 +233,10 @@ Returns the repository or throws an error if no repository could be found."
 (define (openable-repository? directory)
   (let ((proc (libgit2->procedure* "git_repository_open_ext" `(* * ,unsigned-int *))))
     (catch 'git-error
-      (proc %null-pointer (string->pointer directory) REPOSITORY_OPEN_NO_SEARCH %null-pointer)
-      #t
+      (lambda ()
+        (proc %null-pointer (string->pointer directory)
+              REPOSITORY_OPEN_NO_SEARCH %null-pointer)
+        #t)
       (lambda _ #f))))
 
 (define (repository-close! repository)
