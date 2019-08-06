@@ -106,7 +106,14 @@
       (pk 'file-descriptors fd-before fd-after)
       (repository-close! repository)
       (<= (pk 'after-close (length (scandir "/proc/self/fd")))
-          fd-before))))
+          fd-before)))
+
+  (test-equal "openable-repository?, does not exist"
+    #f
+    (openable-repository? "/does/not/exist"))
+
+  (test-assert "openable-repository?"
+    (openable-repository? directory)))
 
 (with-repository "simple-bare" directory
 
