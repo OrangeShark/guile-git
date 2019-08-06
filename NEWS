@@ -2,12 +2,89 @@
 #+TITLE: Guile-Git NEWS - history of user-visible changes
 
 
-Copyright © 2018 Erik Edrosa
+Copyright © 2018, 2019 Erik Edrosa
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.  This file is offered as-is,
   without any warranty.
+
+* Changes in 0.3.0 (since 0.2.0)
+
+** New Functionality
+
+*** Add new (git tag) procedures
+
+Four new procedures were added to (git tag) related to creating tags
+in a git repository.
+
+~tag-create~ and ~tag-create!~ are used to create what is known as
+"annotated" tags in git which contain a creation date, creator's
+signature, and a message. The ~tag-create!~ procedure can replace
+exisiting references with the same name.
+
+~tag-create-lightweight~ and ~tag-create-lightweight!~ are used to
+create lightweight tags in git which just create a reference that
+points directly to a git object.
+
+*** Add (git signature) module
+
+The (git signature) module adds three new procedures related to
+signatures. Signatures are objects which identify a name, email, and
+time that are found on many git objects. You would need to create a
+signature if you want to use the ~tag-create~ procedure mentioned
+above.
+
+~signature-default~ creates a signature by looking up the ~user.name~
+and ~user.email~ from the repository's configuration. It also uses the
+current time.
+
+~signature-new~ creates a signature with the passed in name, email,
+time and timezone offset.
+
+~signature-now~ creates a signature with the passed in name and
+email. The time will use the current time.
+
+
+*** Add (git describe) module
+
+*** Support for Guile 3.0
+
+Upgrade the configure script to be able to find Guile 3.0.
+
+** Changes
+
+*** ~repository-state~ return a symbols instead of an int
+
+The ~repository-state~ procedure used to return an integer to
+represent a state like none, merge, revert. It now returns the
+following symbols based on the state of the repository
+
+    - ~repository-state/none~
+    - ~repository-state/merge~
+    - ~repository-state/revert~
+    - ~repository-state/revert-sequence~
+    - ~repository-state/cherrypick~
+    - ~repository-state/cherrypick-sequence~
+    - ~repository-state/bisect~
+    - ~repository-state/rebase~
+    - ~repository-state/rebase-interactive~
+    - ~repository-state/rebase-merge~
+    - ~repository-state/apply-mailbox~
+    - ~repository-state/apply-mailbox-or-rebase~
+
+*** Rename ~foo-init-options~ procedures to be more idiomatic
+
+Several procedures named like ~foo-init-options~ were renamed to be
+more idiomatic like ~make-foo-options~. The previous functions are
+deprecated and will be removed in a future version of Guile Git. The
+functions renamed are:
+
+    - ~clone-init-options~ renamed to ~make-clone-options~
+    - ~fetch-init-options~ renamed to ~make-fetch-options~
+    - ~status-init-options~ renamed to ~make-status-options~
+
+** Bug Fixes
 
 * Changes in 0.2.0 (since 0.1.0)
 
