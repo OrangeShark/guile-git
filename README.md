@@ -15,7 +15,7 @@ without any warranty.
 Guile-Git requires the following to be installed.
 
 - [GNU Guile](https://www.gnu.org/software/guile/) >= 2.0.11
-- [libgit2](https://libgit2.org/)
+- [libgit2](https://libgit2.org/) >= 0.28.0
 - [scheme-bytestructures](https://github.com/TaylanUB/scheme-bytestructures)
 
 ## Installation
