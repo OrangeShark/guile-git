@@ -74,7 +74,7 @@
 (define STATUS-FLAG-INCLUDE-UNREADABLE               16384)
 (define STATUS-FLAG-INCLUDE-UNREADABLE-AS-UNTRACKED  32768)
 
-(define %status-list-free (dynamic-func "git_status_list_free" libgit2))
+(define %status-list-free (libgit2->pointer "git_status_list_free"))
 
 (define (pointer->status-list! pointer)
   (set-pointer-finalizer! pointer %status-list-free)

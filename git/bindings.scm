@@ -26,7 +26,7 @@
   #:use-module (git config)
   #:use-module (git types)
   #:use-module (git structs)
-  #:export (libgit2
+  #:export (libgit2->pointer
             libgit2->procedure
             raise-git-error
             libgit2->procedure*
@@ -46,11 +46,26 @@
           %null-pointer
           dirs))
 
-(define libgit2
-  (dynamic-link %libgit2))
+(define (libgit2->pointer name)
+  (catch #t
+    (lambda ()
+      (dynamic-func name (dynamic-link %libgit2)))
+    (lambda args
+      (lambda _
+        (throw 'system-error name  "~A" (list (strerror ENOSYS))
+               (list ENOSYS))))))
 
 (define (libgit2->procedure return name params)
-  (pointer->procedure return (dynamic-func name libgit2) params))
+  (catch #t
+    (lambda ()
+      (let ((ptr (dynamic-func name (dynamic-link %libgit2))))
+        ;; The #:return-errno? facility was introduced in Guile 2.0.12.
+        (pointer->procedure return ptr params
+                            #:return-errno? #t)))
+    (lambda args
+      (lambda _
+        (throw 'system-error name  "~A" (list (strerror ENOSYS))
+               (list ENOSYS))))))
 
 (define last-git-error
   (let ((proc (libgit2->procedure '* "giterr_last" '())))
@@ -151,7 +166,7 @@
         (proc major minor rev)
         (map (compose pointer-address dereference-pointer) (list major minor rev))))))
 
-(define %object-free (dynamic-func "git_object_free" libgit2))
+(define %object-free (libgit2->pointer "git_object_free"))
 
 (define (pointer->object! pointer)
   (set-pointer-finalizer! pointer %object-free)

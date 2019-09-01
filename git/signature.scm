@@ -27,7 +27,7 @@
 
 ;;; https://libgit2.org/libgit2/#HEAD/group/signature
 
-(define %signature-free (dynamic-func "git_signature_free" libgit2))
+(define %signature-free (libgit2->pointer "git_signature_free"))
 
 (define (pointer->signature! pointer)
   (set-pointer-finalizer! pointer %signature-free)

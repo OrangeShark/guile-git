@@ -74,7 +74,7 @@
         (proc out (reference->pointer reference) obj-type)
         (pointer->object! (dereference-pointer out))))))
 
-(define %reference-free (dynamic-func "git_reference_free" libgit2))
+(define %reference-free (libgit2->pointer "git_reference_free"))
 
 (define (pointer->reference! pointer)
   (set-pointer-finalizer! pointer %reference-free)
@@ -88,7 +88,8 @@
         (pointer->reference! (dereference-pointer out))))))
 
 
-(define %reference-iterator-free (dynamic-func "git_reference_iterator_free" libgit2))
+(define %reference-iterator-free
+  (libgit2->pointer "git_reference_iterator_free"))
 
 (define (pointer->reference-iterator! pointer)
   (set-pointer-finalizer! pointer %reference-iterator-free)

@@ -38,7 +38,7 @@
               (blame-options->pointer options))
         (pointer->blame! (dereference-pointer out))))))
 
-(define %blame-free (dynamic-func "git_blame_free" libgit2))
+(define %blame-free (libgit2->pointer "git_blame_free"))
 
 (define (pointer->blame! pointer)
   (set-pointer-finalizer! pointer %blame-free)

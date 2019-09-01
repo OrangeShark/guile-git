@@ -87,7 +87,7 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/repository/git_repository_fetchhead_foreach
 
-(define %repository-free (dynamic-func "git_repository_free" libgit2))
+(define %repository-free (libgit2->pointer "git_repository_free"))
 
 (define (pointer->repository! pointer)
   (set-pointer-finalizer! pointer %repository-free)

@@ -31,7 +31,7 @@
 
 ;;; annotated
 
-(define %annotated-commit-free (dynamic-func "git_annotated_commit_free" libgit2))
+(define %annotated-commit-free (libgit2->pointer "git_annotated_commit_free"))
 
 (define (pointer->annotated-commit! pointer)
   (set-pointer-finalizer! pointer %annotated-commit-free)

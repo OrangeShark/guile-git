@@ -94,7 +94,7 @@
 
         describe-options))))
 
-(define %describe-result-free (dynamic-func "git_describe_result_free" libgit2))
+(define %describe-result-free (libgit2->pointer "git_describe_result_free"))
 
 (define (pointer->describe-result! pointer)
   (set-pointer-finalizer! pointer %describe-result-free)

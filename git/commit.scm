@@ -134,7 +134,7 @@
           (free-buffer data)
           (values signature* data*))))))
 
-(define %commit-free (dynamic-func "git_commit_free" libgit2))
+(define %commit-free (libgit2->pointer "git_commit_free"))
 
 (define (pointer->commit! pointer)
   (set-pointer-finalizer! pointer %commit-free)

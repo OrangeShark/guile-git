@@ -36,7 +36,7 @@
             tag-create-lightweight
             tag-create-lightweight!))
 
-(define %tag-free (dynamic-func "git_tag_free" libgit2))
+(define %tag-free (libgit2->pointer "git_tag_free"))
 
 (define (pointer->tag! pointer)
   (set-pointer-finalizer! pointer %tag-free)

@@ -39,7 +39,7 @@
 
 ;; https://libgit2.org/libgit2/#HEAD/group/submodule
 
-(define %submodule-free (dynamic-func "git_submodule_free" libgit2))
+(define %submodule-free (libgit2->pointer "git_submodule_free"))
 
 (define %submodule-owners
   ;; This table maps <submodule> records to their "owner", usually a

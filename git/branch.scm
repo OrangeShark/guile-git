@@ -81,7 +81,7 @@
         ((1) #t)
         (else => (lambda (code) (raise-git-error code)))))))
 
-(define %branch-iterator-free (dynamic-func "git_branch_iterator_free" libgit2))
+(define %branch-iterator-free (libgit2->pointer "git_branch_iterator_free"))
 
 (define (pointer->branch-iterator! pointer)
   (set-pointer-finalizer! pointer %branch-iterator-free)

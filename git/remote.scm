@@ -32,7 +32,7 @@
             remote-disconnect
             remote-ls))
 
-(define %remote-free (dynamic-func "git_remote_free" libgit2))
+(define %remote-free (libgit2->pointer "git_remote_free"))
 
 (define (pointer->remote! pointer)
   (set-pointer-finalizer! pointer %remote-free)

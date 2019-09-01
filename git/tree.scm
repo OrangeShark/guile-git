@@ -98,7 +98,7 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entry_filemode_raw
 
-(define %tree-entry-free (dynamic-func "git_tree_entry_free" libgit2))
+(define %tree-entry-free (libgit2->pointer "git_tree_entry_free"))
 
 (define (pointer->tree-entry! pointer)
   (set-pointer-finalizer! pointer %tree-entry-free)
@@ -127,7 +127,7 @@
 
 ;; FIXME: https://libgit2.github.com/libgit2/#HEAD/group/tree/git_tree_entrycount
 
-(define %tree-free (dynamic-func "git_tree_free" libgit2))
+(define %tree-free (libgit2->pointer "git_tree_free"))
 
 (define (pointer->tree! pointer)
   (set-pointer-finalizer! pointer %tree-free)
