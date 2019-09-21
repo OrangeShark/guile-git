@@ -1,7 +1,7 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
-;;; Copyright © 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2017, 2019 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;; Copyright © 2018 Jelle Licht <jlicht@fsfe.org>
 ;;; Copyright © 2019 Marius Bakke <marius@devup.no>
@@ -50,6 +50,7 @@
 
             make-remote-callbacks remote-callbacks->pointer set-remote-callbacks-version!
             make-fetch-options-bytestructure fetch-options-bytestructure fetch-options->pointer fetch-options-callbacks
+            fetch-options-download-tags set-fetch-options-download-tags!
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
             make-clone-options-bytestructure clone-options->pointer clone-options-fetch-options
@@ -371,6 +372,41 @@
 
 (define (fetch-options->pointer fetch-options)
   (bytestructure->pointer (fetch-options-bytestructure fetch-options)))
+
+(define (remote-autotag-option->symbol integer)
+  "Convert INTEGER, a valud of the 'git_remote_autotag_option_t' enum, to a
+symbol."
+  (case integer
+    ((0) 'unspecified)          ;follow user configuration
+    ((1) 'auto)                 ;tags for objects we're downloading
+    ((2) 'none)                 ;don't ask for any tags
+    ((3) 'all)                  ;ask for all the tags
+    (else 'unknown)))
+
+(define (symbol->remote-autotag-option symbol)
+  "Convert SYMBOL to an integer of the 'git_remote_autotag_option_t' enum."
+  (case symbol
+    ((unspecified) 0)
+    ((auto)        1)
+    ((none)        2)
+    ((all)         3)
+    (else          1)))
+
+(define (fetch-options-download-tags fetch-options)
+  "Return the tag download policy specified by FETCH-OPTIONS.  The policy is
+denoted by a symbol: 'unspecified means to follow the user configuration,
+'auto to download tags for objects we're already downloading, 'none to not
+ask for any tags, and 'all to ask for all the tags."
+  (remote-autotag-option->symbol
+   (bytestructure-ref (fetch-options-bytestructure fetch-options)
+                      'download-tags)))
+
+(define* (set-fetch-options-download-tags! fetch-options policy)
+  "Use POLICY, a symbol (see 'fetch-options-download-tags'), as the download
+tag policy in FETCH-OPTIONS."
+  (bytestructure-set! (fetch-options-bytestructure fetch-options)
+                      'download-tags
+                      (symbol->remote-autotag-option policy)))
 
 (define (fetch-options-callbacks fetch-options)
   (bytestructure-ref (fetch-options-bytestructure fetch-options) 'callbacks))
