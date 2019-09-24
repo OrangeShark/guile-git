@@ -374,7 +374,7 @@
   (bytestructure->pointer (fetch-options-bytestructure fetch-options)))
 
 (define (remote-autotag-option->symbol integer)
-  "Convert INTEGER, a valud of the 'git_remote_autotag_option_t' enum, to a
+  "Convert INTEGER, a value of the 'git_remote_autotag_option_t' enum, to a
 symbol."
   (case integer
     ((0) 'unspecified)          ;follow user configuration
