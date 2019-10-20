@@ -84,6 +84,13 @@ functions renamed are:
     - ~fetch-init-options~ renamed to ~make-fetch-options~
     - ~status-init-options~ renamed to ~make-status-options~
 
+*** Add accessor and setter for the download tags of ~fetch-options~
+
+The (git structs) module has added ~fetch-options-download-tags~ and
+~set-fetch-options-download-tags!~ procedures for accessing and
+setting the download tags field of ~fetch-options~. This field
+determines the tag download policy when fetching from a remote.
+
 ** Bug Fixes
 
 * Changes in 0.2.0 (since 0.1.0)
