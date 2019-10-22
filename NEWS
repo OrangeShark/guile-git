@@ -48,9 +48,19 @@ email. The time will use the current time.
 
 *** Add (git describe) module
 
+The (git describe) module adds several new procedures used to create
+human readable names for objects based on an available references.
+
 *** Support for Guile 3.0
 
 Upgrade the configure script to be able to find Guile 3.0.
+
+*** Add accessor and setter for the download tags of ~fetch-options~
+
+The (git structs) module has added ~fetch-options-download-tags~ and
+~set-fetch-options-download-tags!~ procedures for accessing and
+setting the download tags field of ~fetch-options~. This field
+determines the tag download policy when fetching from a remote.
 
 ** Changes
 
@@ -83,13 +93,6 @@ functions renamed are:
     - ~clone-init-options~ renamed to ~make-clone-options~
     - ~fetch-init-options~ renamed to ~make-fetch-options~
     - ~status-init-options~ renamed to ~make-status-options~
-
-*** Add accessor and setter for the download tags of ~fetch-options~
-
-The (git structs) module has added ~fetch-options-download-tags~ and
-~set-fetch-options-download-tags!~ procedures for accessing and
-setting the download tags field of ~fetch-options~. This field
-determines the tag download policy when fetching from a remote.
 
 ** Bug Fixes
 
