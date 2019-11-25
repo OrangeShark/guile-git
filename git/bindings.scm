@@ -2,6 +2,7 @@
 ;;; Copyright © 2016 Amirouche Boubekki <amirouche@hypermove.net>
 ;;; Copyright © 2016, 2017 Erik Edrosa <erik.edrosa@gmail.com>
 ;;; Copyright © 2016, 2017 Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -59,9 +60,7 @@
   (catch #t
     (lambda ()
       (let ((ptr (dynamic-func name (dynamic-link %libgit2))))
-        ;; The #:return-errno? facility was introduced in Guile 2.0.12.
-        (pointer->procedure return ptr params
-                            #:return-errno? #t)))
+        (pointer->procedure return ptr params)))
     (lambda args
       (lambda _
         (throw 'system-error name  "~A" (list (strerror ENOSYS))
