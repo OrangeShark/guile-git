@@ -7,6 +7,7 @@
              (gnu packages compression)
              (gnu packages guile)
              (gnu packages pkg-config)
+             (gnu packages ssh)
              (gnu packages texinfo)
              (gnu packages tls)
              (gnu packages version-control))
@@ -20,7 +21,9 @@
    `(("autoconf" ,autoconf)
      ("automake" ,automake)
      ("pkg-config" ,pkg-config)
-     ("texinfo" ,texinfo)))
+     ("texinfo" ,texinfo)
+     ("openssh" ,openssh)
+     ("git" ,git)))
   (inputs
    `(("guile" ,guile-2.2)
      ("libgit2" ,libgit2)

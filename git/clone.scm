@@ -21,6 +21,7 @@
   #:use-module (rnrs bytevectors)
   #:use-module (system foreign)
   #:use-module (git bindings)
+  #:use-module (git fetch)
   #:use-module (git structs)
   #:use-module (git types)
   #:use-module (git repository)
@@ -34,11 +35,17 @@
 
 (define clone
   (let ((proc (libgit2->procedure* "git_clone" '(* * * *))))
-    (lambda* (url directory #:optional (clone-options (make-clone-options)))
-      "Clones a remote repository found at URL into DIRECTORY.
-
-Returns the repository on success or throws an error on failure."
-      (let ((out (make-double-pointer)))
+    (lambda* (url directory
+                  #:optional (clone-options (make-clone-options))
+                  #:key (auth-method #f))
+      "Clones a remote repository found at URL into DIRECTORY.  An
+authentication method from (git auth) can be passed optionally if the
+repository is protected.  Returns the repository on success or throws an error
+on failure."
+      (let* ((out (make-double-pointer))
+             (fetch-options
+              (clone-options-fetch-options clone-options)))
+        (init-auth-fetch-options fetch-options auth-method)
         (proc out
               (string->pointer url)
               (string->pointer directory)

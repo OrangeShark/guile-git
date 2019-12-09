@@ -23,7 +23,8 @@
 (eval-when (eval load compile)
   (begin
     (define %public-modules
-      '((git bindings)
+      '((git auth)
+        (git bindings)
         (git branch)
         (git clone)
         (git commit)

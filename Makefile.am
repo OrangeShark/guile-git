@@ -28,6 +28,7 @@ SOURCES =                           \
   git.scm                           \
   git/annotated.scm                 \
   git/attr.scm                      \
+  git/auth.scm                      \
   git/bindings.scm                  \
   git/blame.scm                     \
   git/blob.scm                      \
@@ -75,6 +76,7 @@ TESTS_UTILS =                                   \
 
 TESTS =                                         \
   tests/branch.scm                              \
+  tests/clone.scm                               \
   tests/commit.scm                              \
   tests/describe.scm                            \
   tests/oid.scm                                 \

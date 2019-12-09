@@ -1,5 +1,5 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
-;;; Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -18,25 +18,37 @@
 
 (define-module (git fetch)
   #:use-module (system foreign)
+  #:use-module (git auth)
   #:use-module (git bindings)
   #:use-module (git cred)
   #:use-module (git structs)
   #:use-module (git types)
   #:use-module (srfi srfi-26)
 
-  #:export (make-fetch-options
+  #:export (init-auth-fetch-options
+            make-fetch-options
             fetch-init-options   ;deprecated!
             set-fetch-auth-with-ssh-agent!
+            set-fetch-auth-with-ssh-key!
             set-fetch-auth-with-default-ssh-key!))
 
 (define FETCH-OPTIONS-VERSION 1)
 
-(define make-fetch-options
-  (let ((proc (libgit2->procedure* "git_fetch_init_options" `(* ,unsigned-int))))
-    (lambda ()
-      (let ((fetch-options (make-fetch-options-bytestructure)))
-        (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
-        fetch-options))))
+(define init-auth-fetch-options
+  (let ((proc (libgit2->procedure* "git_fetch_init_options"
+                                   `(* ,unsigned-int))))
+    (lambda* (fetch-options #:optional auth-method)
+      (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
+      (cond
+       ((auth-ssh-credentials? auth-method)
+        (set-fetch-auth-with-ssh-key! fetch-options auth-method))
+       ((auth-ssh-agent? auth-method)
+        (set-fetch-auth-with-ssh-agent! fetch-options)))
+      fetch-options)))
+
+(define* (make-fetch-options #:optional auth-method)
+  (let ((fetch-options (make-fetch-options-bytestructure)))
+    (init-auth-fetch-options fetch-options auth-method)))
 
 (define fetch-init-options
   ;; Deprecated alias for compatibility with 0.2.
@@ -52,20 +64,37 @@
    fetch-options
    (cred-acquire-cb
     (lambda (cred url username allowed payload)
-      (cred-ssh-key-from-agent cred
-                               (pointer->string username))))))
+      (let ((username (if (eq? username %null-pointer)
+                          ""
+                          (pointer->string username))))
+        (cond
+         ;; If no username were specified in URL, we will be asked for
+         ;; one. Try with the current user login.
+         ((= allowed CREDTYPE-SSH-USERNAME)
+          (cred-username-new cred (getlogin)))
+         (else
+          (cred-ssh-key-from-agent cred username))))))))
 
-(define (set-fetch-auth-with-default-ssh-key! fetch-options)
-  (let* ((home (getenv "HOME"))
-         (ssh-dir (in-vicinity home ".ssh"))
-         (pub-key (in-vicinity ssh-dir "id_rsa.pub"))
-         (pri-key (in-vicinity ssh-dir "id_rsa")))
-    (set-fetch-auth-callback
-     fetch-options
-     (cred-acquire-cb
-      (lambda (cred url username allowed payload)
-        (cred-ssh-key-new cred
-                          (pointer->string username)
-                          pub-key
-                          pri-key
-                          ""))))))
+(define* (set-fetch-auth-with-ssh-key! fetch-options
+                                       auth-ssh-credentials)
+  (set-fetch-auth-callback
+   fetch-options
+   (cred-acquire-cb
+    (lambda (cred url username allowed payload)
+      (cond
+       ;; Same as above.
+       ((= allowed CREDTYPE-SSH-USERNAME)
+        (cred-username-new cred (getlogin)))
+       (else
+        (let* ((pri-key-file
+                (auth-ssh-credentials-private-key auth-ssh-credentials))
+               (pub-key-file
+                (auth-ssh-credentials-public-key auth-ssh-credentials))
+               (username (if (eq? username %null-pointer)
+                             ""
+                             (pointer->string username))))
+          (cred-ssh-key-new cred
+                            username
+                            pub-key-file
+                            pri-key-file
+                            ""))) )))))

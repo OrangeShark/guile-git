@@ -1,0 +1,123 @@
+;;; Guile-Git --- GNU Guile bindings of libgit2
+;;; Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;;
+;;; This file is part of Guile-Git.
+;;;
+;;; Guile-Git is free software; you can redistribute it and/or modify it
+;;; under the terms of the GNU General Public License as published by
+;;; the Free Software Foundation; either version 3 of the License, or
+;;; (at your option) any later version.
+;;;
+;;; Guile-Git is distributed in the hope that it will be useful, but
+;;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;;; General Public License for more details.
+;;;
+;;; You should have received a copy of the GNU General Public License
+;;; along with Guile-Git.  If not, see <http://www.gnu.org/licenses/>.
+
+(define-module (tests ssh)
+  #:use-module (git auth)
+  #:use-module (tests helpers)
+  #:use-module (ice-9 popen)
+  #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 regex)
+  #:export (sshd-available?
+            with-sshd-server
+            with-ssh-agent
+            make-client-ssh-auth))
+
+(define sshd "@SSHD@")
+(define %ssh-dir (path-join (getenv "srcdir") "/tests/.ssh"))
+(define (in-ssh-folder . args)
+  (apply path-join %ssh-dir args))
+
+(define (sshd-available?)
+  ;; Return #t if sshd is available (it does not support
+  ;; ‘--version’ or anything similar though).
+  (= 256 (system* sshd "--something-not-supported")))
+
+(define (start-sshd port)
+  (define (write-authorized-keys file)
+    (call-with-output-file file
+      (lambda (port)
+        ;; We need to pass PATH so that git binary (git-upload-pack) can be
+        ;; found from sshd.
+        (format port "environment=\"PATH=~a\" ~a"
+                (getenv "PATH")
+                (call-with-input-file (in-ssh-folder "id_rsa_client.pub")
+                  read-string)))))
+
+  (define (write-sshd-conf conf authorized-keys)
+    (call-with-output-file conf
+      (lambda (port)
+        (format port "AuthorizedKeysFile ~a
+PidFile ~a
+PermitUserEnvironment yes~%"
+                authorized-keys
+                (in-ssh-folder "sshd_pid")))))
+
+  (let ((sshd-conf (in-ssh-folder "sshd.conf"))
+        (sshd-key (in-ssh-folder "id_rsa_server"))
+        (authorized-keys (in-ssh-folder "authorized_keys")))
+    (unsetenv "SSH_AUTH_SOCK")
+    (write-authorized-keys authorized-keys)
+    (write-sshd-conf sshd-conf authorized-keys)
+    (system* sshd "-p" (number->string port) "-f" sshd-conf "-h" sshd-key)))
+
+(define (stop-sshd)
+  (define (read-pid port)
+    (string-trim-right (read-string port) #\newline))
+
+  (let ((pid
+         (call-with-input-file (in-ssh-folder "sshd_pid")
+           read-pid)))
+    (system* "kill" pid)))
+
+(define-syntax-rule (with-sshd-server port body ...)
+  (dynamic-wind
+    (lambda ()
+      (start-sshd port))
+    (lambda ()
+      body ...)
+    (lambda ()
+      (stop-sshd))))
+
+(define %ssh-auth-sock-regexp
+  (make-regexp "SSH_AUTH_SOCK=(.*); export SSH_AUTH_SOCK;"))
+
+(define %ssh-agent-pid-regexp
+  (make-regexp "SSH_AGENT_PID=(.*); export SSH_AGENT_PID;"))
+
+(define (start-ssh-agent)
+  (let* ((p (open-input-pipe "ssh-agent -s"))
+         (ssh-auth-sock-data (read-line p))
+         (ssh-agent-pid-data (read-line p))
+         (sock
+          (let ((match (regexp-exec %ssh-auth-sock-regexp
+                                    ssh-auth-sock-data)))
+            (match:substring match 1)))
+         (pid (let ((match (regexp-exec %ssh-agent-pid-regexp
+                                        ssh-agent-pid-data)))
+                (match:substring match 1))))
+    (setenv "SSH_AUTH_SOCK" sock)
+    pid))
+
+(define (ssh-agent-add-client-key)
+  (system* "ssh-add" (in-ssh-folder "id_rsa_client")))
+
+(define-syntax-rule (with-ssh-agent body ...)
+  (let ((pid (start-ssh-agent)))
+    (dynamic-wind
+      (const #f)
+      (lambda ()
+        (ssh-agent-add-client-key)
+        body ...)
+      (lambda ()
+        (system* "kill" pid)
+        (unsetenv "SSH_AUTH_SOCK")))))
+
+(define (make-client-ssh-auth)
+  (%make-auth-ssh-credentials
+   (in-ssh-folder "id_rsa_client.pub")
+   (in-ssh-folder "id_rsa_client")))

@@ -28,3 +28,6 @@ doc/guile-git.info
 doc/version.texi
 doc/.dirstamp
 doc/stamp-vti
+
+tests/ssh.scm
+tests/.ssh

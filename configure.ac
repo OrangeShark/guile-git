@@ -1,6 +1,7 @@
 dnl Guile-Git --- GNU Guile bindings of libgit2
 dnl Copyright © 2016-2018 Erik Edrosa <erik.edrosa@gmail.com>
 dnl Copyright © 2017, 2019 Ludovic Courtès <ludo@gnu.org>
+dnl Copyright © 2019 Mathieu Othacehe <m.othacehe@gmail.com>
 dnl
 dnl This file is part of Guile-Git.
 dnl
@@ -42,7 +43,14 @@ AS_IF([test "x$LIBGIT2_LIBDIR" = "x"], [
 ])
 AC_SUBST([LIBGIT2_LIBDIR])
 
-AC_CONFIG_FILES([Makefile git/config.scm])
+dnl Those binaries are required for ssh authentication tests.
+AC_PATH_PROG([SSHD], [sshd])
+AC_PATH_PROG([SSH_AGENT], [ssh-agent])
+AC_PATH_PROG([SSH_ADD], [ssh-add])
+AC_PATH_PROG([GIT_UPLOAD_PACK], [git-upload-pack])
+AC_SUBST([SSHD])
+
+AC_CONFIG_FILES([Makefile git/config.scm tests/ssh.scm])
 AC_CONFIG_FILES([pre-inst-env], [chmod +x pre-inst-env])
 
 AC_OUTPUT

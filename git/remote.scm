@@ -21,6 +21,7 @@
   #:use-module (srfi srfi-9 gnu)
   #:use-module (system foreign)
   #:use-module (git bindings)
+  #:use-module (git fetch)
   #:use-module (git structs)
   #:use-module (git types)
   #:export (remote-name
@@ -99,13 +100,15 @@
 
 (define remote-fetch
   (let ((proc (libgit2->procedure* "git_remote_fetch" '(* * * *))))
-    (lambda* (remote #:key (reflog-message "") (fetch-options #f))
+    (lambda* (remote #:key
+                     (reflog-message "")
+                     (fetch-options (make-fetch-options))
+                     (auth-method #f))
+      (init-auth-fetch-options fetch-options auth-method)
       (proc (remote->pointer remote)
             ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_strarray
             %null-pointer
-            (if fetch-options
-                (fetch-options->pointer fetch-options)
-                %null-pointer)
+            (fetch-options->pointer fetch-options)
             (string->pointer reflog-message)))))
 
 ;; FIXME https://libgit2.github.com/libgit2/#HEAD/group/reset/git_reset_default
