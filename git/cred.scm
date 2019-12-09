@@ -21,7 +21,15 @@
   #:use-module (git bindings)
   #:use-module (git types)
   #:use-module (srfi srfi-26)
-  #:export (cred-default-new
+  #:export (CREDTYPE-USERPASS-PLAINTEXT
+            CREDTYPE-SSH-KEY
+            CREDTYPE-SSH-CUSTOM
+            CREDTYPE-SSH-DEFAULT
+            CREDTYPE-SSH-INTERACTIVE
+            CREDTYPE-SSH-USERNAME
+            CREDTYPE-SSH-MEMORY
+
+            cred-default-new
             cred-free
             cred-has-username?
             cred-ssh-custom-new
@@ -32,6 +40,14 @@
             cred-userpass
             cred-userpass-paintext-new
             cred-acquire-cb))
+
+(define CREDTYPE-USERPASS-PLAINTEXT 1)
+(define CREDTYPE-SSH-KEY 2)
+(define CREDTYPE-SSH-CUSTOM 4)
+(define CREDTYPE-SSH-DEFAULT 8)
+(define CREDTYPE-SSH-INTERACTIVE 16)
+(define CREDTYPE-SSH-USERNAME 32)
+(define CREDTYPE-SSH-MEMORY 64)
 
 (define cred-default-new
   (let ((proc (libgit2->procedure* "git_cred_default_new" '(*))))
