@@ -61,6 +61,7 @@ PermitUserEnvironment yes~%"
         (sshd-key (in-ssh-folder "id_rsa_server"))
         (authorized-keys (in-ssh-folder "authorized_keys")))
     (unsetenv "SSH_AUTH_SOCK")
+    (chmod sshd-key #o600)
     (write-authorized-keys authorized-keys)
     (write-sshd-conf sshd-conf authorized-keys)
     (system* sshd "-p" (number->string port) "-f" sshd-conf "-h" sshd-key)))
@@ -118,6 +119,10 @@ PermitUserEnvironment yes~%"
         (unsetenv "SSH_AUTH_SOCK")))))
 
 (define (make-client-ssh-auth)
-  (%make-auth-ssh-credentials
-   (in-ssh-folder "id_rsa_client.pub")
-   (in-ssh-folder "id_rsa_client")))
+  (let ((pub-key (in-ssh-folder "id_rsa_client.pub"))
+        (pri-key (in-ssh-folder "id_rsa_client")))
+    (chmod pri-key #o600)
+    (chmod pub-key #o644)
+    (%make-auth-ssh-credentials
+     pub-key
+     pri-key)))
