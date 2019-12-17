@@ -29,7 +29,7 @@
 
 (define sshd "@SSHD@")
 (define %ssh-dir (path-join (getenv "srcdir") "/tests/.ssh"))
-(define (in-ssh-folder . args)
+(define (in-ssh-directory . args)
   (apply path-join %ssh-dir args))
 
 (define (sshd-available?)
@@ -45,7 +45,7 @@
         ;; found from sshd.
         (format port "environment=\"PATH=~a\" ~a"
                 (getenv "PATH")
-                (call-with-input-file (in-ssh-folder "id_rsa_client.pub")
+                (call-with-input-file (in-ssh-directory "id_rsa_client.pub")
                   read-string)))))
 
   (define (write-sshd-conf conf authorized-keys)
@@ -55,11 +55,11 @@
 PidFile ~a
 PermitUserEnvironment yes~%"
                 authorized-keys
-                (in-ssh-folder "sshd_pid")))))
+                (in-ssh-directory "sshd_pid")))))
 
-  (let ((sshd-conf (in-ssh-folder "sshd.conf"))
-        (sshd-key (in-ssh-folder "id_rsa_server"))
-        (authorized-keys (in-ssh-folder "authorized_keys")))
+  (let ((sshd-conf (in-ssh-directory "sshd.conf"))
+        (sshd-key (in-ssh-directory "id_rsa_server"))
+        (authorized-keys (in-ssh-directory "authorized_keys")))
     (unsetenv "SSH_AUTH_SOCK")
     (chmod sshd-key #o600)
     (write-authorized-keys authorized-keys)
@@ -71,7 +71,7 @@ PermitUserEnvironment yes~%"
     (string-trim-right (read-string port) #\newline))
 
   (let ((pid
-         (call-with-input-file (in-ssh-folder "sshd_pid")
+         (call-with-input-file (in-ssh-directory "sshd_pid")
            read-pid)))
     (system* "kill" pid)))
 
@@ -105,7 +105,7 @@ PermitUserEnvironment yes~%"
     pid))
 
 (define (ssh-agent-add-client-key)
-  (system* "ssh-add" (in-ssh-folder "id_rsa_client")))
+  (system* "ssh-add" (in-ssh-directory "id_rsa_client")))
 
 (define-syntax-rule (with-ssh-agent body ...)
   (let ((pid (start-ssh-agent)))
@@ -119,8 +119,8 @@ PermitUserEnvironment yes~%"
         (unsetenv "SSH_AUTH_SOCK")))))
 
 (define (make-client-ssh-auth)
-  (let ((pub-key (in-ssh-folder "id_rsa_client.pub"))
-        (pri-key (in-ssh-folder "id_rsa_client")))
+  (let ((pub-key (in-ssh-directory "id_rsa_client.pub"))
+        (pri-key (in-ssh-directory "id_rsa_client")))
     (chmod pri-key #o600)
     (chmod pub-key #o644)
     (%make-auth-ssh-credentials
