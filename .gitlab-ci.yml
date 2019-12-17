@@ -1,0 +1,23 @@
+image: debian:testing
+
+before_script:
+  - apt -y update
+  - apt -y install autoconf pkg-config make texinfo libgit2-dev guile-2.2-dev guile-bytestructures
+  - ./bootstrap
+  - ./configure
+
+test:
+  script:
+    - make -j $(nproc)
+    - make -j $(nproc) check
+
+distcheck:
+  script:
+    - apt -y install texlive
+    - make -j $(nproc) distcheck
+  artifacts:
+    paths:
+      - guile-git-*.tar.gz
+
+after_script:
+  - test -f test-suite.log && cat test-suite.log
