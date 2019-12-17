@@ -1,5 +1,6 @@
 ;;; Guile-Git --- GNU Guile bindings of libgit2
 ;;; Copyright © 2017, 2019 Mathieu Othacehe <m.othacehe@gmail.com>
+;;; Copyright © 2019 Marius Bakke <marius@devup.no>
 ;;;
 ;;; This file is part of Guile-Git.
 ;;;
@@ -25,8 +26,7 @@
   #:use-module (git types)
   #:use-module (srfi srfi-26)
 
-  #:export (init-auth-fetch-options
-            make-fetch-options
+  #:export (make-fetch-options
             fetch-init-options   ;deprecated!
             set-fetch-auth-with-ssh-agent!
             set-fetch-auth-with-ssh-key!
@@ -34,21 +34,18 @@
 
 (define FETCH-OPTIONS-VERSION 1)
 
-(define init-auth-fetch-options
+(define make-fetch-options
   (let ((proc (libgit2->procedure* "git_fetch_init_options"
                                    `(* ,unsigned-int))))
-    (lambda* (fetch-options #:optional auth-method)
-      (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
-      (cond
-       ((auth-ssh-credentials? auth-method)
-        (set-fetch-auth-with-ssh-key! fetch-options auth-method))
-       ((auth-ssh-agent? auth-method)
-        (set-fetch-auth-with-ssh-agent! fetch-options)))
-      fetch-options)))
-
-(define* (make-fetch-options #:optional auth-method)
-  (let ((fetch-options (make-fetch-options-bytestructure)))
-    (init-auth-fetch-options fetch-options auth-method)))
+    (lambda* (#:optional auth-method)
+      (let ((fetch-options (make-fetch-options-bytestructure)))
+        (proc (fetch-options->pointer fetch-options) FETCH-OPTIONS-VERSION)
+        (cond
+         ((auth-ssh-credentials? auth-method)
+          (set-fetch-auth-with-ssh-key! fetch-options auth-method))
+         ((auth-ssh-agent? auth-method)
+          (set-fetch-auth-with-ssh-agent! fetch-options)))
+        fetch-options))))
 
 (define fetch-init-options
   ;; Deprecated alias for compatibility with 0.2.

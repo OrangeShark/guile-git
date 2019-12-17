@@ -36,7 +36,8 @@
          (clone-dir (in-vicinity repo-dir "out")))
     (clone (make-ssh-url repo-dir ssh-server-port)
            clone-dir
-           #:auth-method auth-method)
+           (make-clone-options #:fetch-options
+                               (make-fetch-options auth-method)))
     (let* ((repository (repository-open clone-dir))
            (oid (reference-target (repository-head repository))))
       (oid->string (commit-id (commit-lookup repository oid))))))
@@ -63,7 +64,7 @@
                 (clone-dir (in-vicinity directory "out"))
                 (repository (repository-open clone-dir))
                 (remote (remote-lookup repository "origin")))
-           (remote-fetch remote #:auth-method auth)
+           (remote-fetch remote #:fetch-options (make-fetch-options auth))
            #t)))))
 
 (libgit2-shutdown!)
