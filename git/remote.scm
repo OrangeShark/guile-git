@@ -102,9 +102,7 @@
   (let ((proc (libgit2->procedure* "git_remote_fetch" '(* * * *))))
     (lambda* (remote #:key
                      (reflog-message "")
-                     (fetch-options (make-fetch-options))
-                     (auth-method #f))
-      (init-auth-fetch-options fetch-options auth-method)
+                     (fetch-options (make-fetch-options)))
       (proc (remote->pointer remote)
             ;; FIXME https://libgit2.github.com/libgit2/#HEAD/type/git_strarray
             %null-pointer

@@ -53,7 +53,7 @@
             fetch-options-download-tags set-fetch-options-download-tags!
             set-fetch-options-callbacks! set-remote-callbacks-credentials!
 
-            make-clone-options-bytestructure clone-options-bytestructure clone-options->pointer clone-options-fetch-options
+            make-clone-options-bytestructure clone-options-bytestructure clone-options->pointer set-clone-options-fetch-opts!
 
             make-describe-options-bytestructure describe-options->pointer describe-options->bytestructure
             set-describe-options-max-candidates-tag! set-describe-options-strategy!
@@ -465,16 +465,11 @@ tag policy in FETCH-OPTIONS."
 (define (clone-options->pointer clone-options)
   (bytestructure->pointer (clone-options-bytestructure clone-options)))
 
-(define (clone-options-fetch-options clone-options)
-  (let* ((fetch-options-bs
-          (bytestructure-ref
-           (clone-options-bytestructure clone-options) 'fetch-opts))
-         (fetch-options-offset (bytestructure-offset fetch-options-bs))
-         (fetch-options-pointer (bytevector->pointer
-                                 (bytestructure-bytevector fetch-options-bs)
-                                 fetch-options-offset)))
-    (%make-fetch-options
-     (pointer->bytestructure fetch-options-pointer %fetch-options))))
+(define (set-clone-options-fetch-opts! clone-options fetch-options)
+  (let ((clone-options-bs (clone-options-bytestructure clone-options))
+        (fetch-options-bs (fetch-options-bytestructure fetch-options)))
+    (bytestructure-set! clone-options-bs 'fetch-opts
+                        (bytestructure-bytevector fetch-options-bs))))
 
 ;; git remote head
 
