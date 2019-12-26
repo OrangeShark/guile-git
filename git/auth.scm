@@ -22,7 +22,6 @@
             auth-ssh-credentials?
             auth-ssh-credentials-public-key
             auth-ssh-credentials-private-key
-            auth-ssh-credentials-password-key
 
             %make-auth-ssh-agent
             auth-ssh-agent?))
