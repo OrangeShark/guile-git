@@ -25,6 +25,7 @@
     (define %public-modules
       '((git auth)
         (git bindings)
+        (git blob)
         (git branch)
         (git clone)
         (git commit)

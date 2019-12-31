@@ -1,7 +1,7 @@
 # Guile-Git --- GNU Guile bindings of libgit2
 # Copyright © 2016-2018 Erik Edrosa <erik.edrosa@gmail.com>
 # Copyright © 2016, 2017 Amirouche Boubekki <amirouche@hypermove.net>
-# Copyright © 2017, 2018 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2017, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2017 Mathieu Othacehe <m.othacehe@gmail.com>
 #
 # This file is part of Guile-Git.
@@ -75,6 +75,7 @@ TESTS_UTILS =                                   \
   tests/data/README
 
 TESTS =                                         \
+  tests/blob.scm                                \
   tests/branch.scm                              \
   tests/clone.scm                               \
   tests/commit.scm                              \
@@ -86,7 +87,7 @@ TESTS =                                         \
   tests/remote.scm                              \
   tests/rev-parse.scm                           \
   tests/status.scm                              \
-  tests/submodule.scm														\
+  tests/submodule.scm                           \
   tests/tag.scm                                 \
   tests/tree.scm
 
