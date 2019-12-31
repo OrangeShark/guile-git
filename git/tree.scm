@@ -22,15 +22,21 @@
   #:use-module (git bindings)
   #:use-module (git types)
   #:use-module (git structs)
+  #:re-export (tree?
+               tree-entry?)
   #:export (TREEWALK-PRE
             TREEWALK-POST
             pointer->tree!
             tree-dup
             tree-fold
+
             tree-entry-byid
             tree-entry-byindex
             tree-entry-bypath
             tree-entry-name
+            tree-entry-id
+            tree-entry->object
+
             tree-id
             tree-list
             tree-lookup
