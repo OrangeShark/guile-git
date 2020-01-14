@@ -2,7 +2,7 @@
 #+TITLE: Guile-Git NEWS - history of user-visible changes
 
 
-Copyright © 2018, 2019 Erik Edrosa
+Copyright © 2018, 2019, 2020 Erik Edrosa
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
@@ -61,6 +61,21 @@ The (git structs) module has added ~fetch-options-download-tags~ and
 ~set-fetch-options-download-tags!~ procedures for accessing and
 setting the download tags field of ~fetch-options~. This field
 determines the tag download policy when fetching from a remote.
+
+*** Add ~CREDTYPE-*~ variables
+
+(git cred) module has added several new variables which are used to
+represent a bitmask for the supported credential types.
+
+*** Add ssh authentication support
+
+Add ssh auth support to ~clone~ and ~remote-fetch~ procedures with an
+authentication method from the new module (git auth).
+
+*** Add (git blob) module
+
+(git blob) module adds several procedures for accessing and
+interacting with blobs.
 
 ** Changes
 
