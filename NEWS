@@ -21,7 +21,7 @@ in a git repository.
 ~tag-create~ and ~tag-create!~ are used to create what is known as
 "annotated" tags in git which contain a creation date, creator's
 signature, and a message. The ~tag-create!~ procedure can replace
-exisiting references with the same name.
+existing references with the same name.
 
 ~tag-create-lightweight~ and ~tag-create-lightweight!~ are used to
 create lightweight tags in git which just create a reference that
